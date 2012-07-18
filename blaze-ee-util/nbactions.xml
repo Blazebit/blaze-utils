@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-Debug Clean and Build project</actionName>
+            <displayName>Debug Clean and Build project</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
+                
+                
+            </goals>
+            <properties>
+                
+                
+                
+                <jpda.listen>maven</jpda.listen>
+            </properties>
+        </action>
+    </actions>

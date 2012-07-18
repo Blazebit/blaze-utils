@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<beans xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://jboss.org/schema/cdi/beans_1_0.xsd">
+    <interceptors>
+        <class>com.blazebit.cdi.transaction.TransactionalInterceptor</class>
+        <class>com.blazebit.cdi.logging.LoggingInterceptor</class>
+        <class>com.blazebit.cdi.exception.ExceptionWrappingInterceptor</class>
+        <class>com.blazebit.cdi.exception.CatchHandlerInterceptor</class>
+        <class>com.blazebit.cdi.cleanup.CleanupHandlerInterceptor</class>
+    </interceptors>
+</beans>

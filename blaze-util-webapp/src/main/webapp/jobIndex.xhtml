@@ -1,0 +1,165 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <f:view>
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{jobBean.preRender}"/>
+            <f:viewParam name="schedulerName" value="#{jobBean.schedulerName}"/>
+        </f:metadata>
+        <h:head>
+            <title>Job Übersicht</title>
+        </h:head>
+        <h:body>
+            <h:form id="form">
+                <h:link value="Zurück zu Schedulers" outcome="schedulerIndex.xhtml"/>
+                <h:messages/>
+                <h:panelGroup id="jobForm">
+                    <ul>
+                        <li>
+                            <h:outputLabel for="jobGroup" value="Job-Gruppe" rendered="#{jobBean.selectedJob == null}"/>
+                            <h:inputText id="jobGroup" value="#{jobBean.jobGroup}" rendered="#{jobBean.selectedJob == null}" required="true"/>
+                            <h:message for="jobGroup" rendered="#{jobBean.selectedJob == null}"/>
+
+                            <h:outputLabel for="jobGroupOutput" value="Job-Gruppe" rendered="#{jobBean.selectedJob != null}"/>
+                            <h:outputText id="jobGroupOutput" value="#{jobBean.selectedJob.key.group}" rendered="#{jobBean.selectedJob != null}"/>
+                        </li>
+                        <li>
+                            <h:outputLabel for="jobName" value="Job-Name" rendered="#{jobBean.selectedJob == null}"/>
+                            <h:inputText id="jobName" value="#{jobBean.jobName}" rendered="#{jobBean.selectedJob == null}" required="true"/>
+                            <h:message for="jobName" rendered="#{jobBean.selectedJob == null}"/>
+
+                            <h:outputLabel for="jobNameOutput" value="Job-Name" rendered="#{jobBean.selectedJob != null}"/>
+                            <h:outputText id="jobNameOutput" value="#{jobBean.selectedJob.key.name}" rendered="#{jobBean.selectedJob != null}"/>
+                        </li>
+                        <li>
+                            <h:outputLabel for="jobType" value="Job-Klasse" rendered="#{jobBean.selectedJob == null}"/>
+                            <h:selectOneMenu id="jobType" value="#{jobBean.jobType}" converter="jobTypeConverter" rendered="#{jobBean.selectedJob == null}" required="true" valueChangeListener="#{jobBean.jobTypeChanged}">
+                                <f:selectItems value="#{jobBean.jobTypes}" var="type" itemLabel="#{type.simpleName}" itemValue="#{type}"/>
+                                <f:ajax render="jobDataMap" execute="@this" immediate="true"/>
+                            </h:selectOneMenu>
+                            <h:message for="jobType" rendered="#{jobBean.selectedJob == null}"/>
+
+                            <h:outputLabel for="jobTypeOutput" value="Job-Klasse" rendered="#{jobBean.selectedJob != null}"/>
+                            <h:outputText id="jobTypeOutput" value="#{jobBean.selectedJob.jobClass}" rendered="#{jobBean.selectedJob != null}"/>
+                        </li>
+                    </ul>
+                    <h:panelGroup id="jobDataMap" rendered="#{jobBean.selectedJob == null}">
+                        <h:dataTable value="#{jobBean.jobDataMap}" var="property" border="1">
+                            <f:facet name="header">
+                                JobDataMap
+                            </f:facet>
+                            <h:column>
+                                <f:facet name="header">
+                                    Name
+                                </f:facet>
+                                <h:outputLabel for="jobParam" value="#{property.name}" rendered="#{property.required}"/>
+                                <h:inputText id="jobParamName" value="#{property.name}" rendered="#{not property.required}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Wert
+                                </f:facet>
+                                <h:inputText id="jobParam" value="#{property.value}">
+                                    <f:validator validatorId="onSubmitValidator"/>
+                                    <f:attribute name="onSubmitRequired" value="#{property.required}"/>
+                                </h:inputText>
+                                <h:message for="jobParam"/>
+                            </h:column>
+
+                            <f:facet name="footer">
+                                <h:commandButton value="Feld Hinzufügen" actionListener="#{jobBean.addParameter}">
+                                    <f:param name="performValidation" value="false"/>
+                                    <f:ajax execute=":form:jobDataMap" render=":form:jobDataMap"/>
+                                </h:commandButton>
+                            </f:facet>
+                        </h:dataTable>
+                    </h:panelGroup>
+                    <h:panelGroup id="selectedJobDataMap" rendered="#{jobBean.selectedJob != null}" layout="block">
+                        <h:dataTable value="#{jobBean.selectedJobDataMap}" var="property" border="1">
+                            <f:facet name="header">
+                                JobDataMap für #{jobBean.selectedJob.key.name}
+                            </f:facet>
+                            <h:column>
+                                <f:facet name="header">
+                                    Name
+                                </f:facet>
+                                <h:outputLabel for="jobParam" value="#{property.name}"/>
+                            </h:column>
+                            <h:column>
+                                <f:facet name="header">
+                                    Wert
+                                </f:facet>
+                                <h:outputText id="jobParam" value="#{property.value}"/>
+                            </h:column>
+                        </h:dataTable>
+                    </h:panelGroup>
+                    <h:commandButton value="Hinzufügen" rendered="#{jobBean.selectedJob == null}" action="#{jobBean.addJob}">
+                        <f:ajax render=":form" execute=":form:jobForm"/>
+                    </h:commandButton>
+                    <h:commandButton value="Neuen Job erstellen" rendered="#{jobBean.selectedJob != null}">
+                        <f:ajax render=":form" execute="@this" immediate="true"/>
+                        <f:setPropertyActionListener target="#{jobBean.selectedJob}" value="#{null}"/>
+                    </h:commandButton>
+                    <h:link value="Trigger bearbeiten" rendered="#{jobBean.selectedJob != null}" outcome="triggerIndex.xhtml">
+                        <f:param name="schedulerName" value="#{jobBean.schedulerName}"/>
+                        <f:param name="jobGroup" value="#{jobBean.selectedJob.key.group}"/>
+                        <f:param name="jobName" value="#{jobBean.selectedJob.key.name}"/>
+                    </h:link>
+                </h:panelGroup>
+
+                <h:dataTable value="#{jobBean.jobs}" var="job" border="1">
+                    <f:facet name="header">
+                        Jobs
+                    </f:facet>
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="Job-Gruppe"/>
+                        </f:facet>
+                        <h:outputText value="#{job.key.group}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="Job-Name"/>
+                        </f:facet>
+                        <h:outputText value="#{job.key.name}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="Job-Klasse"/>
+                        </f:facet>
+                        <h:outputText value="#{job.jobClass}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="Persistent"/>
+                        </f:facet>
+                        <h:outputText value="#{job.durable ? 'Ja' : 'Nein'}"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="Aktion"/>
+                        </f:facet>
+                        <h:commandButton value="Löschen" action="#{jobBean.deleteJob(job)}">
+                            <f:ajax render=":form" execute="@this" immediate="true"/>
+                        </h:commandButton>
+                        <h:commandButton value="Details">
+                            <f:setPropertyActionListener value="#{job}" target="#{jobBean.selectedJob}"/>
+                            <f:ajax render=":form" execute="@this" immediate="true"/>
+                        </h:commandButton>
+                        <h:commandButton value="Jetzt Ausführen" action="#{jobBean.triggerJob(job)}">
+                            <f:ajax render=":form" execute="@this" immediate="true"/>
+                        </h:commandButton>
+                        <h:commandButton value="Pausieren" action="#{jobBean.pauseJob(job)}">
+                            <f:ajax render=":form" execute="@this" immediate="true"/>
+                        </h:commandButton>
+                        <h:commandButton value="Fortsetzen" action="#{jobBean.resumeJob(job)}">
+                            <f:ajax render=":form" execute="@this" immediate="true"/>
+                        </h:commandButton>
+                    </h:column>
+                </h:dataTable>     
+            </h:form>
+        </h:body>
+    </f:view>
+</html>

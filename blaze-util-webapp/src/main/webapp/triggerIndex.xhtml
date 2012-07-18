@@ -1,0 +1,249 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+    <f:view>
+        <f:metadata>
+            <f:event type="preRenderView" listener="#{triggerBean.preRender}"/>
+            <f:viewParam name="schedulerName" value="#{triggerBean.schedulerName}"/>
+            <f:viewParam name="jobGroup" value="#{triggerBean.jobGroup}"/>
+            <f:viewParam name="jobName" value="#{triggerBean.jobName}"/>
+        </f:metadata>
+        <h:head>
+            <title>Trigger Übersicht</title>
+        </h:head>
+        <h:body>
+            <h:form id="form">
+                <h:link value="Zurück zu Jobs" outcome="jobIndex.xhtml">
+                    <f:param name="schedulerName" value="#{triggerBean.schedulerName}"/>
+                </h:link>
+                <h:messages/>
+                <h:panelGroup id="triggerInfo" rendered="#{triggerBean.selectedJob != null}" layout="block">
+                    <h:panelGroup id="triggerForm">
+                        <ul>
+                            <li>
+                                <h:outputLabel for="triggerGroup" value="Trigger-Gruppe" rendered="#{triggerBean.selectedTrigger == null}"/>
+                                <h:inputText id="triggerGroup" value="#{triggerBean.triggerGroup}" rendered="#{triggerBean.selectedTrigger == null}"/>
+                                <h:message for="triggerGroup" rendered="#{triggerBean.selectedTrigger == null}"/>
+
+                                <h:outputLabel for="triggerGroupOutput" value="Trigger-Gruppe" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                <h:outputText id="triggerGroupOutput" value="#{triggerBean.selectedTrigger.key.group}" rendered="#{triggerBean.selectedTrigger != null}"/>
+                            </li>
+                            <li>
+                                <h:outputLabel for="triggerName" value="Trigger-Name" rendered="#{triggerBean.selectedTrigger == null}"/>
+                                <h:inputText id="triggerName" value="#{triggerBean.triggerName}" rendered="#{triggerBean.selectedTrigger == null}"/>
+                                <h:message for="triggerName" rendered="#{triggerBean.selectedTrigger == null}"/>
+
+                                <h:outputLabel for="triggerNameOutput" value="Trigger-Name" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                <h:outputText id="triggerNameOutput" value="#{triggerBean.selectedTrigger.key.name}" rendered="#{triggerBean.selectedTrigger != null}"/>
+                            </li>
+                            <li>
+                                <h:outputLabel for="triggerStart" value="Startzeit" rendered="#{triggerBean.selectedTrigger == null}"/>
+                                <h:inputText id="triggerStart" value="#{triggerBean.triggerStart}" rendered="#{triggerBean.selectedTrigger == null}">
+                                    <f:convertDateTime pattern="dd.MM.yyyy HH:mm:ss" timeZone="GMT+2:00"/>
+                                </h:inputText>
+                                <h:message for="triggerStart" rendered="#{triggerBean.selectedTrigger == null}"/>
+
+                                <h:outputLabel for="triggerStartOutput" value="Startzeit" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                <h:outputText id="triggerStartOutput" value="#{triggerBean.triggerStart}" rendered="#{triggerBean.selectedTrigger != null}">
+                                    <f:convertDateTime pattern="dd.MM.yyyy HH:mm:ss" timeZone="GMT+2:00"/>
+                                </h:outputText>
+                            </li>
+                            <li>
+                                <h:outputLabel for="triggerEnd" value="Endzeit" rendered="#{triggerBean.selectedTrigger == null}"/>
+                                <h:inputText id="triggerEnd" value="#{triggerBean.triggerEnd}" rendered="#{triggerBean.selectedTrigger == null}">
+                                    <f:convertDateTime pattern="dd.MM.yyyy HH:mm:ss" timeZone="GMT+2:00"/>
+                                </h:inputText>
+                                <h:message for="triggerEnd" rendered="#{triggerBean.selectedTrigger == null}"/>
+
+                                <h:outputLabel for="triggerEndOutput" value="Endzeit" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                <h:outputText id="triggerEndOutput" value="#{triggerBean.triggerEnd}" rendered="#{triggerBean.selectedTrigger != null}">
+                                    <f:convertDateTime pattern="dd.MM.yyyy HH:mm:ss" timeZone="GMT+2:00"/>
+                                </h:outputText>
+                            </li>
+                            <li>
+                                <h:outputLabel for="triggerType" value="Typ" rendered="#{triggerBean.selectedTrigger == null}"/>
+                                <h:selectOneMenu id="triggerType" value="#{triggerBean.triggerType}" required="true" rendered="#{triggerBean.selectedTrigger == null}">
+                                    <f:selectItems value="#{triggerBean.triggerTypes}" var="type" itemLabel="#{type}" itemValue="#{type}"/>
+                                    <f:ajax render="addTriggerDetail" execute="@this"/>
+                                </h:selectOneMenu>
+
+                                <h:outputLabel for="triggerTypeOutput" value="Typ" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                <h:outputText id="triggerTypeOutput" value="#{triggerBean.triggerType}" rendered="#{triggerBean.selectedTrigger != null}"/>
+                            </li>
+                        </ul>
+                        <h:panelGroup id="addTriggerDetail">
+                            <h:panelGroup rendered="#{triggerBean.triggerType != 'Simple'}">
+                                <h:panelGroup rendered="#{triggerBean.triggerType == 'Interval'}">
+                                    <ul>
+                                        <li>
+                                            <h:outputLabel for="triggerIntervalType" value="Einheit" rendered="#{triggerBean.selectedTrigger == null}"/>
+                                            <h:selectOneMenu id="triggerIntervalType" value="#{triggerBean.triggerIntervalType}" rendered="#{triggerBean.selectedTrigger == null}" required="true">
+                                                <f:selectItems value="#{triggerBean.triggerIntervalTypes}" var="type" itemLabel="#{type}" itemValue="#{type}"/>
+                                            </h:selectOneMenu>
+                                            <h:message for="triggerIntervalType" rendered="#{triggerBean.selectedTrigger == null}"/>
+
+                                            <h:outputLabel for="triggerIntervalTypeOutput" value="Einheit" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                            <h:outputText id="triggerIntervalTypeOutput" value="#{triggerBean.triggerIntervalType}" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                        </li>
+                                        <li>
+                                            <h:outputLabel for="triggerInterval" value="Interval" rendered="#{triggerBean.selectedTrigger == null}"/>
+                                            <h:inputText id="triggerInterval" value="#{triggerBean.triggerInterval}" rendered="#{triggerBean.selectedTrigger == null}" required="true"/>
+                                            <h:message for="triggerInterval" rendered="#{triggerBean.selectedTrigger == null}"/>
+
+                                            <h:outputLabel for="triggerIntervalOutput" value="Interval" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                            <h:outputText id="triggerIntervalOutput" value="#{triggerBean.triggerInterval}" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                        </li>
+                                    </ul>
+                                </h:panelGroup>
+                                <h:panelGroup rendered="#{triggerBean.triggerType == 'Cron'}">
+                                    <ul>
+                                        <li>
+                                            <h:outputLabel for="triggerCronExpression" value="Cron-Ausdruck" rendered="#{triggerBean.selectedTrigger == null}"/>
+                                            <h:inputText id="triggerCronExpression" value="#{triggerBean.triggerCronExpression}" rendered="#{triggerBean.selectedTrigger == null}" required="true"/>
+                                            <h:message for="triggerCronExpression" rendered="#{triggerBean.selectedTrigger == null}"/>
+
+                                            <h:outputLabel for="triggerCronExpressionOutput" value="Cron-Ausdruck" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                            <h:outputText id="triggerCronExpressionOutput" value="#{triggerBean.triggerCronExpression}" rendered="#{triggerBean.selectedTrigger != null}"/>
+                                        </li>
+                                    </ul>
+                                </h:panelGroup>
+                            </h:panelGroup>
+                        </h:panelGroup>
+                        <h:panelGroup id="triggerDataMap" rendered="#{triggerBean.selectedTrigger == null}">
+                            <h:dataTable value="#{triggerBean.triggerDataMap}" var="property" border="1">
+                                <f:facet name="header">
+                                    TriggerDataMap
+                                </f:facet>
+                                <h:column>
+                                    <f:facet name="header">
+                                        Name
+                                    </f:facet>
+                                    <h:outputLabel for="triggerParam" value="#{property.name}" rendered="#{property.required}"/>
+                                    <h:inputText id="triggerParamName" value="#{property.name}" rendered="#{not property.required}"/>
+                                </h:column>
+                                <h:column>
+                                    <f:facet name="header">
+                                        Wert
+                                    </f:facet>
+                                    <h:inputText id="triggerParam" value="#{property.value}">
+                                        <f:validator validatorId="onSubmitValidator"/>
+                                        <f:attribute name="onSubmitRequired" value="#{property.required}"/>
+                                    </h:inputText>
+                                    <h:message for="triggerParam"/>
+                                </h:column>
+
+                                <f:facet name="footer">
+                                    <h:commandButton value="Feld Hinzufügen" actionListener="#{triggerBean.addParameter}">
+                                        <f:ajax execute=":form:jobDataMap" render=":form:jobDataMap"/>
+                                        <f:param name="performValidation" value="false"/>
+                                    </h:commandButton>
+                                </f:facet>
+                            </h:dataTable>
+                        </h:panelGroup>
+                        <h:panelGroup id="selectedTriggerDataMap" rendered="#{triggerBean.selectedTrigger != null}">
+                            <h:dataTable value="#{triggerBean.selectedTriggerDataMap}" var="property" border="1">
+                                <f:facet name="header">
+                                    TriggerDataMap für #{triggerBean.selectedTrigger.key.name}
+                                </f:facet>
+                                <h:column>
+                                    <f:facet name="header">
+                                        Name
+                                    </f:facet>
+                                    <h:outputLabel for="triggerParam" value="#{property.name}"/>
+                                </h:column>
+                                <h:column>
+                                    <f:facet name="header">
+                                        Wert
+                                    </f:facet>
+                                    <h:outputText id="triggerParam" value="#{property.value}"/>
+                                </h:column>
+                            </h:dataTable>
+                        </h:panelGroup>
+                        <h:commandButton value="Hinzufügen" action="#{triggerBean.addTrigger}" rendered="#{triggerBean.selectedTrigger == null}">
+                            <f:ajax render=":form:triggerInfo" execute=":form:triggerForm"/>
+                        </h:commandButton>
+                        <h:commandButton value="Neuen Trigger erstellen" rendered="#{triggerBean.selectedTrigger != null}">
+                            <f:ajax render=":form" execute="@this" immediate="true"/>
+                            <f:setPropertyActionListener target="#{triggerBean.selectedTrigger}" value="#{null}"/>
+                        </h:commandButton>
+                    </h:panelGroup>
+                    <h:dataTable value="#{triggerBean.jobTriggers}" var="trigger" border="1">
+                        <f:facet name="header">
+                            Trigger für Job #{triggerBean.selectedJob.key.name}
+                        </f:facet>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Trigger-Gruppe"/>
+                            </f:facet>
+                            <h:outputText value="#{trigger.key.group}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Trigger-Name"/>
+                            </f:facet>
+                            <h:outputText value="#{trigger.key.name}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Startzeit"/>
+                            </f:facet>
+                            <h:outputText value="#{trigger.startTime}">
+                                <f:convertDateTime dateStyle="medium" timeStyle="medium" type="both" timeZone="GMT+2:00"/>
+                            </h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Endzeit"/>
+                            </f:facet>
+                            <h:outputText value="#{trigger.endTime}">
+                                <f:convertDateTime dateStyle="medium" timeStyle="medium" type="both" timeZone="GMT+2:00"/>
+                            </h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Letzter Aufruf"/>
+                            </f:facet>
+                            <h:outputText value="#{trigger.previousFireTime}">
+                                <f:convertDateTime dateStyle="medium" timeStyle="medium" type="both" timeZone="GMT+2:00"/>
+                            </h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Nächster Aufruf"/>
+                            </f:facet>
+                            <h:outputText value="#{trigger.nextFireTime}">
+                                <f:convertDateTime dateStyle="medium" timeStyle="medium" type="both" timeZone="GMT+2:00"/>
+                            </h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Status"/>
+                            </f:facet>
+                            <h:outputText value="#{triggerBean.getTriggerState(trigger)}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="Aktion"/>
+                            </f:facet>
+                            <h:commandButton value="Details">
+                                <f:setPropertyActionListener value="#{trigger}" target="#{triggerBean.selectedTrigger}"/>
+                                <f:ajax render=":form" execute="@this"/>
+                            </h:commandButton>
+                            <h:commandButton value="Pausieren" action="#{triggerBean.pauseTrigger(trigger)}" disabled="#{triggerBean.getTriggerState(trigger) == 'PAUSED'}">
+                                <f:ajax render=":form" execute="@this"/>
+                            </h:commandButton>
+                            <h:commandButton value="Fortsetzen" action="#{triggerBean.resumeTrigger(trigger)}" disabled="#{triggerBean.getTriggerState(trigger) == 'NORMAL'}">
+                                <f:ajax render=":form" execute="@this"/>
+                            </h:commandButton>
+                            <h:commandButton value="Löschen" action="#{triggerBean.deleteTrigger(trigger)}">
+                                <f:ajax render=":form" execute="@this"/>
+                            </h:commandButton>
+                        </h:column>
+                    </h:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </h:body>
+    </f:view>
+</html>
