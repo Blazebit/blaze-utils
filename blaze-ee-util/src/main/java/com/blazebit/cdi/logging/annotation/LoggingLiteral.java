@@ -12,7 +12,8 @@ import javax.enterprise.util.AnnotationLiteral;
  * @since 0.1.2
  * @see Logging
  */
-public class LoggingLiteral extends AnnotationLiteral<Logging> implements Logging {
-    private static final long serialVersionUID = 1L;
-    
+public class LoggingLiteral extends AnnotationLiteral<Logging> implements
+		Logging {
+	private static final long serialVersionUID = 1L;
+
 }

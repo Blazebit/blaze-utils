@@ -3,78 +3,82 @@
  */
 package com.blazebit.web.mail.bean;
 
+import java.io.File;
+import java.io.IOException;
+
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Named;
+
 import com.blazebit.mail.Mail;
 import com.blazebit.mail.MailTransport;
 import com.blazebit.mail.impl.SimpleMailSender;
-import java.io.File;
-import java.io.IOException;
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Named;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 /**
- *
+ * 
  * @author Christian Beikov
  */
 @Named
 @RequestScoped
 public class MailBean {
 
-//    private static final Logger log = LoggerFactory.getLogger(MailBean.class);
-    private String from = "christian@blazebit.com";
-    private String to = "christian@blazebit.com";
-    private String subject = "test";
-    private String text = "Testtext";
-    
-    public String send() throws IOException{
-        Mail m = new Mail();
-        m.setFrom(from);
-        m.addTo(to);
-        m.setSubject(subject);
-        m.setText(text);
-        m.setHtml("<p>" + text + "</p><br/><img src=\"cid:MyAvatar\">");
-        m.addEmbeddedImage("MyAvatar", new File("D:/Eigene Bilder/avatar1.jpg"), "image/jpeg");
-        m.addAttachment("YourAvatar", new File("D:/Eigene Bilder/avatar.jpg"), "image/jpeg");
-        
-        MailTransport mt = MailTransport.SMTPS;
-        mt.addTrustedHost("web118.ip-projects.de", true);
-        mt.addTrustedHost("blazebit.com", true);
-        
-        new SimpleMailSender("smtp.blazebit.com", 465, "christian@blazebit.com", "aA159732684!", mt).sendMail(m);
-        return "";
-    }
+	// private static final Logger log =
+	// LoggerFactory.getLogger(MailBean.class);
+	private String from = "christian@blazebit.com";
+	private String to = "christian@blazebit.com";
+	private String subject = "test";
+	private String text = "Testtext";
 
-    public String getFrom() {
-        return from;
-    }
+	public String send() throws IOException {
+		Mail m = new Mail();
+		m.setFrom(from);
+		m.addTo(to);
+		m.setSubject(subject);
+		m.setText(text);
+		m.setHtml("<p>" + text + "</p><br/><img src=\"cid:MyAvatar\">");
+		m.addEmbeddedImage("MyAvatar",
+				new File("D:/Eigene Bilder/avatar1.jpg"), "image/jpeg");
+		m.addAttachment("YourAvatar", new File("D:/Eigene Bilder/avatar.jpg"),
+				"image/jpeg");
 
-    public void setFrom(String from) {
-        this.from = from;
-    }
+		MailTransport mt = MailTransport.SMTPS;
+		mt.addTrustedHost("web118.ip-projects.de", true);
+		mt.addTrustedHost("blazebit.com", true);
 
-    public String getSubject() {
-        return subject;
-    }
+		new SimpleMailSender("smtp.blazebit.com", 465,
+				"christian@blazebit.com", "aA159732684!", mt).sendMail(m);
+		return "";
+	}
 
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
+	public String getFrom() {
+		return from;
+	}
 
-    public String getText() {
-        return text;
-    }
+	public void setFrom(String from) {
+		this.from = from;
+	}
 
-    public void setText(String text) {
-        this.text = text;
-    }
+	public String getSubject() {
+		return subject;
+	}
 
-    public String getTo() {
-        return to;
-    }
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
 
-    public void setTo(String to) {
-        this.to = to;
-    }
-    
+	public String getText() {
+		return text;
+	}
+
+	public void setText(String text) {
+		this.text = text;
+	}
+
+	public String getTo() {
+		return to;
+	}
+
+	public void setTo(String to) {
+		this.to = to;
+	}
+
 }

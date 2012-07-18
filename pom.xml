@@ -16,11 +16,10 @@
     </properties>
     
     <modules>
-        <module>BlazeCommonUtil</module>
-        <module>BlazeEEUtil</module>
-        <module>BlazeMailUtil</module>
-        <module>BlazeQuartzUtil</module>
-        <module>BlazeCBAV</module>
+        <module>blaze-common-util</module>
+        <module>blaze-ee-util</module>
+        <module>blaze-mail-util</module>
+        <module>blaze-quartz-util</module>
     </modules>
 
     <developers>

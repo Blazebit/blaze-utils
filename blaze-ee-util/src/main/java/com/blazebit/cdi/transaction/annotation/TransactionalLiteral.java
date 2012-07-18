@@ -12,21 +12,22 @@ import javax.enterprise.util.AnnotationLiteral;
  * @since 0.1.2
  * @see Transactional
  */
-public class TransactionalLiteral extends AnnotationLiteral<Transactional> implements Transactional {
-    private static final long serialVersionUID = 1L;
-    private boolean requiresNew;
+public class TransactionalLiteral extends AnnotationLiteral<Transactional>
+		implements Transactional {
+	private static final long serialVersionUID = 1L;
+	private boolean requiresNew;
 
-    public TransactionalLiteral() {
-        this(false);
-    }
+	public TransactionalLiteral() {
+		this(false);
+	}
 
-    public TransactionalLiteral(boolean requiresNew) {
-        this.requiresNew = requiresNew;
-    }
+	public TransactionalLiteral(boolean requiresNew) {
+		this.requiresNew = requiresNew;
+	}
 
-    @Override
-    public boolean requiresNew() {
-        return requiresNew;
-    }
-    
+	@Override
+	public boolean requiresNew() {
+		return requiresNew;
+	}
+
 }

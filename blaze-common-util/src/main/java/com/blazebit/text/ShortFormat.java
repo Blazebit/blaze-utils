@@ -4,18 +4,20 @@
 package com.blazebit.text;
 
 /**
- *
+ * 
  * @author Christian Beikov
  * @since 0.1.2
  */
 public class ShortFormat extends AbstractDecimalFormat<Short> {
 
-    public ShortFormat() {
-        super(Short.class);
-    }
+	private static final long serialVersionUID = 1L;
 
-    public Short parse(String value, ParserContext context) {
-        return Short.parseShort(value);
-    }
+	public ShortFormat() {
+		super(Short.class);
+	}
+
+	public Short parse(String value, ParserContext context) {
+		return Short.parseShort(value);
+	}
 
 }

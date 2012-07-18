@@ -83,42 +83,52 @@ public class FetchUtilTest {
         private Collection<TestClass> testComplexClass3;
         private TestClass testComplexClass4;
 
-        public Set<TestClass> getTestComplexClass() {
+        @SuppressWarnings("unused")
+		public Set<TestClass> getTestComplexClass() {
             return testComplexClass;
         }
 
+        @SuppressWarnings("unused")
         public void setTestComplexClass(Set<TestClass> testComplexClass) {
             this.testComplexClass = testComplexClass;
         }
 
+        @SuppressWarnings("unused")
         public List<TestClass> getTestComplexClass2() {
             return testComplexClass2;
         }
 
+        @SuppressWarnings("unused")
         public void setTestComplexClass2(List<TestClass> testComplexClass2) {
             this.testComplexClass2 = testComplexClass2;
         }
 
+        @SuppressWarnings("unused")
         public Collection<TestClass> getTestComplexClass3() {
             return testComplexClass3;
         }
 
+        @SuppressWarnings("unused")
         public void setTestComplexClass3(Collection<TestClass> testComplexClass3) {
             this.testComplexClass3 = testComplexClass3;
         }
 
+        @SuppressWarnings("unused")
         public TestClass getTestComplexClass4() {
             return testComplexClass4;
         }
 
+        @SuppressWarnings("unused")
         public void setTestComplexClass4(TestClass testComplexClass4) {
             this.testComplexClass4 = testComplexClass4;
         }
 
+        @SuppressWarnings("unused")
         public String getTestString() {
             return testString;
         }
 
+        @SuppressWarnings("unused")
         public void setTestString(String testString) {
             this.testString = testString;
         }

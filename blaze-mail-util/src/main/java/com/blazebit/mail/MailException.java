@@ -6,11 +6,13 @@ package com.blazebit.mail;
 import javax.mail.MessagingException;
 
 /**
- *
+ * 
  * @author Christian Beikov
  * @since 0.1.2
  */
 public final class MailException extends RuntimeException {
+
+	private static final long serialVersionUID = 1L;
 
 	public static final String GENERIC_ERROR = "Generic error: %s";
 	public static final String MISSING_HOST = "Can't send an email without host";

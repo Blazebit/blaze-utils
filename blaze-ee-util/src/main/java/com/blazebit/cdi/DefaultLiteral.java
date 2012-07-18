@@ -14,6 +14,7 @@ import javax.enterprise.util.AnnotationLiteral;
  * @since 0.1.2
  * @see Default
  */
-public class DefaultLiteral extends AnnotationLiteral<Default> implements Default {
-    private static final long serialVersionUID = 1L;
+public class DefaultLiteral extends AnnotationLiteral<Default> implements
+		Default {
+	private static final long serialVersionUID = 1L;
 }

@@ -3,17 +3,19 @@
  */
 package com.blazebit.cdi.transaction;
 
-import com.blazebit.annotation.AnnotationUtil;
-import com.blazebit.cdi.transaction.annotation.Transactional;
-import com.blazebit.exception.ExceptionUtil;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+
 import javax.annotation.Resource;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 import javax.transaction.Status;
 import javax.transaction.UserTransaction;
+
+import com.blazebit.annotation.AnnotationUtil;
+import com.blazebit.cdi.transaction.annotation.Transactional;
+import com.blazebit.exception.ExceptionUtil;
 
 /**
  * This interceptor executes a intercepted method within a JTA trasaction. When
@@ -22,27 +24,22 @@ import javax.transaction.UserTransaction;
  * method, which are also annotated with @Transactional will join the parent
  * transaction. The most outer interceptor that started the transaction is
  * responsible for commiting and rollback.
- *
+ * 
  * A commit is always done when the most outer intercepted method exits, but a
  * rollback only if it throws a Throwable.
- *
+ * 
  * Setting the requiresNew attribute to true will throw an
  * UnsupportedOperationException
- *
+ * 
  * <code>
  * public class Bean implements Serializable {
- *
- *      @Transactional
- *      public void example() {
- *          // code
- *      }
- * }
- * </code>
- *
- * The code of the example method will be invoked between,
- * UserTransaction.begin() and UserTransaction.commit() or
- * UserTransaction.rollback().
- *
+ * 
+ * @Transactional public void example() { // code } } </code>
+ * 
+ *                The code of the example method will be invoked between,
+ *                UserTransaction.begin() and UserTransaction.commit() or
+ *                UserTransaction.rollback().
+ * 
  * @author Christian Beikov
  * @since 0.1.2
  * @see Transactional
@@ -51,65 +48,73 @@ import javax.transaction.UserTransaction;
 @Interceptor
 public class TransactionalInterceptor implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-    @Resource
-    private UserTransaction utx;
+	private static final long serialVersionUID = 1L;
+	@Resource
+	private UserTransaction utx;
 
-    @AroundInvoke
-    public Object applyTransaction(InvocationContext ic) throws Exception {
-        Method m = ic.getMethod();
-        Object targetObject = ic.getTarget();
-        Class<?> targetClass = targetObject == null ? m.getDeclaringClass() : targetObject.getClass();
-        Transactional transactionalAnnotation = AnnotationUtil.findAnnotation(m, targetClass, Transactional.class);
-        Object ret;
-        
-        if(transactionalAnnotation == null){
-            throw new IllegalStateException("The interceptor annotation can not be determined!");
-        }
+	@SuppressWarnings("unused")
+	@AroundInvoke
+	public Object applyTransaction(InvocationContext ic) throws Exception {
+		Method m = ic.getMethod();
+		Object targetObject = ic.getTarget();
+		Class<?> targetClass = targetObject == null ? m.getDeclaringClass()
+				: targetObject.getClass();
+		Transactional transactionalAnnotation = AnnotationUtil.findAnnotation(
+				m, targetClass, Transactional.class);
+		Object ret;
 
-        if (transactionalAnnotation != null) {
-            if (!transactionalAnnotation.requiresNew()) {
-                boolean startedTransaction = false;
+		if (transactionalAnnotation == null) {
+			throw new IllegalStateException(
+					"The interceptor annotation can not be determined!");
+		}
 
-                if (utx.getStatus() != Status.STATUS_ACTIVE) {
-                    utx.begin();
-                    startedTransaction = true;
-                }
+		if (transactionalAnnotation != null) {
+			if (!transactionalAnnotation.requiresNew()) {
+				boolean startedTransaction = false;
 
-                try {
-                    ret = ic.proceed();
+				if (utx.getStatus() != Status.STATUS_ACTIVE) {
+					utx.begin();
+					startedTransaction = true;
+				}
 
-                    if (startedTransaction) {
-                        utx.commit();
+				try {
+					ret = ic.proceed();
 
-                    }
-                } catch (Throwable t) {
-                    if (startedTransaction) {
-                        utx.rollback();
-                    }
+					if (startedTransaction) {
+						utx.commit();
 
-                    // Check if the throwable is an instance of InvocationTargetException
-                    // and if so, unwrap the cause. OWB did not unwrap exceptions that
-                    // have been thrown in decorators in some versions so we need to do
-                    // this to be able to log the right exception
-                    Throwable t1 = ExceptionUtil.unwrapInvocationTargetException(t);
+					}
+				} catch (Throwable t) {
+					if (startedTransaction) {
+						utx.rollback();
+					}
 
-                    // Cast to or wrap the throwable into a new exception and
-                    // rethrow it
-                    if (t1 instanceof Exception) {
-                        throw (Exception) t1;
-                    }
+					// Check if the throwable is an instance of
+					// InvocationTargetException
+					// and if so, unwrap the cause. OWB did not unwrap
+					// exceptions that
+					// have been thrown in decorators in some versions so we
+					// need to do
+					// this to be able to log the right exception
+					Throwable t1 = ExceptionUtil
+							.unwrapInvocationTargetException(t);
 
-                    throw new Exception(t1);
-                }
-            } else {
-                throw new UnsupportedOperationException("Not supported yet.");
-            }
-        } else {
-            ret = ic.proceed();
-        }
+					// Cast to or wrap the throwable into a new exception and
+					// rethrow it
+					if (t1 instanceof Exception) {
+						throw (Exception) t1;
+					}
 
-        return ret;
+					throw new Exception(t1);
+				}
+			} else {
+				throw new UnsupportedOperationException("Not supported yet.");
+			}
+		} else {
+			ret = ic.proceed();
+		}
 
-    }
+		return ret;
+
+	}
 }

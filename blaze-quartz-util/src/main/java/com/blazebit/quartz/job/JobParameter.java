@@ -6,44 +6,47 @@ package com.blazebit.quartz.job;
 import java.io.Serializable;
 
 /**
- *
+ * 
  * @author Christian Beikov
  * @since 0.1.2
  */
 public class JobParameter implements Serializable {
 
-    private String name;
-    private boolean required;
-    private Class type;
-    private String description;
+	private static final long serialVersionUID = 1L;
 
-    public JobParameter(String name, boolean required, Class type) {
-        this.name = name;
-        this.required = required;
-        this.type = type;
-    }
+	private String name;
+	private boolean required;
+	private Class<?> type;
+	private String description;
 
-    public JobParameter(String name, boolean required, Class type, String description) {
-        this.name = name;
-        this.required = required;
-        this.type = type;
-        this.description = description;
-    }
+	public JobParameter(String name, boolean required, Class<?> type) {
+		this.name = name;
+		this.required = required;
+		this.type = type;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public JobParameter(String name, boolean required, Class<?> type,
+			String description) {
+		this.name = name;
+		this.required = required;
+		this.type = type;
+		this.description = description;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public boolean isRequired() {
-        return required;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public Class getType() {
-        return type;
-    }
-    
+	public boolean isRequired() {
+		return required;
+	}
+
+	public Class<?> getType() {
+		return type;
+	}
+
 }
