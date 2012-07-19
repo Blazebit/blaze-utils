@@ -11,8 +11,6 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.inject.Stereotype;
-
 import com.blazebit.reflection.ReflectionUtil;
 
 /**
