@@ -91,9 +91,11 @@ public class CatchHandlerInterceptor implements Serializable {
 						break;
 					}
 				}
-			} else {
-				// Handle the default exception type if no handlings are
-				// declared
+			}
+
+			// Handle the default exception type if no handlings are
+			// declared or the handling did not handle the exception
+			if (!exceptionHandled) {
 				if (exceptionHandlerAnnotation.exception().isInstance(t)) {
 					try {
 						handleThrowable(t);
