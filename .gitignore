@@ -1,35 +1,25 @@
-#################
-## Eclipse
-#################
-
-*.pydevproject
 .project
-.metadata
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.classpath
 .settings/
-.loadpath
-
-# External tool builders
-.externalToolBuilders/
-
-# Locally stored "Eclipse launch configurations"
-*.launch
-
-# CDT-specific
-.cproject
-
-# PDT-specific
-.buildpath
-
-#################
-## Maven
-#################
-
+.classpath
 target/
+blaze-common-util/.project
+blaze-common-util/.settings/
+blaze-common-util/.classpath
+blaze-common-util/target/
+blaze-ee-util/.project
+blaze-ee-util/.settings/
+blaze-ee-util/.classpath
+blaze-ee-util/target/
+blaze-mail-util/.project
+blaze-mail-util/.settings/
+blaze-mail-util/.classpath
+blaze-mail-util/target/
+blaze-quartz-util/.project
+blaze-quartz-util/.settings/
+blaze-quartz-util/.classpath
+blaze-quartz-util/target/
+blaze-util-webapp/faces-config.NavData
+blaze-util-webapp/.project
+blaze-util-webapp/.settings/
+blaze-util-webapp/.classpath
+blaze-util-webapp/target/

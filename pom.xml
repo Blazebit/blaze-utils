@@ -1,32 +1,58 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.blazebit</groupId>
-    <artifactId>BlazeUtil</artifactId>
-    <version>0.1.2</version>
+    <parent>
+        <groupId>com.blazebit</groupId>
+        <artifactId>blazebit-parent</artifactId>
+        <version>1</version>
+    </parent>
+    
+    <artifactId>blaze-utils</artifactId>
+    <version>0.1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>BlazeUtil</name>
-    <url>http://maven.apache.org</url>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <url>http://blazebit.com/util</url>
+    <description>Utilities for Blazebit Projects</description>
     
     <modules>
-        <module>blaze-common-util</module>
-        <module>blaze-ee-util</module>
-        <module>blaze-mail-util</module>
-        <module>blaze-quartz-util</module>
+        <module>blaze-common-utils</module>
+        <module>blaze-ee-utils</module>
+        <module>blaze-mail-utils</module>
+        <module>blaze-quartz-utils</module>
+        <module>blaze-utils-webapp</module>
     </modules>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/Blazebit/blaze-utils/issues</url>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Blazebit</name>
+        <url>http://www.blazebit.com</url>
+    </organization>
+    
+    <scm>
+        <connection>scm:git:git@github.com:Blazebit/blaze-utils.git</connection>
+        <developerConnection>scm:git:git@github.com:Blazebit/blaze-utils.git</developerConnection>
+        <url>git@github.com:Blazebit/blaze-utils.git</url>
+    </scm>
 
     <developers>
         <developer>
             <id>christian</id>
             <name>Christian Beikov</name>
-            <email>christian.beikov@gmail.com</email>
+            <email>christian@blazebit.com</email>
             <organization>Blazebit</organization>
             <organizationUrl>http://www.blazebit.com</organizationUrl>
             <timezone>UTC+1</timezone>
@@ -35,58 +61,61 @@
                 <role>Committer</role>
             </roles>
         </developer>
+        <developer>
+            <id>cchet</id>
+            <name>Thomas Herzog</name>
+            <email>t.herzog@curecomp.com</email>
+            <organization>Curecomp</organization>
+            <organizationUrl>http://www.curecomp.com</organizationUrl>
+            <timezone>UTC+1</timezone>
+            <roles>
+                <role>Committer</role>
+            </roles>
+        </developer>
     </developers>
     
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
-    
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>2.3.2</version>
-                    <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
-                    <!-- Disable annotation processing for ourselves. -->
-                        <compilerArgument>-proc:none</compilerArgument>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.3.2</version>
-                    <executions>
-                        <execution>
-                            <phase>package</phase>
-                            <goals>
-                                <goal>jar</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>2.1.2</version>
-                    <executions>
-                        <execution>
-                            <id>attach-sources</id>
-                            <phase>verify</phase>
-                            <goals>
-                                <goal>jar-no-fork</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.deltaspike.core</groupId>
+                <artifactId>deltaspike-core-api</artifactId>
+                <version>0.2-incubating</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.deltaspike.core</groupId>
+                <artifactId>deltaspike-core-impl</artifactId>
+                <version>0.2-incubating</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>blaze-common-utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>blaze-ee-utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>blaze-quartz-utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>blaze-mail-utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>blaze-utils-webapp</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>blaze-cbav</artifactId>
+                <version>0.1.2-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
