@@ -5,11 +5,7 @@
     <parent>
         <groupId>com.blazebit</groupId>
         <artifactId>blazebit-parent</artifactId>
-<<<<<<< HEAD
-        <version>3</version>
-=======
         <version>7</version>
->>>>>>> Updated pom to use newer version of parent pom, cleanup of readme etc.
     </parent>
     
     <artifactId>blaze-utils</artifactId>
