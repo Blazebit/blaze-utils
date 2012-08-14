@@ -344,14 +344,20 @@ public class ReflectionUtil {
 			// as the resolvedType
 			resolvedType = parameterizedClassToInspect.getActualTypeArguments()[position];
 
-			// If the currently available resolvedType is still a type variable
-			// retrieve the position of the type variable within the type
-			// variables of the current class, so we can look in the next
-			// subclass for the concrete type
 			if (resolvedType instanceof TypeVariable<?>) {
+                            // If the currently available resolvedType is still a type variable
+                            // retrieve the position of the type variable within the type
+                            // variables of the current class, so we can look in the next
+                            // subclass for the concrete type
 				position = getTypeVariablePosition(classToInspect,
 						(TypeVariable<?>) resolvedType);
-			}
+			} else if(resolvedType instanceof ParameterizedType){
+                            // Since we can only want a class object, we don't
+                            // care about type arguments of the parameterized type
+                            // and just set the raw type of it as the resolved
+                            // type
+                            resolvedType = ((ParameterizedType) resolvedType).getRawType();
+                        }
 		}
 
 		if (!(resolvedType instanceof Class<?>)) {
