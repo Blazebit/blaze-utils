@@ -3,6 +3,7 @@
  */
 package com.blazebit.comparator;
 
+import com.blazebit.reflection.LazyGetterMethod;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 
@@ -11,81 +12,78 @@ import com.blazebit.reflection.ReflectionUtil;
 /**
  * Generic Comparator is used at Collections.sort(); and can be applied on every
  * compareable Object.
- * 
+ *
  * @author cchet
  */
 public class GenericComparator<T> implements Comparator<T> {
 
-	protected String field;
+    protected String propertyPath;
 
-	/**
-	 * @param field
-	 */
-	public GenericComparator(String field) {
-		super();
-		this.field = field;
-	}
+    /**
+     * Be arware that if one of the elements in the list does not have the
+     * memeber set addressed via propertyPath, an IllegalArgumentException will
+     * occur.
+     *
+     * @param propertyPath the path to the memeber which shall be compared.
+     * E.g.: object.valueHolder.value
+     */
+    public GenericComparator(String propertyPath) {
+        super();
+        this.propertyPath = propertyPath;
+    }
 
-	@Override
-	@SuppressWarnings("unchecked")
-	public int compare(T object1, T object2) {
-		try {
-			if (field == null) {
-				throw new IllegalArgumentException("Field must not be null !!!");
-			}
-			if (object1 == null || object2 == null) {
-				return compareNullObjects(object1, object2);
-			}
+    @Override
+    @SuppressWarnings("unchecked")
+    public int compare(T object1, T object2) {
+        try {
+            if (propertyPath == null) {
+                throw new IllegalArgumentException("PropertyPath must not be null !!!");
+            }
+            if (object1 == null || object2 == null) {
+                return compareNullObjects(object1, object2);
+            }
 
-			Method method1 = ReflectionUtil
-					.getGetter(object1.getClass(), field);
-			Method method2 = ReflectionUtil
-					.getGetter(object2.getClass(), field);
+            // Retrieve field values of the objects
+            Object value1 = new LazyGetterMethod(object1, propertyPath).invoke();
+            Object value2 = new LazyGetterMethod(object2, propertyPath).invoke();
 
-			// Retrieve field values of the objects
-			Object value1 = method1.invoke(object1);
-			Object value2 = method2.invoke(object2);
+            if (value1 == null || value2 == null) {
+                return compareNullObjects(value1, value2);
+            }
 
-			if (value1 == null || value2 == null) {
-				return compareNullObjects(value1, value2);
-			}
+            if (!(value1 instanceof Comparable)) {
+                throw new IllegalArgumentException(new StringBuilder()
+                        .append("Type '").append(value1.getClass().getName())
+                        .append("' is not comparable.").toString());
+            }
 
-			if (!(value1 instanceof Comparable)) {
-				throw new IllegalArgumentException(new StringBuilder()
-						.append("Type '").append(value1.getClass().getName())
-						.append("' is not comparable.").toString());
-			}
+            return ((Comparable<Object>) value1).compareTo(value2);
+        } catch (RuntimeException ex) {
+            throw new IllegalArgumentException(new StringBuilder("Could not compare !!! object1: ").append(object1.getClass().getName()).append(" / object2: ").append(object2.getClass().getName()).append(" / propertyPath: ").append(propertyPath).toString(), ex);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(new StringBuilder("Could not compare !!! object1: ").append(object1.getClass().getName()).append(" / object2: ").append(object2.getClass().getName()).append(" / propertyPath: ").append(propertyPath).toString(), e);
+        }
+    }
 
-			return ((Comparable<Object>) value1).compareTo(value2);
-		} catch (RuntimeException ex) {
-			throw ex;
-		} catch (Exception e) {
-			throw new RuntimeException("Could not compare !!!", e);
-		}
-	}
-
-	/**
-	 * Checks for null objects.
-	 * 
-	 * @param object1
-	 * @param object2
-	 * @return <ol>
-	 *         <li>0 = field null or both objects null</li>
-	 *         <li>1 = object1 is null</li>
-	 *         <li>-1 = object2 is null</li>
-	 *         <li>null = both objects are not null</li>
-	 *         </ol>
-	 */
-	protected Integer compareNullObjects(Object object1, Object object2) {
-		if ((object1 == null) && (object2 == null)) {
-			return 0;
-		}
-		if (object1 == null) {
-			return 1;
-		}
-		if (object2 == null) {
-			return -1;
-		}
-		return 0;
-	}
+    /**
+     * Checks for null objects.
+     *
+     * @param object1
+     * @param object2
+     * @return <ol> <li>0 = field null or both objects null</li> <li>1 = object1
+     * is null</li> <li>-1 = object2 is null</li> <li>null = both objects are
+     * not null</li> </ol>
+     */
+    protected Integer compareNullObjects(Object object1, Object object2) {
+        if ((object1 == null) && (object2 == null)) {
+            return 0;
+        }
+        if (object1 == null) {
+            return 1;
+        }
+        if (object2 == null) {
+            return -1;
+        }
+        return 0;
+    }
 }
