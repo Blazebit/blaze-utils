@@ -345,19 +345,20 @@ public class ReflectionUtil {
 			resolvedType = parameterizedClassToInspect.getActualTypeArguments()[position];
 
 			if (resolvedType instanceof TypeVariable<?>) {
-                            // If the currently available resolvedType is still a type variable
-                            // retrieve the position of the type variable within the type
-                            // variables of the current class, so we can look in the next
-                            // subclass for the concrete type
+				// If the currently available resolvedType is still a type
+				// variable
+				// retrieve the position of the type variable within the type
+				// variables of the current class, so we can look in the next
+				// subclass for the concrete type
 				position = getTypeVariablePosition(classToInspect,
 						(TypeVariable<?>) resolvedType);
-			} else if(resolvedType instanceof ParameterizedType){
-                            // Since we can only want a class object, we don't
-                            // care about type arguments of the parameterized type
-                            // and just set the raw type of it as the resolved
-                            // type
-                            resolvedType = ((ParameterizedType) resolvedType).getRawType();
-                        }
+			} else if (resolvedType instanceof ParameterizedType) {
+				// Since we can only want a class object, we don't
+				// care about type arguments of the parameterized type
+				// and just set the raw type of it as the resolved
+				// type
+				resolvedType = ((ParameterizedType) resolvedType).getRawType();
+			}
 		}
 
 		if (!(resolvedType instanceof Class<?>)) {
@@ -680,8 +681,9 @@ public class ReflectionUtil {
 	 * and if it can not find that method it looks for the isFieldName method.
 	 * If this method also can not be found, null is returned.
 	 * 
-	 * This method uses #{@link ReflectionUtil#getMethod(java.lang.Class,
-	 * java.lang.String, java.lang.Class<?>[]) } to retrieve the getter.
+	 * This method uses #
+	 * {@link ReflectionUtil#getMethodReturnType(Class, String, Class...)} to
+	 * retrieve the getter.
 	 * 
 	 * A getter must not have any parameters and must have a return type that is
 	 * different from void.

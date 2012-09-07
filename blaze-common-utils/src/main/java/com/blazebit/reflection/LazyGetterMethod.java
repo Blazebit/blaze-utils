@@ -51,7 +51,7 @@ public class LazyGetterMethod {
 		}
 
 		this.source = source;
-		this.fieldNames = fieldNames;
+		this.fieldNames = fieldNames.clone();
 	}
 
 	/**

@@ -6,6 +6,7 @@
         <groupId>com.blazebit</groupId>
         <artifactId>blaze-utils</artifactId>
         <version>0.1.6-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>blaze-ee-utils</artifactId>

@@ -187,7 +187,7 @@ public abstract class AbstractExceptionHandlerInterceptor<T extends Annotation, 
 			for (Method m : clazz.getMethods()) {
 				Cleanup cleanup = m.getAnnotation(Cleanup.class);
 
-				if (cleanup != null && cleanup.value().equals(cleanupName)) {
+				if (cleanup != null && cleanup.value().getName().equals(cleanupName)) {
 					m.invoke(target);
 					invoked = true;
 				}

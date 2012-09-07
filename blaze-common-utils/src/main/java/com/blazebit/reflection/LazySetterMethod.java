@@ -57,7 +57,7 @@ public class LazySetterMethod {
 		}
 
 		this.target = target;
-		this.fieldNames = fieldNames;
+		this.fieldNames = fieldNames.clone();
 		this.args = args;
 	}
 

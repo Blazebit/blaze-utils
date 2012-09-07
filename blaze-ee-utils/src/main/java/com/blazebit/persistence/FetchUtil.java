@@ -10,6 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.FetchParent;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Root;
+
 import com.blazebit.reflection.ReflectionUtil;
 import com.blazebit.text.FormatUtil;
 
@@ -198,5 +204,21 @@ public class FetchUtil {
 		return querySb.replace(placeholderIndex,
 				placeholderIndex + fetchProfilePlaceholder.length(),
 				sb.toString()).toString();
+	}
+	
+	public static <X> CriteriaQuery<X> fetch(Class<X> clazz, CriteriaBuilder cb, String... propertyPaths){
+		CriteriaQuery<X> query = cb.createQuery(clazz);
+		Root<X> root = query.from(clazz);
+		
+		for (String propertyPath : propertyPaths) {
+            FetchParent<X, X> fetch = root;
+            
+            for (String pathSegment : propertyPath.split("\\.")) {
+                fetch = fetch.fetch(pathSegment, JoinType.LEFT);
+            }
+        }
+ 
+		
+		return query;
 	}
 }
