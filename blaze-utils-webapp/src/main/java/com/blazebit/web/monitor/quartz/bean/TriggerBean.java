@@ -276,6 +276,16 @@ public class TriggerBean implements Serializable {
 		return TriggerUtil.getState(trigger);
 	}
 
+	public Trigger.TriggerState getTriggerState(Object trigger)
+			throws SchedulerException {
+                // Fixing websphere 8.0.0.1 EL Bug
+                if(!(trigger instanceof Trigger)){
+                    throw new IllegalArgumentException("No Trigger given");
+                }
+            
+		return getTriggerState((Trigger) trigger);
+	}
+
 	public List<Trigger> getJobTriggers() {
 		return jobTriggers;
 	}

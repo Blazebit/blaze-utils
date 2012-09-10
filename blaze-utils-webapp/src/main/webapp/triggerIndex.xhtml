@@ -162,7 +162,7 @@
                             </h:dataTable>
                         </h:panelGroup>
                         <h:commandButton value="Hinzufügen" action="#{triggerBean.addTrigger}" rendered="#{triggerBean.selectedTrigger == null}">
-                            <f:ajax render=":form:triggerInfo" execute=":form:triggerForm"/>
+                            <f:ajax render=":form" execute=":form:triggerForm"/>
                         </h:commandButton>
                         <h:commandButton value="Neuen Trigger erstellen" rendered="#{triggerBean.selectedTrigger != null}">
                             <f:ajax render=":form" execute="@this" immediate="true"/>

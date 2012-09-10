@@ -74,16 +74,30 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>blaze-quartz-utils</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+        
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
             <version>6.0</version>
             <scope>provided</scope>
         </dependency>
+        
         <dependency>
             <groupId>org.apache.myfaces.extensions.cdi.bundles</groupId>
             <artifactId>myfaces-extcdi-bundle-jsf20</artifactId>
             <version>1.0.5</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>4.1.6.Final</version>
         </dependency>
 
         <dependency>
