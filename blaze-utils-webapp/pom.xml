@@ -93,12 +93,6 @@
             <artifactId>myfaces-extcdi-bundle-jsf20</artifactId>
             <version>1.0.5</version>
         </dependency>
-        
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>4.1.6.Final</version>
-        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
