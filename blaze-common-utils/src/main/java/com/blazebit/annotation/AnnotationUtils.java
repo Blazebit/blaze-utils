@@ -11,7 +11,7 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.blazebit.reflection.ReflectionUtil;
+import com.blazebit.reflection.ReflectionUtils;
 
 /**
  * Utillity class for annotation handling. Basically this class only uses
@@ -22,7 +22,7 @@ import com.blazebit.reflection.ReflectionUtil;
  * @since 0.1.2
  */
 @SuppressWarnings("unchecked")
-public class AnnotationUtil {
+public final class AnnotationUtils {
 
 	private static Class<? extends Annotation> stereotypeAnnotationClass;
 
@@ -31,13 +31,15 @@ public class AnnotationUtil {
 			stereotypeAnnotationClass = (Class<? extends Annotation>) Class
 					.forName("javax.enterprise.inject.Stereotype");
 		} catch (ClassNotFoundException ex) {
-			Logger.getLogger(AnnotationUtil.class.getName())
+			Logger.getLogger(AnnotationUtils.class.getName())
 					.log(Level.WARNING,
 							"Stereotype annotation can not be found, skipping annotation inheritance via stereotype.",
 							ex);
 		}
 	}
 
+	private AnnotationUtils(){}
+	
 	/**
 	 * Returns all annotations of a class, also the annotations of the super
 	 * classes, implemented interfaces and the annotations that are present in
@@ -56,7 +58,7 @@ public class AnnotationUtil {
 		Stack<Class<?>> annotationTypes = new Stack<Class<?>>();
 
 		// Iterate through all super types of the given class
-		for (Class<?> type : ReflectionUtil.getSuperTypes(clazz)) {
+		for (Class<?> type : ReflectionUtils.getSuperTypes(clazz)) {
 			Annotation[] annotations = type.getAnnotations();
 
 			// Iterate through all annotations of the current class
@@ -242,7 +244,7 @@ public class AnnotationUtil {
 		Stack<Class<?>> annotationTypes = new Stack<Class<?>>();
 
 		// Iterate through all super types of the given class
-		for (Class<?> type : ReflectionUtil.getSuperTypes(clazz)) {
+		for (Class<?> type : ReflectionUtils.getSuperTypes(clazz)) {
 			Annotation[] annotations = type.getAnnotations();
 
 			// Iterate through all annotations of the current class

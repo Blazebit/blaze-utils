@@ -9,9 +9,9 @@ import java.lang.reflect.Method;
 
 import javax.interceptor.InvocationContext;
 
-import com.blazebit.annotation.AnnotationUtil;
+import com.blazebit.annotation.AnnotationUtils;
 import com.blazebit.cdi.cleanup.annotation.Cleanup;
-import com.blazebit.exception.ExceptionUtil;
+import com.blazebit.exception.ExceptionUtils;
 
 /**
  * This abstract ExceptionHandlerInterceptor is the base for every type safe
@@ -74,7 +74,7 @@ public abstract class AbstractExceptionHandlerInterceptor<T extends Annotation, 
 
 			// Unwrap Exception if t is instanceof InvocationTargetException
 			if (t instanceof InvocationTargetException) {
-				t = ExceptionUtil
+				t = ExceptionUtils
 						.unwrapInvocationTargetException((InvocationTargetException) t);
 			}
 
@@ -82,7 +82,7 @@ public abstract class AbstractExceptionHandlerInterceptor<T extends Annotation, 
 			if (!handleException(ic.getMethod().getAnnotation(clazz), ic,
 					targetObj, t)) {
 				// Class level exception handling if not handled by method level
-				if (!handleException(AnnotationUtil.findAnnotation(
+				if (!handleException(AnnotationUtils.findAnnotation(
 						targetObj.getClass(), clazz), ic, targetObj, t)) {
 					if (t instanceof Exception) {
 						throw (Exception) t;
@@ -117,7 +117,7 @@ public abstract class AbstractExceptionHandlerInterceptor<T extends Annotation, 
 
 			// Unwrap Exception if t is instanceof InvocationTargetException
 			if (t instanceof InvocationTargetException) {
-				t = ExceptionUtil
+				t = ExceptionUtils
 						.unwrapInvocationTargetException((InvocationTargetException) t);
 			}
 

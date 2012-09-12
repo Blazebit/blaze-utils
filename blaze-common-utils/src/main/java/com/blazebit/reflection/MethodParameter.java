@@ -55,7 +55,7 @@ public class MethodParameter {
 				: constructor.getGenericParameterTypes()[index];
 
 		if (t instanceof TypeVariable<?>) {
-			return ReflectionUtil.resolveTypeVariable(concreteClass,
+			return ReflectionUtils.resolveTypeVariable(concreteClass,
 					(TypeVariable<?>) t);
 		}
 
@@ -65,7 +65,7 @@ public class MethodParameter {
 	public Class<?>[] getResolvedTypeParameters(Class<?> concreteClass) {
 		Type t = method != null ? method.getGenericParameterTypes()[index]
 				: constructor.getGenericParameterTypes()[index];
-		return ReflectionUtil.resolveTypeArguments(concreteClass, t);
+		return ReflectionUtils.resolveTypeArguments(concreteClass, t);
 	}
 
 	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {

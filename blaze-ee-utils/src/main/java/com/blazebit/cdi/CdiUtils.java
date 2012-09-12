@@ -21,9 +21,9 @@ import javax.naming.NamingException;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class CdiUtil {
+public class CdiUtils {
 
-	private static final Logger log = Logger.getLogger(CdiUtil.class.getName());
+	private static final Logger log = Logger.getLogger(CdiUtils.class.getName());
 
 	/**
 	 * Retrieves the #{@link BeanManager} instance via JNDI.

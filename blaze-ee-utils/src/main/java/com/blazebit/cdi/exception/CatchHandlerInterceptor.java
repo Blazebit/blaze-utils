@@ -14,12 +14,12 @@ import javax.interceptor.InvocationContext;
 
 import org.apache.deltaspike.core.api.exception.control.event.ExceptionToCatchEvent;
 
-import com.blazebit.annotation.AnnotationUtil;
+import com.blazebit.annotation.AnnotationUtils;
 import com.blazebit.annotation.constraint.NullClass;
 import com.blazebit.cdi.cleanup.annotation.Cleanup;
 import com.blazebit.cdi.exception.annotation.CatchHandler;
 import com.blazebit.cdi.exception.annotation.CatchHandling;
-import com.blazebit.exception.ExceptionUtil;
+import com.blazebit.exception.ExceptionUtils;
 
 /**
  * 
@@ -53,7 +53,7 @@ public class CatchHandlerInterceptor implements Serializable {
 		Object targetObject = ic.getTarget();
 		Class<?> targetClass = targetObject == null ? m.getDeclaringClass()
 				: targetObject.getClass();
-		CatchHandler exceptionHandlerAnnotation = AnnotationUtil
+		CatchHandler exceptionHandlerAnnotation = AnnotationUtils
 				.findAnnotation(m, targetClass, CatchHandler.class);
 		Exception unexpectedException = null;
 
@@ -69,7 +69,7 @@ public class CatchHandlerInterceptor implements Serializable {
 			return ic.proceed();
 		} catch (Exception ex) {
 			// Unwrap Exception if ex is instanceof InvocationTargetException
-			Throwable t = ExceptionUtil.unwrapInvocationTargetException(ex);
+			Throwable t = ExceptionUtils.unwrapInvocationTargetException(ex);
 			boolean exceptionHandled = false;
 
 			if (exceptionHandlingAnnotations.length > 0) {

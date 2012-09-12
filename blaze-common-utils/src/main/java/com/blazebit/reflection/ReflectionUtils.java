@@ -25,7 +25,7 @@ import java.util.Stack;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class ReflectionUtil {
+public final class ReflectionUtils {
 
 	private static final Map<String, Class<?>> primitiveClasses = new HashMap<String, Class<?>>();
 	private static final Map<Class<?>, Class<?>> primitiveToObjectClasses = new HashMap<Class<?>, Class<?>>();
@@ -51,6 +51,8 @@ public class ReflectionUtil {
 		primitiveToObjectClasses.put(void.class, Void.class);
 		primitiveToObjectClasses.put(short.class, Short.class);
 	}
+	
+	private ReflectionUtils(){}
 
 	/**
 	 * Returns the class object for the specified qualified class name. Calling
@@ -165,7 +167,7 @@ public class ReflectionUtil {
 	/**
 	 * Returns the type of a field if it exists within the class. Calling this
 	 * method is equal to calling #
-	 * {@link ReflectionUtil#getField(java.lang.Class, java.lang.String)
+	 * {@link ReflectionUtils#getField(java.lang.Class, java.lang.String)
      * } with a
 	 * null check and finally return the type via getType().
 	 * 
@@ -175,7 +177,7 @@ public class ReflectionUtil {
 	 * @param fieldName
 	 *            The name of the field to be returned
 	 * @return The type of the field if it can be found, otherwise null
-	 * @see ReflectionUtil#getField(java.lang.Class, java.lang.String)
+	 * @see ReflectionUtils#getField(java.lang.Class, java.lang.String)
 	 */
 	public static Class<?> getFieldType(Class<?> clazz, String fieldName) {
 		Field f = getField(clazz, fieldName);
@@ -455,7 +457,7 @@ public class ReflectionUtil {
 	/**
 	 * Returns the return type of a method if it exists within the class.
 	 * Calling this method is equal to calling #
-	 * {@link ReflectionUtil#getMethod(java.lang.Class, java.lang.String)
+	 * {@link ReflectionUtils#getMethod(java.lang.Class, java.lang.String)
      * } with
 	 * a null check and finally return the type via getReturnType().
 	 * 
@@ -467,7 +469,7 @@ public class ReflectionUtil {
 	 * @param parameterTypes
 	 *            The accepting parameter types of the method
 	 * @return The return type of the method if it can be found, otherwise null
-	 * @see ReflectionUtil#getMethod(java.lang.Class, java.lang.String)
+	 * @see ReflectionUtils#getMethod(java.lang.Class, java.lang.String)
 	 */
 	public static Class<?> getMethodReturnType(Class<?> clazz,
 			String methodName, Class<?>... parameterTypes) {
@@ -682,7 +684,7 @@ public class ReflectionUtil {
 	 * If this method also can not be found, null is returned.
 	 * 
 	 * This method uses #
-	 * {@link ReflectionUtil#getMethodReturnType(Class, String, Class...)} to
+	 * {@link ReflectionUtils#getMethodReturnType(Class, String, Class...)} to
 	 * retrieve the getter.
 	 * 
 	 * A getter must not have any parameters and must have a return type that is

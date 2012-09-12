@@ -14,7 +14,7 @@ import org.quartz.impl.StdSchedulerFactory;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class FireHistoryUtil {
+public class FireHistoryUtils {
 
 	public static List<FireHistoryEntry> getEntries() throws SchedulerException {
 		Scheduler sched = StdSchedulerFactory.getDefaultScheduler();

@@ -24,7 +24,7 @@ import org.quartz.impl.matchers.GroupMatcher;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class JobUtil {
+public class JobUtils {
 
 	public static void add(Scheduler sched, Class<? extends Job> clazz,
 			String jobName, String jobGroup,
@@ -35,7 +35,7 @@ public class JobUtil {
 	public static void schedule(Scheduler sched, Class<? extends Job> clazz,
 			String jobName, String jobGroup,
 			Map<String, ? extends Object> dataMap) throws SchedulerException {
-		Trigger trigger = TriggerUtil.simple(null, null, jobName, jobGroup,
+		Trigger trigger = TriggerUtils.simple(null, null, jobName, jobGroup,
 				null, null, null);
 		schedule(sched, clazz, jobName, jobGroup, dataMap, trigger);
 	}
@@ -45,7 +45,7 @@ public class JobUtil {
 			Map<String, ? extends Object> dataMap, Trigger trigger)
 			throws SchedulerException {
 		add(sched, clazz, jobName, jobGroup, dataMap);
-		TriggerUtil.schedule(trigger);
+		TriggerUtils.schedule(trigger);
 	}
 
 	public static void pause(Scheduler sched, JobDetail job)

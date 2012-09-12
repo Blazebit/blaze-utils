@@ -10,12 +10,12 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
-import com.blazebit.annotation.AnnotationUtil;
+import com.blazebit.annotation.AnnotationUtils;
 import com.blazebit.annotation.constraint.NullClass;
 import com.blazebit.cdi.cleanup.annotation.Cleanup;
 import com.blazebit.cdi.cleanup.annotation.CleanupHandler;
 import com.blazebit.cdi.cleanup.annotation.CleanupHandling;
-import com.blazebit.exception.ExceptionUtil;
+import com.blazebit.exception.ExceptionUtils;
 
 /**
  * Invokes cleanup methods after the invocation of a method. The specified
@@ -44,7 +44,7 @@ public class CleanupHandlerInterceptor implements Serializable {
 		Object targetObject = ic.getTarget();
 		Class<?> targetClass = targetObject == null ? m.getDeclaringClass()
 				: targetObject.getClass();
-		CleanupHandler cleanupHandlerAnnotation = AnnotationUtil
+		CleanupHandler cleanupHandlerAnnotation = AnnotationUtils
 				.findAnnotation(m, targetClass, CleanupHandler.class);
 
 		if (cleanupHandlerAnnotation == null) {
@@ -62,7 +62,7 @@ public class CleanupHandlerInterceptor implements Serializable {
 			ret = ic.proceed();
 		} catch (Throwable t) {
 			// Unwrap Exception if t is instanceof InvocationTargetException
-			Throwable t1 = ExceptionUtil.unwrapInvocationTargetException(t);
+			Throwable t1 = ExceptionUtils.unwrapInvocationTargetException(t);
 			handleCleanups(targetObject, cleanupHandlerAnnotation, t1);
 
 			if (t1 instanceof Exception) {

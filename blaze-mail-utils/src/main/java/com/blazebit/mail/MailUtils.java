@@ -16,7 +16,7 @@ import com.blazebit.mail.impl.SimpleMailSender;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class MailUtil {
+public class MailUtils {
 
 	private static final Pattern mailPattern;
 

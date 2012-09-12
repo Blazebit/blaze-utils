@@ -12,7 +12,7 @@ import org.quartz.impl.StdSchedulerFactory;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class SchedulerUtil {
+public class SchedulerUtils {
 
 	public static void start() throws SchedulerException {
 		Scheduler sched = StdSchedulerFactory.getDefaultScheduler();

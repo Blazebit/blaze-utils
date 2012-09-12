@@ -20,13 +20,13 @@ import javax.enterprise.inject.Stereotype;
 
 import org.junit.Test;
 
-import com.blazebit.reflection.ReflectionUtil;
+import com.blazebit.reflection.ReflectionUtils;
 
 /**
  * 
  * @author Christian Beikov
  */
-public class AnnotationUtilTest {
+public class AnnotationUtilsTest {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	private static @interface Anno {
@@ -64,7 +64,7 @@ public class AnnotationUtilTest {
 	public void testGetAllAnnotationsOnClassLevel() throws Exception {
 		// Test ClassA
 
-		Set<Annotation> annotations = AnnotationUtil
+		Set<Annotation> annotations = AnnotationUtils
 				.getAllAnnotations(ClassA.class);
 		assertFalse(annotations.isEmpty());
 
@@ -78,7 +78,7 @@ public class AnnotationUtilTest {
 
 		// Test ClassB
 
-		annotations = AnnotationUtil.getAllAnnotations(ClassB.class);
+		annotations = AnnotationUtils.getAllAnnotations(ClassB.class);
 		assertFalse(annotations.isEmpty());
 
 		expectedValues = new HashSet<String>(Arrays.asList("classA", "classB",
@@ -92,8 +92,8 @@ public class AnnotationUtilTest {
 
 	@Test
 	public void testGetAllAnnotationsOnMethodLevel() throws Exception {
-		Set<Annotation> annotations = AnnotationUtil
-				.getAllAnnotations(ReflectionUtil.getMethod(ClassA.class, "m1"));
+		Set<Annotation> annotations = AnnotationUtils
+				.getAllAnnotations(ReflectionUtils.getMethod(ClassA.class, "m1"));
 		List<String> expected = Arrays.asList("stereotyped");
 		List<String> values = getMemberValues(annotations, Anno.class,
 				String.class, "value");
@@ -106,27 +106,27 @@ public class AnnotationUtilTest {
 
 	@Test
 	public void testFindAnnotationOnClassLevel() throws Exception {
-		assertNotNull(AnnotationUtil.findAnnotation(ClassA.class, Anno.class));
-		assertNotNull(AnnotationUtil.findAnnotation(ClassA.class, Anno2.class));
+		assertNotNull(AnnotationUtils.findAnnotation(ClassA.class, Anno.class));
+		assertNotNull(AnnotationUtils.findAnnotation(ClassA.class, Anno2.class));
 		assertEquals("classA",
-				AnnotationUtil.findAnnotation(ClassA.class, Anno.class).value());
+				AnnotationUtils.findAnnotation(ClassA.class, Anno.class).value());
 
-		assertNotNull(AnnotationUtil.findAnnotation(ClassB.class, Anno.class));
-		assertNotNull(AnnotationUtil.findAnnotation(ClassB.class, Anno2.class));
+		assertNotNull(AnnotationUtils.findAnnotation(ClassB.class, Anno.class));
+		assertNotNull(AnnotationUtils.findAnnotation(ClassB.class, Anno2.class));
 		assertEquals("classB",
-				AnnotationUtil.findAnnotation(ClassB.class, Anno.class).value());
+				AnnotationUtils.findAnnotation(ClassB.class, Anno.class).value());
 	}
 
 	@Test
 	public void testFindAnnotationOnMethodLevel() throws Exception {
-		assertNotNull(AnnotationUtil.findAnnotation(
-				ReflectionUtil.getMethod(ClassA.class, "m1"), Anno.class));
-		assertNotNull(AnnotationUtil.findAnnotation(
-				ReflectionUtil.getMethod(ClassA.class, "m1"), Anno2.class));
+		assertNotNull(AnnotationUtils.findAnnotation(
+				ReflectionUtils.getMethod(ClassA.class, "m1"), Anno.class));
+		assertNotNull(AnnotationUtils.findAnnotation(
+				ReflectionUtils.getMethod(ClassA.class, "m1"), Anno2.class));
 		assertEquals(
 				"stereotyped",
-				AnnotationUtil.findAnnotation(
-						ReflectionUtil.getMethod(ClassA.class, "m1"),
+				AnnotationUtils.findAnnotation(
+						ReflectionUtils.getMethod(ClassA.class, "m1"),
 						Anno.class).value());
 	}
 
@@ -150,7 +150,7 @@ public class AnnotationUtilTest {
 
 		for (Annotation a : annos) {
 			if (a.annotationType().equals(annotationType)) {
-				l.add(valueType.cast(ReflectionUtil.getMethod(annotationType,
+				l.add(valueType.cast(ReflectionUtils.getMethod(annotationType,
 						memberName).invoke(a)));
 			}
 		}

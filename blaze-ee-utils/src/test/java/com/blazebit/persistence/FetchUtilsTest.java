@@ -14,16 +14,16 @@ import static org.junit.Assert.*;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class FetchUtilTest {
+public class FetchUtilsTest {
     
     @Test
     public void testSimple() {
         String query = "FROM TesClass t ";
         String alias = "t";
         String expResult = query + " LEFT OUTER JOIN FETCH t.testComplexClass _0_testComplexClass_element_0";
-        query += FetchUtil.getFetchProfilePlaceholder(TestClass.class);
+        query += FetchUtils.getFetchProfilePlaceholder(TestClass.class);
         FetchProfile<TestClass> f = new FetchProfile<TestClass>(TestClass.class, "testComplexClass");
-        String result = FetchUtil.query(query, alias, f);
+        String result = FetchUtils.query(query, alias, f);
         assertEquals(expResult, result);
     }
     
@@ -32,9 +32,9 @@ public class FetchUtilTest {
         String query = "FROM TesClass t ";
         String alias = "t";
         String expResult = query + " LEFT OUTER JOIN FETCH t.testComplexClass _0_testComplexClass_element_0 LEFT OUTER JOIN FETCH _0_testComplexClass_element_0.testComplexClass _0_testComplexClass_element_1";
-        query += FetchUtil.getFetchProfilePlaceholder(TestClass.class);
+        query += FetchUtils.getFetchProfilePlaceholder(TestClass.class);
         FetchProfile<TestClass> f = new FetchProfile<TestClass>(TestClass.class, "testComplexClass.testComplexClass");
-        String result = FetchUtil.query(query, alias, f);
+        String result = FetchUtils.query(query, alias, f);
         assertEquals(expResult, result);
     }
     
@@ -45,9 +45,9 @@ public class FetchUtilTest {
         String expResult = query + " LEFT OUTER JOIN FETCH t.testComplexClass _0_testComplexClass_element_0 LEFT OUTER JOIN FETCH _0_testComplexClass_element_0.testComplexClass _0_testComplexClass_element_1"
                                  + " LEFT OUTER JOIN FETCH t.testComplexClass2 _1_testComplexClass2_element_0 LEFT OUTER JOIN FETCH _1_testComplexClass2_element_0.testComplexClass _1_testComplexClass_element_1"
                                  + " LEFT OUTER JOIN FETCH _1_testComplexClass2_element_0.testComplexClass2 _2_testComplexClass2_element_1";
-        query += FetchUtil.getFetchProfilePlaceholder(TestClass.class);
+        query += FetchUtils.getFetchProfilePlaceholder(TestClass.class);
         FetchProfile<TestClass> f = new FetchProfile<TestClass>(TestClass.class, "testComplexClass.testComplexClass", "testComplexClass2.testComplexClass", "testComplexClass2.testComplexClass2");
-        String result = FetchUtil.query(query, alias, f);
+        String result = FetchUtils.query(query, alias, f);
         assertEquals(expResult, result);
     }
     
@@ -59,9 +59,9 @@ public class FetchUtilTest {
                                  + " LEFT OUTER JOIN FETCH t.testComplexClass2 _1_testComplexClass2_element_0 LEFT OUTER JOIN FETCH _1_testComplexClass2_element_0.testComplexClass _1_testComplexClass_element_1 LEFT OUTER JOIN FETCH _1_testComplexClass_element_1.testComplexClass3 _1_testComplexClass3_element_2"
                                  + " LEFT OUTER JOIN FETCH _1_testComplexClass2_element_0.testComplexClass2 _2_testComplexClass2_element_1"
                                  + " LEFT OUTER JOIN FETCH _1_testComplexClass_element_1.testComplexClass _3_testComplexClass_element_2";
-        query += FetchUtil.getFetchProfilePlaceholder(TestClass.class);
+        query += FetchUtils.getFetchProfilePlaceholder(TestClass.class);
         FetchProfile<TestClass> f = new FetchProfile<TestClass>(TestClass.class, "testComplexClass.testComplexClass.testComplexClass3", "testComplexClass2.testComplexClass.testComplexClass3", "testComplexClass2.testComplexClass2", "testComplexClass2.testComplexClass.testComplexClass");
-        String result = FetchUtil.query(query, alias, f);
+        String result = FetchUtils.query(query, alias, f);
         assertEquals(expResult, result);
     }
     
@@ -70,9 +70,9 @@ public class FetchUtilTest {
         String query = "FROM TesClass t ";
         String alias = "t";
         String expResult = query + " LEFT OUTER JOIN FETCH t.testComplexClass4 LEFT OUTER JOIN FETCH t.testComplexClass4.testComplexClass _0_testComplexClass_element_1";
-        query += FetchUtil.getFetchProfilePlaceholder(TestClass.class);
+        query += FetchUtils.getFetchProfilePlaceholder(TestClass.class);
         FetchProfile<TestClass> f = new FetchProfile<TestClass>(TestClass.class, "testComplexClass4.testComplexClass");
-        String result = FetchUtil.query(query, alias, f);
+        String result = FetchUtils.query(query, alias, f);
         assertEquals(expResult, result);
     }
     

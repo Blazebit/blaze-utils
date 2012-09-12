@@ -82,7 +82,7 @@ public class LazyGetterMethod {
 		Object current = source;
 
 		for (String fieldName : fieldNames) {
-			Method m = ReflectionUtil.getGetter(current.getClass(), fieldName);
+			Method m = ReflectionUtils.getGetter(current.getClass(), fieldName);
 			current = m.invoke(current);
 		}
 

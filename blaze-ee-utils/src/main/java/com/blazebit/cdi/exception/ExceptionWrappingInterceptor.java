@@ -12,10 +12,10 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
-import com.blazebit.annotation.AnnotationUtil;
+import com.blazebit.annotation.AnnotationUtils;
 import com.blazebit.cdi.exception.annotation.ExceptionWrap;
 import com.blazebit.cdi.exception.annotation.ExceptionWrapping;
-import com.blazebit.exception.ExceptionUtil;
+import com.blazebit.exception.ExceptionUtils;
 
 /**
  * This interceptor simply wraps exceptions which are declared as sources in the
@@ -75,7 +75,7 @@ public class ExceptionWrappingInterceptor implements Serializable {
 		 * intercepted method
 		 */
 		Class<?>[] declaredExceptions = m.getExceptionTypes();
-		ExceptionWrapping wrappingAnnotation = AnnotationUtil.findAnnotation(m,
+		ExceptionWrapping wrappingAnnotation = AnnotationUtils.findAnnotation(m,
 				targetClass, ExceptionWrapping.class);
 		ExceptionWrap[] wraps = null;
 		Object ret;
@@ -101,7 +101,7 @@ public class ExceptionWrappingInterceptor implements Serializable {
 			 * versions so we need to do this to be able to handle the right
 			 * exception
 			 */
-			Throwable t1 = ExceptionUtil.unwrapInvocationTargetException(t);
+			Throwable t1 = ExceptionUtils.unwrapInvocationTargetException(t);
 
 			if (doWrapping) {
 				/*

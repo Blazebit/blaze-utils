@@ -11,7 +11,7 @@ package com.blazebit.persistence;
  * @param <T>
  *            The type of the on which the fetching should be applied
  * @author Christian Beikov
- * @see FetchUtil
+ * @see FetchUtils
  */
 public class FetchProfile<T> {
 

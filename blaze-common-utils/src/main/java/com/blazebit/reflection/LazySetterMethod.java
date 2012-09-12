@@ -190,7 +190,7 @@ public class LazySetterMethod {
 					.invoke();
 		}
 
-		ReflectionUtil.getSetter(targetObject.getClass(), fieldName).invoke(
+		ReflectionUtils.getSetter(targetObject.getClass(), fieldName).invoke(
 				targetObject, actualArgs);
 	}
 }

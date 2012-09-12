@@ -16,8 +16,8 @@ import javax.persistence.criteria.FetchParent;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 
-import com.blazebit.reflection.ReflectionUtil;
-import com.blazebit.text.FormatUtil;
+import com.blazebit.reflection.ReflectionUtils;
+import com.blazebit.text.FormatUtils;
 
 /**
  * 
@@ -25,9 +25,9 @@ import com.blazebit.text.FormatUtil;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class FetchUtil {
+public class FetchUtils {
 
-	private static final Logger log = Logger.getLogger(FetchUtil.class
+	private static final Logger log = Logger.getLogger(FetchUtils.class
 			.getName());
 
 	public static String getFetchProfilePlaceholder(Class<?> clazz) {
@@ -78,18 +78,18 @@ public class FetchUtil {
 			// Iterate through all property names
 			for (int j = 0; j < propertyNames.length; j++) {
 				String propertyName = propertyNames[j];
-				fieldClass = ReflectionUtil.getFieldType(currentClass,
+				fieldClass = ReflectionUtils.getFieldType(currentClass,
 						propertyName);
-				fieldCollectionType = ReflectionUtil.isSubtype(fieldClass,
+				fieldCollectionType = ReflectionUtils.isSubtype(fieldClass,
 						Collection.class);
 
 				// avoid call when not necessary
-				fieldMapType = fieldCollectionType ? false : ReflectionUtil
+				fieldMapType = fieldCollectionType ? false : ReflectionUtils
 						.isSubtype(fieldClass, Map.class);
 
 				// FIXED: add exceptions when type arguments are not sufficient
 				if (fieldCollectionType) {
-					Class<?>[] types = ReflectionUtil
+					Class<?>[] types = ReflectionUtils
 							.getResolvedFieldTypeArguments(currentClass,
 									propertyName);
 
@@ -102,7 +102,7 @@ public class FetchUtil {
 
 					fieldClass = types[0];
 				} else if (fieldMapType) {
-					Class<?>[] types = ReflectionUtil
+					Class<?>[] types = ReflectionUtils
 							.getResolvedFieldTypeArguments(currentClass,
 									propertyName);
 
@@ -125,7 +125,7 @@ public class FetchUtil {
 
 				// Parseable types do not need to be fetched, so also sub
 				// properties would not have to be fetched
-				if (FormatUtil.isParseableType(fieldClass)
+				if (FormatUtils.isParseableType(fieldClass)
 						|| Blob.class.equals(fieldClass)
 						|| Clob.class.equals(fieldClass)
 						|| new byte[0].getClass().equals(fieldClass)) {

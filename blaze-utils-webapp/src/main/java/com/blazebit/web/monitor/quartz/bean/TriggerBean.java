@@ -26,8 +26,8 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
 
-import com.blazebit.quartz.JobUtil;
-import com.blazebit.quartz.TriggerUtil;
+import com.blazebit.quartz.JobUtils;
+import com.blazebit.quartz.TriggerUtils;
 import com.blazebit.quartz.job.GenericJob;
 import com.blazebit.quartz.job.JobParameter;
 import com.blazebit.web.monitor.quartz.model.Property;
@@ -85,7 +85,7 @@ public class TriggerBean implements Serializable {
 		}
 
 		if (selectedJob != null) {
-			jobTriggers = JobUtil.getTriggers(scheduler, selectedJob);
+			jobTriggers = JobUtils.getTriggers(scheduler, selectedJob);
 		}
 	}
 
@@ -168,63 +168,63 @@ public class TriggerBean implements Serializable {
 	public String addTrigger() throws SchedulerException, ParseException {
 		try {
 			if ("Simple".equals(triggerType)) {
-				TriggerUtil.schedule(TriggerUtil.simple(triggerName,
+				TriggerUtils.schedule(TriggerUtils.simple(triggerName,
 						triggerGroup, selectedJob, getAsMap(triggerDataMap),
 						triggerStart, triggerEnd));
 			} else if ("Interval".equals(triggerType)) {
 				Trigger intervalTrigger = null;
 
 				if ("Sekunde".equals(triggerIntervalType)) {
-					intervalTrigger = TriggerUtil.second(triggerName,
+					intervalTrigger = TriggerUtils.second(triggerName,
 							triggerGroup, selectedJob.getKey().getName(),
 							selectedJob.getKey().getGroup(),
 							getAsMap(triggerDataMap), triggerInterval,
 							triggerStart, triggerEnd);
 				} else if ("Minute".equals(triggerIntervalType)) {
-					intervalTrigger = TriggerUtil.minute(triggerName,
+					intervalTrigger = TriggerUtils.minute(triggerName,
 							triggerGroup, selectedJob.getKey().getName(),
 							selectedJob.getKey().getGroup(),
 							getAsMap(triggerDataMap), triggerInterval,
 							triggerStart, triggerEnd);
 				} else if ("Stunde".equals(triggerIntervalType)) {
-					intervalTrigger = TriggerUtil.hour(triggerName,
+					intervalTrigger = TriggerUtils.hour(triggerName,
 							triggerGroup, selectedJob.getKey().getName(),
 							selectedJob.getKey().getGroup(),
 							getAsMap(triggerDataMap), triggerInterval,
 							triggerStart, triggerEnd);
 				} else if ("Tag".equals(triggerIntervalType)) {
-					intervalTrigger = TriggerUtil.day(triggerName,
+					intervalTrigger = TriggerUtils.day(triggerName,
 							triggerGroup, selectedJob.getKey().getName(),
 							selectedJob.getKey().getGroup(),
 							getAsMap(triggerDataMap), triggerInterval,
 							triggerStart, triggerEnd);
 				} else if ("Woche".equals(triggerIntervalType)) {
-					intervalTrigger = TriggerUtil.week(triggerName,
+					intervalTrigger = TriggerUtils.week(triggerName,
 							triggerGroup, selectedJob.getKey().getName(),
 							selectedJob.getKey().getGroup(),
 							getAsMap(triggerDataMap), triggerInterval,
 							triggerStart, triggerEnd);
 				} else if ("Monat".equals(triggerIntervalType)) {
-					intervalTrigger = TriggerUtil.month(triggerName,
+					intervalTrigger = TriggerUtils.month(triggerName,
 							triggerGroup, selectedJob.getKey().getName(),
 							selectedJob.getKey().getGroup(),
 							getAsMap(triggerDataMap), triggerInterval,
 							triggerStart, triggerEnd);
 				} else if ("Jahr".equals(triggerIntervalType)) {
-					intervalTrigger = TriggerUtil.year(triggerName,
+					intervalTrigger = TriggerUtils.year(triggerName,
 							triggerGroup, selectedJob.getKey().getName(),
 							selectedJob.getKey().getGroup(),
 							getAsMap(triggerDataMap), triggerInterval,
 							triggerStart, triggerEnd);
 				}
 
-				TriggerUtil.schedule(intervalTrigger);
+				TriggerUtils.schedule(intervalTrigger);
 
 				if (triggerStart == null || triggerStart.before(new Date())) {
-					TriggerUtil.pause(intervalTrigger.getKey());
+					TriggerUtils.pause(intervalTrigger.getKey());
 				}
 			} else if ("Cron".equals(triggerType)) {
-				TriggerUtil.schedule(TriggerUtil.cron(triggerName,
+				TriggerUtils.schedule(TriggerUtils.cron(triggerName,
 						triggerGroup, selectedJob.getKey().getName(),
 						selectedJob.getKey().getGroup(),
 						getAsMap(triggerDataMap), triggerCronExpression));
@@ -256,24 +256,24 @@ public class TriggerBean implements Serializable {
 	}
 
 	public String deleteTrigger(Trigger trigger) throws SchedulerException {
-		TriggerUtil.delete(trigger);
+		TriggerUtils.delete(trigger);
 		selectedTrigger = null;
 		return "";
 	}
 
 	public String pauseTrigger(Trigger trigger) throws SchedulerException {
-		TriggerUtil.pause(trigger);
+		TriggerUtils.pause(trigger);
 		return "";
 	}
 
 	public String resumeTrigger(Trigger trigger) throws SchedulerException {
-		TriggerUtil.resume(trigger);
+		TriggerUtils.resume(trigger);
 		return "";
 	}
 
 	public Trigger.TriggerState getTriggerState(Trigger trigger)
 			throws SchedulerException {
-		return TriggerUtil.getState(trigger);
+		return TriggerUtils.getState(trigger);
 	}
 
 	public Trigger.TriggerState getTriggerState(Object trigger)

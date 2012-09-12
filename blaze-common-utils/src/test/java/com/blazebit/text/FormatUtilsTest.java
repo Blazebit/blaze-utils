@@ -9,7 +9,7 @@ import org.junit.Test;
  * 
  * @author Christian Beikov
  */
-public class FormatUtilTest {
+public class FormatUtilsTest {
 
 	/**
 	 * Test of getAvailableFormatters method, of class FormatUtil.

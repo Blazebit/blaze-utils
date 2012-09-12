@@ -40,7 +40,7 @@ import org.quartz.utils.PropertiesParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blazebit.quartz.PropertiesUtil;
+import com.blazebit.quartz.PropertiesUtils;
 
 /**
  * 
@@ -71,7 +71,7 @@ public class FireHistoryPlugin extends TriggerListenerSupport implements
 	@Override
 	public void initialize(String name, Scheduler schdlr)
 			throws SchedulerException {
-		Properties props = PropertiesUtil.getProperties();
+		Properties props = PropertiesUtils.getProperties();
 		PropertiesParser cfg = new PropertiesParser(props);
 
 		if (schdlr.getMetaData().isJobStoreSupportsPersistence()) {

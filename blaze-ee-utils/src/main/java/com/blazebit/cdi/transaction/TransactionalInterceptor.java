@@ -13,9 +13,9 @@ import javax.interceptor.InvocationContext;
 import javax.transaction.Status;
 import javax.transaction.UserTransaction;
 
-import com.blazebit.annotation.AnnotationUtil;
+import com.blazebit.annotation.AnnotationUtils;
 import com.blazebit.cdi.transaction.annotation.Transactional;
-import com.blazebit.exception.ExceptionUtil;
+import com.blazebit.exception.ExceptionUtils;
 
 /**
  * This interceptor executes a intercepted method within a JTA trasaction. When
@@ -59,7 +59,7 @@ public class TransactionalInterceptor implements Serializable {
 		Object targetObject = ic.getTarget();
 		Class<?> targetClass = targetObject == null ? m.getDeclaringClass()
 				: targetObject.getClass();
-		Transactional transactionalAnnotation = AnnotationUtil.findAnnotation(
+		Transactional transactionalAnnotation = AnnotationUtils.findAnnotation(
 				m, targetClass, Transactional.class);
 		Object ret;
 
@@ -96,7 +96,7 @@ public class TransactionalInterceptor implements Serializable {
 					// have been thrown in decorators in some versions so we
 					// need to do
 					// this to be able to log the right exception
-					Throwable t1 = ExceptionUtil
+					Throwable t1 = ExceptionUtils
 							.unwrapInvocationTargetException(t);
 
 					// Cast to or wrap the throwable into a new exception and

@@ -16,13 +16,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import com.blazebit.reflection.ReflectionUtil;
+import com.blazebit.reflection.ReflectionUtils;
 
 /**
  * 
  * @author Christian Beikov
  */
-public class FormatUtil {
+public final class FormatUtils {
 
 	private static final Map<Class<?>, SerializableFormat<?>> parseableTypes = new HashMap<Class<?>, SerializableFormat<?>>();
 
@@ -65,6 +65,8 @@ public class FormatUtil {
 			contextMap.put(name, value);
 		}
 	}
+	
+	private FormatUtils(){}
 
 	/**
 	 * Returns the available serializable formatters.
@@ -113,7 +115,7 @@ public class FormatUtil {
 	/**
 	 * Returns the parsed object of the given type for the given string.
 	 * Invoking this method is equal to invoking #
-	 * {@link ReflectionUtil#getParsedValue(java.lang.Class, java.lang.String, java.text.DateFormat, java.text.DateFormat)}
+	 * {@link ReflectionUtils#getParsedValue(java.lang.Class, java.lang.String, java.text.DateFormat, java.text.DateFormat)}
 	 * and the 3rd argument <code>DateFormat.getDateTimeInstance()</code>
 	 * 
 	 * @param returnType
@@ -123,8 +125,8 @@ public class FormatUtil {
 	 * @return The parsed object
 	 * @throws ParseException
 	 *             Is thrown when the string can not be parsed
-	 * @see ReflectionUtil#isParseableType(java.lang.Class)
-	 * @see ReflectionUtil#getParsedValue(java.lang.Class, java.lang.String,
+	 * @see ReflectionUtils#isParseableType(java.lang.Class)
+	 * @see ReflectionUtils#getParsedValue(java.lang.Class, java.lang.String,
 	 *      java.text.DateFormat, java.text.DateFormat)
 	 */
 	public static Serializable getParsedValue(Class<?> returnType, String value)
@@ -149,7 +151,7 @@ public class FormatUtil {
 	 * @return The parsed object
 	 * @throws ParseException
 	 *             Is thrown when the string can not be parsed
-	 * @see ReflectionUtil#isParseableType(java.lang.Class)
+	 * @see ReflectionUtils#isParseableType(java.lang.Class)
 	 */
 	public static Serializable getParsedValue(Class<?> returnType,
 			String value, java.text.DateFormat dateFormatter)

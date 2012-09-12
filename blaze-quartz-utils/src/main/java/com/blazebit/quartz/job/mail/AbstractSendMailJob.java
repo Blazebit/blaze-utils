@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blazebit.mail.Mail;
-import com.blazebit.mail.MailUtil;
+import com.blazebit.mail.MailUtils;
 import com.blazebit.quartz.job.AbstractJob;
 import com.blazebit.quartz.job.JobParameter;
 
@@ -33,20 +33,20 @@ public abstract class AbstractSendMailJob extends AbstractJob {
 
 	protected Mail createMail(JobDataMap dataMap, String[] to, String subject,
 			String text, String html) {
-		return MailUtil.createMessage(getRequiredParam(dataMap, "from"), to,
+		return MailUtils.createMessage(getRequiredParam(dataMap, "from"), to,
 				subject, text, html);
 	}
 
 	protected Mail createMail(JobDataMap dataMap, String[] to, String subject,
 			String text, String html, File[] files) throws IOException {
-		return MailUtil.createMessage(getRequiredParam(dataMap, "from"), to,
+		return MailUtils.createMessage(getRequiredParam(dataMap, "from"), to,
 				subject, text, html, files);
 	}
 
 	protected void sendMail(JobDataMap dataMap, Mail m)
 			throws JobExecutionException {
 		try {
-			MailUtil.sendMessage(getRequiredParam(dataMap, "host"),
+			MailUtils.sendMessage(getRequiredParam(dataMap, "host"),
 					Integer.valueOf(getRequiredParam(dataMap, "port")),
 					getRequiredParam(dataMap, "user"),
 					getRequiredParam(dataMap, "password"),

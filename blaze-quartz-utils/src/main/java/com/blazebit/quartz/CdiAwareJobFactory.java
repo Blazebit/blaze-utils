@@ -16,7 +16,7 @@ import org.quartz.spi.TriggerFiredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.blazebit.cdi.CdiUtil;
+import com.blazebit.cdi.CdiUtils;
 import com.blazebit.quartz.job.CdiAwareJob;
 
 /**
@@ -56,7 +56,7 @@ public class CdiAwareJobFactory implements JobFactory {
 
 					if (bm == null)
 						break;
-					return CdiUtil.getBean(bm, jobClass);
+					return CdiUtils.getBean(bm, jobClass);
 				}
 			}
 

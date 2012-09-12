@@ -12,7 +12,7 @@ import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
 import com.blazebit.cdi.logging.annotation.Logging;
-import com.blazebit.exception.ExceptionUtil;
+import com.blazebit.exception.ExceptionUtils;
 
 /**
  * This interceptor logs invocations of methods, class name, method name,
@@ -96,7 +96,7 @@ public class LoggingInterceptor implements Serializable {
 			// and if so, unwrap the cause. OWB did not unwrap exceptions that
 			// have been thrown in decorators in some versions so we need to do
 			// this to be able to log the right exception
-			t = ExceptionUtil.unwrapInvocationTargetException(t);
+			t = ExceptionUtils.unwrapInvocationTargetException(t);
 		}
 
 		// Reuse the StringBuilder

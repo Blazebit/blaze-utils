@@ -62,8 +62,7 @@
                                     Wert
                                 </f:facet>
                                 <h:inputText id="jobParam" value="#{property.value}">
-                                    <f:validator validatorId="onSubmitValidator"/>
-                                    <f:attribute name="onSubmitRequired" value="#{property.required}"/>
+                                	<f:validateRequired disabled="#{performValidation eq false}"/>
                                 </h:inputText>
                                 <h:message for="jobParam"/>
                             </h:column>

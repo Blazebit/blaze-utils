@@ -11,9 +11,9 @@ import java.lang.reflect.InvocationTargetException;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class ExceptionUtil {
+public final class ExceptionUtils {
 
-	private ExceptionUtil() {
+	private ExceptionUtils() {
 	}
 
 	/**
@@ -26,7 +26,7 @@ public class ExceptionUtil {
 	 *            The throwable to unwrap
 	 * @return The unwrapped throwable or null if no further causes can be
 	 *         unwrapped
-	 * @see ExceptionUtil#unwrap(java.lang.Throwable, java.lang.Class)
+	 * @see ExceptionUtils#unwrap(java.lang.Throwable, java.lang.Class)
 	 */
 	public static Throwable unwrapInvocationTargetException(Throwable t) {
 		return unwrap(t, InvocationTargetException.class);

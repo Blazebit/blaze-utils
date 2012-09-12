@@ -19,7 +19,7 @@ import org.quartz.impl.StdSchedulerFactory;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class PropertiesUtil {
+public class PropertiesUtils {
 
 	public static Properties getProperties() throws SchedulerException {
 		String requestedFile = System
@@ -61,7 +61,7 @@ public class PropertiesUtil {
 				}
 
 			} else {
-				ClassLoader cl = PropertiesUtil.class.getClassLoader();
+				ClassLoader cl = PropertiesUtils.class.getClassLoader();
 
 				if (cl == null) {
 					cl = findClassloader();
@@ -107,9 +107,9 @@ public class PropertiesUtil {
 		// work-around set context loader for windows-service started jvms
 		// (QUARTZ-748)
 		if (Thread.currentThread().getContextClassLoader() == null
-				&& PropertiesUtil.class.getClassLoader() != null) {
+				&& PropertiesUtils.class.getClassLoader() != null) {
 			Thread.currentThread().setContextClassLoader(
-					PropertiesUtil.class.getClassLoader());
+					PropertiesUtils.class.getClassLoader());
 		}
 		return Thread.currentThread().getContextClassLoader();
 	}

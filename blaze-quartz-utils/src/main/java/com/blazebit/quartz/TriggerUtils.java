@@ -33,7 +33,7 @@ import org.quartz.impl.matchers.GroupMatcher;
  * @author Christian Beikov
  * @since 0.1.2
  */
-public class TriggerUtil {
+public class TriggerUtils {
 
 	public static Trigger simple(String triggerName, String triggerGroup,
 			JobDetail job, Map<String, ? extends Object> dataMap, Date start,

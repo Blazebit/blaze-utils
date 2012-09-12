@@ -30,7 +30,7 @@ import com.blazebit.mail.MailException;
 import com.blazebit.mail.MailResource;
 import com.blazebit.mail.MailSender;
 import com.blazebit.mail.MailTransport;
-import com.blazebit.mail.MailUtil;
+import com.blazebit.mail.MailUtils;
 import com.blazebit.mail.Recipient;
 
 /**
@@ -112,7 +112,7 @@ public class SimpleMailSender implements MailSender {
 	@Override
 	public void sendMail(Mail email, MailTransport transport)
 			throws MailException {
-		if (MailUtil.validate(email)) {
+		if (MailUtils.validate(email)) {
 			try {
 				Message message = prepareMessage(email);
 				message.saveChanges();

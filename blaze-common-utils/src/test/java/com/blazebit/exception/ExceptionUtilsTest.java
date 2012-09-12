@@ -14,7 +14,7 @@ import org.junit.Test;
  * 
  * @author Christian Beikov
  */
-public class ExceptionUtilTest {
+public class ExceptionUtilsTest {
 
 	/**
 	 * Test of unwrapInvocationTargetException method, of class ExceptionUtil.
@@ -23,14 +23,14 @@ public class ExceptionUtilTest {
 	public void testUnwrapInvocationTargetException() {
 		Throwable inner = new RuntimeException();
 		Throwable outer = new InvocationTargetException(inner);
-		assertEquals(ExceptionUtil.unwrapInvocationTargetException(outer),
+		assertEquals(ExceptionUtils.unwrapInvocationTargetException(outer),
 				inner);
 		outer = new InvocationTargetException(outer);
-		assertEquals(ExceptionUtil.unwrapInvocationTargetException(outer),
+		assertEquals(ExceptionUtils.unwrapInvocationTargetException(outer),
 				inner);
-		assertEquals(ExceptionUtil.unwrapInvocationTargetException(inner),
+		assertEquals(ExceptionUtils.unwrapInvocationTargetException(inner),
 				inner);
-		assertNull(ExceptionUtil
+		assertNull(ExceptionUtils
 				.unwrapInvocationTargetException(new InvocationTargetException(
 						null)));
 	}
@@ -43,11 +43,11 @@ public class ExceptionUtilTest {
 		Throwable inner = new RuntimeException();
 		Throwable outer = new InvocationTargetException(inner);
 		assertEquals(
-				ExceptionUtil.unwrap(outer, InvocationTargetException.class),
+				ExceptionUtils.unwrap(outer, InvocationTargetException.class),
 				inner);
 		Throwable outer1 = new Error(outer);
-		assertEquals(ExceptionUtil.unwrap(outer1, Error.class), outer);
-		assertNull(ExceptionUtil.unwrap(inner, RuntimeException.class));
+		assertEquals(ExceptionUtils.unwrap(outer1, Error.class), outer);
+		assertNull(ExceptionUtils.unwrap(inner, RuntimeException.class));
 
 	}
 }

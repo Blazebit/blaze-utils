@@ -7,7 +7,7 @@ import com.blazebit.reflection.LazyGetterMethod;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 
-import com.blazebit.reflection.ReflectionUtil;
+import com.blazebit.reflection.ReflectionUtils;
 
 /**
  * Generic Comparator is used at Collections.sort(); and can be applied on every

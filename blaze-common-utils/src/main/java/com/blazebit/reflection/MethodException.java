@@ -54,7 +54,7 @@ public class MethodException {
 				: constructor.getGenericExceptionTypes()[index];
 
 		if (t instanceof TypeVariable<?>) {
-			return ReflectionUtil.resolveTypeVariable(concreteClass,
+			return ReflectionUtils.resolveTypeVariable(concreteClass,
 					(TypeVariable<?>) t);
 		}
 
@@ -64,7 +64,7 @@ public class MethodException {
 	public Class<?>[] getResolvedTypeParameters(Class<?> concreteClass) {
 		Type t = method != null ? method.getGenericExceptionTypes()[index]
 				: constructor.getGenericExceptionTypes()[index];
-		return ReflectionUtil.resolveTypeArguments(concreteClass, t);
+		return ReflectionUtils.resolveTypeArguments(concreteClass, t);
 	}
 
 	public Method getMethod() {

@@ -24,7 +24,7 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
 
-import com.blazebit.quartz.JobUtil;
+import com.blazebit.quartz.JobUtils;
 import com.blazebit.quartz.job.GenericJob;
 import com.blazebit.quartz.job.JobParameter;
 import com.blazebit.quartz.job.http.HttpGetInvokerJob;
@@ -70,10 +70,10 @@ public class JobBean implements Serializable {
 	}
 
 	public void preRender() throws SchedulerException {
-		jobs = JobUtil.getJobs(scheduler);
+		jobs = JobUtils.getJobs(scheduler);
 
 		if (selectedJob != null) {
-			jobTriggers = JobUtil.getTriggers(scheduler, selectedJob);
+			jobTriggers = JobUtils.getTriggers(scheduler, selectedJob);
 		}
 	}
 
@@ -127,7 +127,7 @@ public class JobBean implements Serializable {
 
 	public String addJob() throws SchedulerException {
 		try {
-			JobUtil.add(scheduler, jobType, jobName, jobGroup,
+			JobUtils.add(scheduler, jobType, jobName, jobGroup,
 					getAsMap(jobDataMap));
 		} catch (ObjectAlreadyExistsException ex) {
 			FacesContext
@@ -150,24 +150,24 @@ public class JobBean implements Serializable {
 	}
 
 	public String deleteJob(JobDetail job) throws SchedulerException {
-		JobUtil.delete(scheduler, job);
+		JobUtils.delete(scheduler, job);
 		selectedJob = null;
 
 		return "";
 	}
 
 	public String triggerJob(JobDetail job) throws SchedulerException {
-		JobUtil.trigger(scheduler, job);
+		JobUtils.trigger(scheduler, job);
 		return "";
 	}
 
 	public String pauseJob(JobDetail job) throws SchedulerException {
-		JobUtil.pause(scheduler, job);
+		JobUtils.pause(scheduler, job);
 		return "";
 	}
 
 	public String resumeJob(JobDetail job) throws SchedulerException {
-		JobUtil.resume(scheduler, job);
+		JobUtils.resume(scheduler, job);
 		return "";
 	}
 
