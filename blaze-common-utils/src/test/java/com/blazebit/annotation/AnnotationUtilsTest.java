@@ -49,7 +49,6 @@ public class AnnotationUtilsTest {
 
 		@StereotypeAnno
 		@Anno2
-		@SuppressWarnings("unused")
 		public void m1() {
 		}
 	}

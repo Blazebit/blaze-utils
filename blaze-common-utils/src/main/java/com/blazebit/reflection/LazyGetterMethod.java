@@ -15,8 +15,8 @@ import java.lang.reflect.Method;
  * @since 0.1.2
  */
 public class LazyGetterMethod {
-	private Object source;
-	private String[] fieldNames;
+	private final Object source;
+	private final PropertyPathExpression<Object, Object> expression;
 
 	/**
 	 * Constructs a LazyGetterMethod object for the given source object and
@@ -31,27 +31,10 @@ public class LazyGetterMethod {
 	 *            The field names which should be used for the getter
 	 *            determination
 	 */
+	@SuppressWarnings("unchecked")
 	public LazyGetterMethod(Object source, String fieldNames) {
-		this(source, fieldNames.split("\\."));
-	}
-
-	/**
-	 * Constructs a LazyGetterMethod object for the given source object and
-	 * field names as a string array.
-	 * 
-	 * @param source
-	 *            The object on which to invoke the first getter
-	 * @param fieldNames
-	 *            The field names which should be used for the getter
-	 *            determination
-	 */
-	public LazyGetterMethod(Object source, String[] fieldNames) {
-		if (source == null) {
-			throw new NullPointerException("target");
-		}
-
 		this.source = source;
-		this.fieldNames = fieldNames.clone();
+		this.expression = (PropertyPathExpression<Object, Object>) ExpressionUtils.getExpression(source.getClass(), fieldNames);
 	}
 
 	/**
@@ -73,19 +56,12 @@ public class LazyGetterMethod {
 	 * 
 	 * @return The result of the last getter in the chain
 	 * @throws InvocationTargetException
-	 *             #{@link Method#invoke(java.lang.Object, java.lang.Object[]) }
+	 *             {@link Method#invoke(java.lang.Object, java.lang.Object[]) }
 	 * @throws IllegalAccessException
-	 *             #{@link Method#invoke(java.lang.Object, java.lang.Object[]) }
+	 *             {@link Method#invoke(java.lang.Object, java.lang.Object[]) }
 	 */
 	public Object invoke() throws InvocationTargetException,
 			IllegalAccessException {
-		Object current = source;
-
-		for (String fieldName : fieldNames) {
-			Method m = ReflectionUtils.getGetter(current.getClass(), fieldName);
-			current = m.invoke(current);
-		}
-
-		return current;
+		return expression.getValue(source);
 	}
 }

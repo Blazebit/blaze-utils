@@ -3,7 +3,6 @@
  */
 package com.blazebit.mail;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,283 +15,380 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.Message.RecipientType;
+import javax.activation.DataSource;
+import javax.mail.internet.InternetAddress;
 import javax.mail.util.ByteArrayDataSource;
 
 /**
- *
+ * 
  * @author Christian Beikov
  * @since 0.1.2
  */
 public class Mail {
 
-    private Recipient from;
-    private Recipient replyTo;
-    private List<Recipient> recipients = new ArrayList<Recipient>();
-    private String subject;
-    private String text;
-    private String html;
-    private final List<MailResource> embeddedImages = new ArrayList<MailResource>();
-    private final List<MailResource> attachments = new ArrayList<MailResource>();
-    private final Map<String, String> headers = new HashMap<String, String>();
+	private static final String STREAM_MIME_TYPE = "application/octet-stream";
 
-    public List<Recipient> getBcc() {
-        return getRecipients(RecipientType.BCC);
-    }
+	private InternetAddress from;
+	private InternetAddress replyTo;
+	private List<InternetAddress> to;
+	private List<InternetAddress> cc;
+	private List<InternetAddress> bcc;
+	private String subject;
+	private String text;
+	private String html;
+	private List<MailResource> embeddedImages;
+	private List<MailResource> attachments;
+	private Map<String, String> headers;
 
-    public void addBcc(String address) {
-        addBcc(address, null);
-    }
+	public List<InternetAddress> getBcc() {
+		if (bcc == null) {
+			return Collections.emptyList();
+		}
 
-    public void addBcc(String[] addresses) {
-        for (String address : addresses) {
-            addBcc(address, null);
-        }
-    }
+		return Collections.unmodifiableList(bcc);
+	}
 
-    public void addBcc(String address, String name) {
-        addRecipient(address, name, RecipientType.BCC);
-    }
+	public void addBcc(InternetAddress address) {
+		if (bcc == null) {
+			bcc = new ArrayList<InternetAddress>();
+		}
 
-    public List<Recipient> getCc() {
-        return getRecipients(RecipientType.CC);
-    }
+		bcc.add(address);
+	}
 
-    public void addCc(String address) {
-        addCc(address, null);
-    }
+	public void addBcc(String address) {
+		addBcc(address, null);
+	}
 
-    public void addCc(String[] addresses) {
-        for (String address : addresses) {
-            addCc(address, null);
-        }
-    }
+	public void addBcc(String[] addresses) {
+		for (String address : addresses) {
+			addBcc(address, null);
+		}
+	}
 
-    public void addCc(String address, String name) {
-        addRecipient(address, name, RecipientType.CC);
-    }
+	public void addBcc(String address, String name) {
+		addBcc(create(address, name));
+	}
 
-    public List<Recipient> getTo() {
-        return getRecipients(RecipientType.TO);
-    }
+	public List<InternetAddress> getCc() {
+		if (cc == null) {
+			return Collections.emptyList();
+		}
 
-    public void addTo(String address) {
-        addCc(address, null);
-    }
+		return Collections.unmodifiableList(cc);
+	}
 
-    public void addTo(String[] addresses) {
-        for (String address : addresses) {
-            addCc(address, null);
-        }
-    }
+	public void addCc(InternetAddress address) {
+		if (cc == null) {
+			cc = new ArrayList<InternetAddress>();
+		}
 
-    public void addTo(String address, String name) {
-        addRecipient(address, name, RecipientType.TO);
-    }
+		cc.add(address);
+	}
 
-    private void addRecipient(String address, String name, RecipientType type) {
-        this.recipients.add(new Recipient(name, address, type));
-    }
+	public void addCc(String address) {
+		addCc(address, null);
+	}
 
-    private List<Recipient> getRecipients(RecipientType type) {
-        List<Recipient> ret = new ArrayList<Recipient>();
+	public void addCc(String[] addresses) {
+		for (String address : addresses) {
+			addCc(address, null);
+		}
+	}
 
-        for (Recipient r : recipients) {
-            if (r.getType().equals(type)) {
-                ret.add(r);
-            }
-        }
+	public void addCc(String address, String name) {
+		addCc(create(address, name));
+	}
 
-        return Collections.unmodifiableList(ret);
-    }
+	public List<InternetAddress> getTo() {
+		if (to == null) {
+			return Collections.emptyList();
+		}
 
-    public List<Recipient> getRecipients() {
-        return Collections.unmodifiableList(recipients);
-    }
+		return Collections.unmodifiableList(to);
+	}
 
-    public Recipient getFrom() {
-        return from;
-    }
+	public void addTo(InternetAddress address) {
+		if (to == null) {
+			to = new ArrayList<InternetAddress>();
+		}
 
-    public void setFrom(String address) {
-        setFrom(address, null);
-    }
+		to.add(address);
+	}
 
-    public void setFrom(String address, String name) {
-        this.from = new Recipient(name, address, null);
-    }
+	public void addTo(String address) {
+		addTo(address, null);
+	}
 
-    public Recipient getReplyTo() {
-        return replyTo;
-    }
+	public void addTo(String[] addresses) {
+		for (String address : addresses) {
+			addTo(address, null);
+		}
+	}
 
-    public void setReplyTo(String address) {
-        setReplyTo(address, null);
-    }
+	public void addTo(String address, String name) {
+		addTo(create(address, name));
+	}
 
-    public void setReplyTo(String address, String name) {
-        this.replyTo = new Recipient(name, address, null);
-    }
+	public InternetAddress getFrom() {
+		return from;
+	}
 
-    public String getSubject() {
-        return subject;
-    }
+	public void setFrom(String address) {
+		setFrom(address, null);
+	}
 
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
+	public void setFrom(String address, String name) {
+		setFrom(create(address, name));
+	}
 
-    public Map<String, String> getHeaders() {
-        return Collections.unmodifiableMap(headers);
-    }
+	public void setFrom(InternetAddress from) {
+		this.from = from;
+	}
 
-    public void addHeader(String name, Object value) {
-        headers.put(name, String.valueOf(value));
-    }
+	public InternetAddress getReplyTo() {
+		return replyTo;
+	}
 
-    public String getText() {
-        return text;
-    }
+	public void setReplyTo(String address) {
+		setReplyTo(address, null);
+	}
 
-    public void setText(String text) {
-        this.text = text;
-    }
+	public void setReplyTo(String address, String name) {
+		setReplyTo(create(address, name));
+	}
 
-    public String getHtml() {
-        return html;
-    }
+	public void setReplyTo(InternetAddress replyTo) {
+		this.replyTo = replyTo;
+	}
 
-    public void setHtml(String html) {
-        this.html = html;
-    }
+	private static InternetAddress create(String address, String name) {
+		String addressString;
 
-    public List<MailResource> getEmbeddedImages() {
-        return Collections.unmodifiableList(embeddedImages);
-    }
+		if (address == null || address.isEmpty()
+				|| (addressString = address.trim()).isEmpty()) {
+			throw new IllegalArgumentException("Empty or no address");
+		}
 
-    public void addEmbeddedImage(File f) throws FileNotFoundException,
-            IOException {
-        addEmbeddedImage(f.getName(), new FileInputStream(f));
-    }
+		try {
+			if (name == null) {
+				return new InternetAddress(address);
+			}
 
-    public void addEmbeddedImages(File[] files) throws FileNotFoundException,
-            IOException {
-        for (File f : files) {
-            addEmbeddedImage(f.getName(), new FileInputStream(f));
-        }
-    }
+			if (addressString.indexOf('<') == -1) {
+				addressString = new StringBuilder(addressString.length()
+						+ name.length() + 2).append(name).append('<')
+						.append(addressString).append('>').toString();
+			} else {
+				addressString = name + addressString;
+			}
 
-    public void addEmbeddedImage(String fileName, File f)
-            throws FileNotFoundException, IOException {
-        addEmbeddedImage(fileName, new FileInputStream(f));
-    }
+			return new InternetAddress(addressString);
+		} catch (Exception ex) {
+			throw new IllegalArgumentException(ex);
+		}
+	}
 
-    public void addEmbeddedImage(File f, String mimeType)
-            throws FileNotFoundException, IOException {
-        addEmbeddedImage(f.getName(), new FileInputStream(f), mimeType);
-    }
+	public String getSubject() {
+		return subject;
+	}
 
-    public void addEmbeddedImage(String fileName, File f, String mimeType)
-            throws FileNotFoundException, IOException {
-        addEmbeddedImage(fileName, new FileInputStream(f), mimeType);
-    }
+	public void setSubject(String subject) {
+		this.subject = subject;
+	}
 
-    public void addEmbeddedImage(String fileName, InputStream f)
-            throws IOException {
-        addEmbeddedImage(fileName, toByteArray(f));
-    }
+	public Map<String, String> getHeaders() {
+		if (headers == null) {
+			return Collections.emptyMap();
+		}
+		return Collections.unmodifiableMap(headers);
+	}
 
-    public void addEmbeddedImage(String fileName, InputStream f, String mimeType)
-            throws IOException {
-        addEmbeddedImage(fileName, toByteArray(f), mimeType);
-    }
+	public void addHeader(String name, Object value) {
+		if (headers == null) {
+			headers = new HashMap<String, String>();
+		}
 
-    public void addEmbeddedImage(String fileName, byte[] f) {
-        addEmbeddedImage(fileName, f, "application/octet-stream");
-    }
+		headers.put(name, String.valueOf(value));
+	}
 
-    public void addEmbeddedImage(String fileName, byte[] f, String mimeType) {
-        ByteArrayDataSource ds = new ByteArrayDataSource(f, mimeType);
-        ds.setName(fileName);
-        embeddedImages.add(new MailResource(fileName, ds));
-    }
+	public String getText() {
+		return text;
+	}
 
-    public List<MailResource> getAttachments() {
-        return Collections.unmodifiableList(attachments);
-    }
+	public void setText(String text) {
+		this.text = text;
+	}
 
-    public void addAttachment(File f) throws FileNotFoundException, IOException {
-        addAttachment(f.getName(), new FileInputStream(f));
-    }
+	public String getHtml() {
+		return html;
+	}
 
-    public void addAttachment(File[] files) throws FileNotFoundException,
-            IOException {
-        for (File f : files) {
-            addAttachment(f.getName(), new FileInputStream(f));
-        }
-    }
+	public void setHtml(String html) {
+		this.html = html;
+	}
 
-    public void addAttachment(String fileName, File f)
-            throws FileNotFoundException, IOException {
-        addAttachment(fileName, new FileInputStream(f));
-    }
+	public List<MailResource> getEmbeddedImages() {
+		if (embeddedImages == null) {
+			return Collections.emptyList();
+		}
 
-    public void addAttachment(File f, String mimeType)
-            throws FileNotFoundException, IOException {
-        addAttachment(f.getName(), new FileInputStream(f), mimeType);
-    }
+		return Collections.unmodifiableList(embeddedImages);
+	}
 
-    public void addAttachment(String fileName, File f, String mimeType)
-            throws FileNotFoundException, IOException {
-        addAttachment(fileName, new FileInputStream(f), mimeType);
-    }
+	public void addEmbeddedImage(File f) throws FileNotFoundException,
+			IOException {
+		addEmbeddedImage(f.getName(), new FileInputStream(f));
+	}
 
-    public void addAttachment(String fileName, InputStream f)
-            throws IOException {
-        addAttachment(fileName, toByteArray(f));
-    }
+	public void addEmbeddedImages(File[] files) throws FileNotFoundException,
+			IOException {
+		for (File f : files) {
+			addEmbeddedImage(f.getName(), new FileInputStream(f));
+		}
+	}
 
-    public void addAttachment(String fileName, InputStream f, String mimeType)
-            throws IOException {
-        addAttachment(fileName, toByteArray(f), mimeType);
-    }
+	public void addEmbeddedImage(String fileName, File f)
+			throws FileNotFoundException, IOException {
+		addEmbeddedImage(fileName, new FileInputStream(f));
+	}
 
-    public void addAttachment(String fileName, byte[] f) {
-        addAttachment(fileName, f, "application/octet-stream");
-    }
+	public void addEmbeddedImage(File f, String mimeType)
+			throws FileNotFoundException, IOException {
+		addEmbeddedImage(f.getName(), new FileInputStream(f), mimeType);
+	}
 
-    public void addAttachment(String fileName, byte[] f, String mimeType) {
-        ByteArrayDataSource ds = new ByteArrayDataSource(f, mimeType);
-        ds.setName(fileName);
-        attachments.add(new MailResource(fileName, ds));
-    }
-    
-    /*
-     * Source code taken from Apache IO Utils to avoid dependency.
-     */
+	public void addEmbeddedImage(String fileName, File f, String mimeType)
+			throws FileNotFoundException, IOException {
+		addEmbeddedImage(fileName, new FileInputStream(f), mimeType);
+	}
 
-    private static byte[] toByteArray(InputStream input) throws IOException {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        copy(input, output);
-        return output.toByteArray();
-    }
+	public void addEmbeddedImage(String fileName, InputStream f)
+			throws IOException {
+		addEmbeddedImage(fileName, new InputStreamDataSource(fileName,
+				STREAM_MIME_TYPE, f));
+	}
 
-    private static int copy(InputStream input, OutputStream output) throws IOException {
-        long count = copyLarge(input, output);
-        if (count > Integer.MAX_VALUE) {
-            return -1;
-        }
-        return (int) count;
-    }
+	public void addEmbeddedImage(String fileName, InputStream f, String mimeType)
+			throws IOException {
+		addEmbeddedImage(fileName, new InputStreamDataSource(fileName,
+				mimeType, f));
+	}
 
-    private static long copyLarge(InputStream input, OutputStream output) throws IOException {
-        byte[] buffer = new byte[4096];
-        long count = 0;
-        int n = 0;
-        while (-1 != (n = input.read(buffer))) {
-            output.write(buffer, 0, n);
-            count += n;
-        }
-        return count;
-    }
+	public void addEmbeddedImage(String fileName, byte[] f) {
+		addEmbeddedImage(fileName, f, STREAM_MIME_TYPE);
+	}
+
+	public void addEmbeddedImage(String fileName, byte[] f, String mimeType) {
+		ByteArrayDataSource ds = new ByteArrayDataSource(f, mimeType);
+		ds.setName(fileName);
+		addEmbeddedImage(fileName, ds);
+	}
+
+	private void addEmbeddedImage(String fileName, DataSource ds) {
+		if (embeddedImages == null) {
+			embeddedImages = new ArrayList<MailResource>();
+		}
+
+		embeddedImages.add(new MailResource(fileName, ds));
+	}
+
+	public List<MailResource> getAttachments() {
+		if (attachments == null) {
+			return Collections.emptyList();
+		}
+
+		return Collections.unmodifiableList(attachments);
+	}
+
+	public void addAttachment(File f) throws FileNotFoundException, IOException {
+		addAttachment(f.getName(), new FileInputStream(f));
+	}
+
+	public void addAttachment(File[] files) throws FileNotFoundException,
+			IOException {
+		for (File f : files) {
+			addAttachment(f.getName(), new FileInputStream(f));
+		}
+	}
+
+	public void addAttachment(String fileName, File f)
+			throws FileNotFoundException, IOException {
+		addAttachment(fileName, new FileInputStream(f));
+	}
+
+	public void addAttachment(File f, String mimeType)
+			throws FileNotFoundException, IOException {
+		addAttachment(f.getName(), new FileInputStream(f), mimeType);
+	}
+
+	public void addAttachment(String fileName, File f, String mimeType)
+			throws FileNotFoundException, IOException {
+		addAttachment(fileName, new FileInputStream(f), mimeType);
+	}
+
+	public void addAttachment(String fileName, InputStream f)
+			throws IOException {
+		addAttachment(fileName, new InputStreamDataSource(fileName,
+				STREAM_MIME_TYPE, f));
+	}
+
+	public void addAttachment(String fileName, InputStream f, String mimeType)
+			throws IOException {
+		addAttachment(fileName,
+				new InputStreamDataSource(fileName, mimeType, f));
+	}
+
+	public void addAttachment(String fileName, byte[] f) {
+		addAttachment(fileName, f, STREAM_MIME_TYPE);
+	}
+
+	public void addAttachment(String fileName, byte[] f, String mimeType) {
+		ByteArrayDataSource ds = new ByteArrayDataSource(f, mimeType);
+		ds.setName(fileName);
+		addAttachment(fileName, ds);
+	}
+
+	private void addAttachment(String fileName, DataSource ds) {
+		if (attachments == null) {
+			attachments = new ArrayList<MailResource>();
+		}
+
+		attachments.add(new MailResource(fileName, ds));
+	}
+
+	private static class InputStreamDataSource implements DataSource {
+
+		private String name;
+		private String contentType;
+		private InputStream is;
+
+		public InputStreamDataSource(String name, String contentType,
+				InputStream is) {
+			this.name = name;
+			this.contentType = contentType;
+			this.is = is;
+		}
+
+		@Override
+		public String getContentType() {
+			return contentType;
+		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			return is;
+		}
+
+		@Override
+		public String getName() {
+			return name;
+		}
+
+		@Override
+		public OutputStream getOutputStream() throws IOException {
+			return null;
+		}
+
+	}
 }

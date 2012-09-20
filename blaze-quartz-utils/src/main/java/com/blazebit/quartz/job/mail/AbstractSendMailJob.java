@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.blazebit.mail.Mail;
-import com.blazebit.mail.MailUtils;
+import com.blazebit.mail.util.MailUtils;
 import com.blazebit.quartz.job.AbstractJob;
 import com.blazebit.quartz.job.JobParameter;
 

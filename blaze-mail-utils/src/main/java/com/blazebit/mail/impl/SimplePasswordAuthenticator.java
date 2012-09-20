@@ -13,16 +13,14 @@ import javax.mail.PasswordAuthentication;
  */
 public class SimplePasswordAuthenticator extends Authenticator {
 
-	private final String user;
-	private final String password;
+	private final PasswordAuthentication passwordAuthentication;
 
 	public SimplePasswordAuthenticator(String user, String password) {
-		this.user = user;
-		this.password = password;
+		this.passwordAuthentication = new PasswordAuthentication(user, password);
 	}
 
 	@Override
 	protected PasswordAuthentication getPasswordAuthentication() {
-		return new PasswordAuthentication(user, password);
+		return passwordAuthentication;
 	}
 }

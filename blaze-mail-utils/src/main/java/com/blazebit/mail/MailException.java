@@ -20,6 +20,9 @@ public final class MailException extends RuntimeException {
 	public static final String INVALID_ENCODING = "Encoding not accepted: %s";
 	public static final String INVALID_RECIPIENT = "Invalid TO address: %s";
 	public static final String INVALID_REPLYTO = "Invalid REPLY TO address: %s";
+	public static final String INVALID_TO = "Invalid TO address: %s";
+	public static final String INVALID_BCC = "Invalid BCC address: %s";
+	public static final String INVALID_CC = "Invalid CC address: %s";
 	public static final String INVALID_SENDER = "Invalid FROM address: %s";
 	public static final String MISSING_SENDER = "Email is not valid: missing sender";
 	public static final String MISSING_RECIPIENT = "Email is not valid: missing recipients";

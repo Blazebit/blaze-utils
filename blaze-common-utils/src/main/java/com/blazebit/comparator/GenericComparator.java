@@ -3,11 +3,9 @@
  */
 package com.blazebit.comparator;
 
-import com.blazebit.reflection.LazyGetterMethod;
-import java.lang.reflect.Method;
 import java.util.Comparator;
 
-import com.blazebit.reflection.ReflectionUtils;
+import com.blazebit.reflection.ExpressionUtils;
 
 /**
  * Generic Comparator is used at Collections.sort(); and can be applied on every
@@ -44,8 +42,8 @@ public class GenericComparator<T> implements Comparator<T> {
             }
 
             // Retrieve field values of the objects
-            Object value1 = new LazyGetterMethod(object1, propertyPath).invoke();
-            Object value2 = new LazyGetterMethod(object2, propertyPath).invoke();
+            Object value1 = ExpressionUtils.getValue(object1, propertyPath);
+            Object value2 = ExpressionUtils.getValue(object1, propertyPath);
 
             if (value1 == null || value2 == null) {
                 return compareNullObjects(value1, value2);

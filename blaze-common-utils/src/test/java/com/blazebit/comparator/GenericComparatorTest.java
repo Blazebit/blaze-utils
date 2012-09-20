@@ -52,22 +52,18 @@ public class GenericComparatorTest {
             this.stringValue = stringValue;
         }
 
-        @SuppressWarnings("unused")
         public String getStringValue() {
             return stringValue;
         }
 
-        @SuppressWarnings("unused")
         public int getIntValue() {
             return intValue;
         }
 
-        @SuppressWarnings("unused")
         public void setIntValue(int intValue) {
             this.intValue = intValue;
         }
 
-        @SuppressWarnings("unused")
         public void setStringValue(String stringValue) {
             this.stringValue = stringValue;
         }

@@ -15,6 +15,7 @@ import javax.activation.DataSource;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Message;
+import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.Session;
@@ -30,8 +31,7 @@ import com.blazebit.mail.MailException;
 import com.blazebit.mail.MailResource;
 import com.blazebit.mail.MailSender;
 import com.blazebit.mail.MailTransport;
-import com.blazebit.mail.MailUtils;
-import com.blazebit.mail.Recipient;
+import com.blazebit.mail.util.MailUtils;
 
 /**
  * 
@@ -152,8 +152,7 @@ public class SimpleMailSender implements MailSender {
 
 		Message message = new MimeMessage(session);
 		message.setSubject(email.getSubject());
-		message.setFrom(new InternetAddress(email.getFrom().getAddress(), email
-				.getFrom().getName()));
+		message.setFrom(email.getFrom());
 
 		setReplyTo(email, message);
 		setRecipients(email, message);
@@ -171,21 +170,23 @@ public class SimpleMailSender implements MailSender {
 
 	private void setRecipients(Mail email, Message message)
 			throws UnsupportedEncodingException, MessagingException {
-		for (Recipient recipient : email.getRecipients()) {
-			Address address = new InternetAddress(recipient.getAddress(),
-					recipient.getName());
-			message.addRecipient(recipient.getType(), address);
+		for (InternetAddress recipient : email.getTo()) {
+			message.addRecipient(RecipientType.TO, recipient);
+		}
+		for (InternetAddress recipient : email.getBcc()) {
+			message.addRecipient(RecipientType.BCC, recipient);
+		}
+		for (InternetAddress recipient : email.getCc()) {
+			message.addRecipient(RecipientType.CC, recipient);
 		}
 	}
 
 	private void setReplyTo(Mail email, Message message)
 			throws UnsupportedEncodingException, MessagingException {
-		Recipient replyToRecipient = email.getReplyTo();
+		InternetAddress replyToRecipient = email.getReplyTo();
 
 		if (replyToRecipient != null) {
-			InternetAddress replyToAddress = new InternetAddress(
-					replyToRecipient.getAddress(), replyToRecipient.getName());
-			message.setReplyTo(new Address[] { replyToAddress });
+			message.setReplyTo(new Address[] { replyToRecipient });
 		}
 	}
 

@@ -46,15 +46,15 @@ public class GenericCollectionComparator<T> extends GenericComparator<T> {
             throw new IndexOutOfBoundsException("Index cannot be negative: " + index);
         }
         if (object instanceof Map) {
-            Map map = (Map) object;
-            Iterator iterator = map.entrySet().iterator();
+            Map<?, ?> map = (Map<?, ?>) object;
+            Iterator<?> iterator = map.entrySet().iterator();
             return get(iterator, index);
         } else if (object instanceof List) {
-            return ((List) object).get(index);
+            return ((List<?>) object).get(index);
         } else if (object instanceof Object[]) {
             return ((Object[]) object)[index];
         } else if (object instanceof Iterator) {
-            Iterator it = (Iterator) object;
+            Iterator<?> it = (Iterator<?>) object;
             while (it.hasNext()) {
                 index--;
                 if (index == -1) {
@@ -65,10 +65,10 @@ public class GenericCollectionComparator<T> extends GenericComparator<T> {
             }
             throw new IndexOutOfBoundsException("Entry does not exist: " + index);
         } else if (object instanceof Collection) {
-            Iterator iterator = ((Collection) object).iterator();
+            Iterator<?> iterator = ((Collection<?>) object).iterator();
             return get(iterator, index);
         } else if (object instanceof Enumeration) {
-            Enumeration it = (Enumeration) object;
+            Enumeration<?> it = (Enumeration<?>) object;
             while (it.hasMoreElements()) {
                 index--;
                 if (index == -1) {

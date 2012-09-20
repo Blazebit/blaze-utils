@@ -37,6 +37,7 @@ public abstract class AbstractFormat<T extends Serializable> extends Format
 		return format(obj, toAppendTo);
 	}
 
+	@SuppressWarnings("unchecked")
 	public StringBuffer format(Object obj, StringBuffer toAppendTo) {
 		toAppendTo.append(format((T) obj, (ParserContext) null));
 		return toAppendTo;

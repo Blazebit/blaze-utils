@@ -91,7 +91,7 @@ public abstract class AbstractMailTransport implements MailTransport {
 	@Override
 	public Properties getDefaultProperties() {
 		Properties props = new Properties();
-		props.setProperty("mail.transport.protocol", getProtocol());
+		props.setProperty(protocolProperty, getProtocol());
 		return props;
 	}
 
