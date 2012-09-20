@@ -11,14 +11,12 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.inject.Stereotype;
-
 import com.blazebit.reflection.ReflectionUtils;
 
 /**
  * Utillity class for annotation handling. Basically this class only uses
  * java.lang classes for the methods. The only exception is, that #
- * {@link Stereotype} is used for annotation 'inheritance'.
+ * javax.enterprise.inject.Stereotype is used for annotation 'inheritance'.
  * 
  * @author Christian Beikov
  * @since 0.1.2

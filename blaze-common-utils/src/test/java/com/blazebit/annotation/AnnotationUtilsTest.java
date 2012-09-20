@@ -15,9 +15,6 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.enterprise.inject.Stereotype;
-
 import org.junit.Test;
 
 import com.blazebit.reflection.ReflectionUtils;
@@ -38,7 +35,7 @@ public class AnnotationUtilsTest {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Stereotype
+	@javax.enterprise.inject.Stereotype
 	@Anno("stereotyped")
 	private static @interface StereotypeAnno {
 	}

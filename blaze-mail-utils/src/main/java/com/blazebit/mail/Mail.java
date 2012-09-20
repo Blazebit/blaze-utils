@@ -10,12 +10,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.activation.DataSource;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.util.ByteArrayDataSource;
 
@@ -47,6 +49,18 @@ public class Mail {
 
 		return Collections.unmodifiableList(bcc);
 	}
+	
+	public void setBcc(List<InternetAddress> bcc){
+		this.bcc = new ArrayList<InternetAddress>(bcc);
+	}
+	
+	public void setBcc(String bcc){
+		try{
+			this.bcc = Arrays.asList(InternetAddress.parse(bcc));
+		}catch(AddressException ex){
+			throw new IllegalArgumentException(ex);
+		}
+	}
 
 	public void addBcc(InternetAddress address) {
 		if (bcc == null) {
@@ -77,6 +91,18 @@ public class Mail {
 
 		return Collections.unmodifiableList(cc);
 	}
+	
+	public void setCc(List<InternetAddress> cc){
+		this.cc = new ArrayList<InternetAddress>(cc);
+	}
+	
+	public void setCc(String cc){
+		try{
+			this.cc = Arrays.asList(InternetAddress.parse(cc));
+		}catch(AddressException ex){
+			throw new IllegalArgumentException(ex);
+		}
+	}
 
 	public void addCc(InternetAddress address) {
 		if (cc == null) {
@@ -106,6 +132,18 @@ public class Mail {
 		}
 
 		return Collections.unmodifiableList(to);
+	}
+	
+	public void setTo(List<InternetAddress> to){
+		this.to = new ArrayList<InternetAddress>(to);
+	}
+	
+	public void setTo(String to){
+		try{
+			this.to = Arrays.asList(InternetAddress.parse(to));
+		}catch(AddressException ex){
+			throw new IllegalArgumentException(ex);
+		}
 	}
 
 	public void addTo(InternetAddress address) {

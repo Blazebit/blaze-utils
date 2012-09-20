@@ -43,7 +43,7 @@ public class GenericComparator<T> implements Comparator<T> {
 
             // Retrieve field values of the objects
             Object value1 = ExpressionUtils.getValue(object1, propertyPath);
-            Object value2 = ExpressionUtils.getValue(object1, propertyPath);
+            Object value2 = ExpressionUtils.getValue(object2, propertyPath);
 
             if (value1 == null || value2 == null) {
                 return compareNullObjects(value1, value2);
