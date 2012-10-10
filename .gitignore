@@ -6,6 +6,10 @@ blaze-common-utils/.project
 blaze-common-utils/.settings/
 blaze-common-utils/.classpath
 blaze-common-utils/target/
+blaze-ai-utils/.project
+blaze-ai-utils/.settings/
+blaze-ai-utils/.classpath
+blaze-ai-utils/target/
 blaze-ee-utils/.project
 blaze-ee-utils/.settings/
 blaze-ee-utils/.classpath

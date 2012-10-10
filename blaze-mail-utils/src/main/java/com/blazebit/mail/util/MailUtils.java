@@ -40,8 +40,10 @@ public class MailUtils {
 				exceptionMessage = MailException.INVALID_SENDER;
 				email.getFrom().validate();
 
-				exceptionMessage = MailException.INVALID_REPLYTO;
-				email.getReplyTo().validate();
+				if(email.getReplyTo() != null){
+					exceptionMessage = MailException.INVALID_REPLYTO;
+					email.getReplyTo().validate();
+				}
 
 				exceptionMessage = MailException.INVALID_TO;
 

@@ -18,6 +18,7 @@
     
     <modules>
         <module>blaze-common-utils</module>
+        <module>blaze-ai-utils</module>
         <module>blaze-ee-utils</module>
         <module>blaze-mail-utils</module>
         <module>blaze-quartz-utils</module>
