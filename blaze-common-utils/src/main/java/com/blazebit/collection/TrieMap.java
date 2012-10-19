@@ -130,7 +130,8 @@ public class TrieMap<V> extends AbstractMap<CharSequence, V>
      * @param map The map from which to construct this TrieMap or null
      * @param nullAllowed Whether null is allowed or not
      */
-    private TrieMap(final Map<CharSequence, ? extends V> map, final boolean nullAllowed) {
+    @SuppressWarnings("unchecked")
+	private TrieMap(final Map<CharSequence, ? extends V> map, final boolean nullAllowed) {
         if((nullAllowed && map == null) || !(map instanceof TrieMap<?>)){
             this.root = new TrieNode<V>(false);
         } else {
@@ -325,7 +326,8 @@ public class TrieMap<V> extends AbstractMap<CharSequence, V>
             throw new IllegalArgumentException();
         }
 
-        final Entry<? extends CharSequence, V> e = (Map.Entry<? extends CharSequence, V>) o;
+        @SuppressWarnings("unchecked")
+		final Entry<? extends CharSequence, V> e = (Map.Entry<? extends CharSequence, V>) o;
         final CharSequence key = keyCheck(e.getKey());
         final V value = e.getValue();
         final TrieNode<V> currentNode = findPreviousNode(key);
@@ -676,7 +678,8 @@ public class TrieMap<V> extends AbstractMap<CharSequence, V>
                 return false;
             }
 
-            final Map.Entry<CharSequence, V> e = (Map.Entry<CharSequence, V>) (Map.Entry<?, ?>) o;
+            @SuppressWarnings("unchecked")
+			final Map.Entry<CharSequence, V> e = (Map.Entry<CharSequence, V>) (Map.Entry<?, ?>) o;
             final V value = get(e.getKey());
             return value != null && value.equals(e.getValue());
         }
@@ -713,7 +716,8 @@ public class TrieMap<V> extends AbstractMap<CharSequence, V>
             TrieMap.this.clear();
         }
 
-        @Override
+        @SuppressWarnings("unchecked")
+		@Override
         public boolean contains(final Object o) {
             return TrieMap.this.containsValue((V) o);
         }
@@ -737,7 +741,9 @@ public class TrieMap<V> extends AbstractMap<CharSequence, V>
      */
     private static class SubTrieMap<V> extends TrieMap<V> {
 
-        private TrieNode<V> subRootNode;
+		private static final long serialVersionUID = 1;
+		
+		private TrieNode<V> subRootNode;
         private TrieMap<V> parent;
         private final CharSequence prefix;
 
