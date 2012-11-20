@@ -4,6 +4,7 @@
 package com.blazebit.cdi.transaction;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.annotation.Resource;
@@ -97,7 +98,7 @@ public class TransactionalInterceptor implements Serializable {
 					// need to do
 					// this to be able to log the right exception
 					Throwable t1 = ExceptionUtils
-							.unwrapInvocationTargetException(t);
+							.unwrap(t, InvocationTargetException.class);
 
 					// Cast to or wrap the throwable into a new exception and
 					// rethrow it

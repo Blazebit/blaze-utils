@@ -75,7 +75,7 @@ public abstract class AbstractExceptionHandlerInterceptor<T extends Annotation, 
 			// Unwrap Exception if t is instanceof InvocationTargetException
 			if (t instanceof InvocationTargetException) {
 				t = ExceptionUtils
-						.unwrapInvocationTargetException((InvocationTargetException) t);
+						.unwrap(t, InvocationTargetException.class);
 			}
 
 			// Method level exception handling is preferred
@@ -118,7 +118,7 @@ public abstract class AbstractExceptionHandlerInterceptor<T extends Annotation, 
 			// Unwrap Exception if t is instanceof InvocationTargetException
 			if (t instanceof InvocationTargetException) {
 				t = ExceptionUtils
-						.unwrapInvocationTargetException((InvocationTargetException) t);
+						.unwrap(t, InvocationTargetException.class);
 			}
 
 			for (Object exHandle : handlings) {

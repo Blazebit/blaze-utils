@@ -4,7 +4,9 @@
 package com.blazebit.cdi.exception;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -64,12 +66,18 @@ public class CatchHandlerInterceptor implements Serializable {
 
 		CatchHandling[] exceptionHandlingAnnotations = exceptionHandlerAnnotation
 				.value();
+		Class<? extends Throwable>[] unwrap = exceptionHandlerAnnotation.unwrap();
 
 		try {
 			return ic.proceed();
 		} catch (Exception ex) {
+			if(!contains(unwrap, InvocationTargetException.class)){
+				unwrap = Arrays.copyOf(unwrap, unwrap.length + 1);
+				unwrap[unwrap.length - 1] = InvocationTargetException.class;
+			}
+			
 			// Unwrap Exception if ex is instanceof InvocationTargetException
-			Throwable t = ExceptionUtils.unwrapInvocationTargetException(ex);
+			Throwable t = ExceptionUtils.unwrap(ex, InvocationTargetException.class);
 			boolean exceptionHandled = false;
 
 			if (exceptionHandlingAnnotations.length > 0) {
@@ -126,6 +134,16 @@ public class CatchHandlerInterceptor implements Serializable {
 		}
 
 		return null;
+	}
+	
+	private static boolean contains(Class<? extends Throwable>[] classes, Class<? extends Throwable> clazz){
+		for(int i = 0; i < classes.length; i++){
+			if(classes[i].equals(clazz)){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**

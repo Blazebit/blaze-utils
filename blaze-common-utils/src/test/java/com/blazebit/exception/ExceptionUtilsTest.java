@@ -23,16 +23,16 @@ public class ExceptionUtilsTest {
 	public void testUnwrapInvocationTargetException() {
 		Throwable inner = new RuntimeException();
 		Throwable outer = new InvocationTargetException(inner);
-		assertEquals(ExceptionUtils.unwrapInvocationTargetException(outer),
+		assertEquals(ExceptionUtils.unwrap(outer, InvocationTargetException.class),
 				inner);
 		outer = new InvocationTargetException(outer);
-		assertEquals(ExceptionUtils.unwrapInvocationTargetException(outer),
+		assertEquals(ExceptionUtils.unwrap(outer, InvocationTargetException.class),
 				inner);
-		assertEquals(ExceptionUtils.unwrapInvocationTargetException(inner),
+		assertEquals(ExceptionUtils.unwrap(inner, InvocationTargetException.class),
 				inner);
 		assertNull(ExceptionUtils
-				.unwrapInvocationTargetException(new InvocationTargetException(
-						null)));
+				.unwrap(new InvocationTargetException(
+						null), InvocationTargetException.class));
 	}
 
 	/**

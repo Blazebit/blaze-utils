@@ -41,6 +41,14 @@ public @interface CatchHandler {
 	 */
 	@Nonbinding
 	CatchHandling[] value() default {};
+	
+	/**
+	 * The exception types which should be unwrapped when occurring.
+	 * 
+	 * @return The types of exceptions which should be unwrapped.
+	 */
+	@Nonbinding
+	Class<? extends Throwable>[] unwrap() default {};
 
 	/**
 	 * The exception which should be handeled by this exception handler by

@@ -4,6 +4,7 @@
 package com.blazebit.cdi.logging;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -96,7 +97,7 @@ public class LoggingInterceptor implements Serializable {
 			// and if so, unwrap the cause. OWB did not unwrap exceptions that
 			// have been thrown in decorators in some versions so we need to do
 			// this to be able to log the right exception
-			t = ExceptionUtils.unwrapInvocationTargetException(t);
+			t = ExceptionUtils.unwrap(t, InvocationTargetException.class);
 		}
 
 		// Reuse the StringBuilder

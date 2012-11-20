@@ -4,6 +4,7 @@
 package com.blazebit.cdi.cleanup;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.interceptor.AroundInvoke;
@@ -62,7 +63,7 @@ public class CleanupHandlerInterceptor implements Serializable {
 			ret = ic.proceed();
 		} catch (Throwable t) {
 			// Unwrap Exception if t is instanceof InvocationTargetException
-			Throwable t1 = ExceptionUtils.unwrapInvocationTargetException(t);
+			Throwable t1 = ExceptionUtils.unwrap(t, InvocationTargetException.class);
 			handleCleanups(targetObject, cleanupHandlerAnnotation, t1);
 
 			if (t1 instanceof Exception) {

@@ -17,22 +17,6 @@ public final class ExceptionUtils {
 	}
 
 	/**
-	 * Unwraps the cause of InvocationTargetException until an throwable element
-	 * is given that is no subtype of InvocationTargetException.
-	 * 
-	 * Using this method is equal to unwrap(t, InvocationTargetException.class)
-	 * 
-	 * @param t
-	 *            The throwable to unwrap
-	 * @return The unwrapped throwable or null if no further causes can be
-	 *         unwrapped
-	 * @see ExceptionUtils#unwrap(java.lang.Throwable, java.lang.Class)
-	 */
-	public static Throwable unwrapInvocationTargetException(Throwable t) {
-		return unwrap(t, InvocationTargetException.class);
-	}
-
-	/**
 	 * Unwraps the throwable until it is no instance of the throwableClass.
 	 * Basically this method unwraps the throwable instances by calling
 	 * getCause() except the throwable element is an instance of
@@ -50,8 +34,28 @@ public final class ExceptionUtils {
 	 * @return The unwrapped throwable or null if no further causes can be
 	 *         unwrapped
 	 */
-	public static Throwable unwrap(Throwable t,
-			Class<? extends Throwable> throwableClass) {
+	public static <T extends Throwable> Throwable unwrap(Throwable t,
+			Class<T>[] throwableClasses) {
+		Throwable unwrapped = t;
+
+		while (unwrapped != null && isInstance(unwrapped, throwableClasses)) {
+			if (unwrapped.getCause() == null
+					&& unwrapped instanceof InvocationTargetException) {
+				// We do this here because an invocation target exception may
+				// return null on getCause() but the throwable element we are
+				// looking for can be accessed via getTargetException()
+				unwrapped = ((InvocationTargetException) unwrapped)
+						.getTargetException();
+			} else {
+				unwrapped = unwrapped.getCause();
+			}
+		}
+
+		return unwrapped;
+	}
+	
+	public static <T extends Throwable> Throwable unwrap(Throwable t,
+			Class<T> throwableClass) {
 		Throwable unwrapped = t;
 
 		while (unwrapped != null && throwableClass.isInstance(unwrapped)) {
@@ -68,5 +72,15 @@ public final class ExceptionUtils {
 		}
 
 		return unwrapped;
+	}
+	
+	private static <T extends Throwable> boolean isInstance(Throwable t, Class<T>[] throwableClasses){
+		for(int i = 0; i < throwableClasses.length; i++){
+			if(throwableClasses[i].isInstance(t)){
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

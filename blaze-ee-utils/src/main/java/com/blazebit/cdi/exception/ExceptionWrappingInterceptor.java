@@ -4,6 +4,7 @@
 package com.blazebit.cdi.exception;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -101,7 +102,7 @@ public class ExceptionWrappingInterceptor implements Serializable {
 			 * versions so we need to do this to be able to handle the right
 			 * exception
 			 */
-			Throwable t1 = ExceptionUtils.unwrapInvocationTargetException(t);
+			Throwable t1 = ExceptionUtils.unwrap(t, InvocationTargetException.class);
 
 			if (doWrapping) {
 				/*
