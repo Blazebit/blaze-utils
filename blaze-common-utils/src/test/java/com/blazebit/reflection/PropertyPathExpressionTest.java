@@ -27,6 +27,14 @@ public class PropertyPathExpressionTest {
 		assertEquals(o.getName(), nameExpression.getValue(o));
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetValueWithUnresolveableTypeParameters() {
+		GenericId<String> genericId = new GenericId<String>("test");
+		
+		assertEquals("test", new PropertyPathExpression<GenericId<String>, String>((Class<GenericId<String>>)(Class<?>)GenericId.class, "id").getValue(genericId));
+	}
+	
 	@Test
 	public void testGetNullSafeValue() {
 		Car o;
@@ -46,6 +54,22 @@ public class PropertyPathExpressionTest {
 	@Test(expected=NullPointerException.class)
 	public void testSetValueWithNull() {
 		vendorNameExpression.setValue(new Car(null), "Test");
+	}
+	
+	public class GenericId<X> {
+		X id;
+
+		public GenericId(X id) {
+			this.id = id;
+		}
+
+		public X getId() {
+			return id;
+		}
+
+		public void setId(X id) {
+			this.id = id;
+		}
 	}
 	
 	public class Vendor{

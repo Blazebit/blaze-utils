@@ -5,6 +5,8 @@ package com.blazebit.reflection;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.blazebit.lang.ValueAccessor;
 
@@ -63,32 +65,39 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
 	private void initialize(){
 		if(dirty){
 			synchronized (this) {
-				if(dirty){
-					final int getterChainLength = explodedPropertyPath.length - 1;
-					this.getterChain = new Method[getterChainLength];
+				if(dirty){					
+					final String[] properties = explodedPropertyPath;
+					final int getterChainLength = properties.length - 1;
+					final List<Method> getters = new ArrayList<Method>(getterChainLength);
 					
 					Class<?> current = source;
 					
 					if(getterChainLength > 0){
 						/* Retrieve the getters for the field names and also resolve the return type */
 						for (int i = 0; i < getterChainLength; i++) {
-							getterChain[i] = ReflectionUtils.getGetter(current, explodedPropertyPath[i]);
-							current = ReflectionUtils.getResolvedMethodReturnType(current, getterChain[i]);
+							final Method getter = ReflectionUtils.getGetter(current, properties[i]);
+							getters.add(getter);
+							current = ReflectionUtils.getResolvedMethodReturnType(current, getter);
+							
+							if(current == null){
+								break;
+							}
 						}
 					}
 					
-					/* TODO: Think about what to do when a getter or setter is missing */
-					/* Retrieve the leaf methods for get and set access */
-					leafGetter = ReflectionUtils.getGetter(current, explodedPropertyPath[getterChainLength]);
-					leafSetter = ReflectionUtils.getSetter(current, explodedPropertyPath[getterChainLength]);
-					/* Finally let GC do some work ;) */
-					explodedPropertyPath = null;
+					getterChain = getters.toArray(new Method[0]);
+					
+					if(current != null){
+						/* Retrieve the leaf methods for get and set access */
+						leafGetter = ReflectionUtils.getGetter(current, properties[getterChainLength]);
+						leafSetter = ReflectionUtils.getSetter(current, properties[getterChainLength]);
+					}
+					
 					dirty = false;
 				}
 			}
 		}
 	}
-
 
 	/**
 	 * Invokes the getter chain based on the source object. First the source
@@ -124,9 +133,11 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
 	@SuppressWarnings("unchecked")
 	private Y getValue(X target, boolean nullSafe){
 		initialize();
+		
 		try{
 			Object leafObj = getLeafObject(target, nullSafe);
-			return nullSafe && leafObj == null ? null : (Y) leafGetter.invoke(leafObj);
+			final Method getter = leafGetter == null && leafObj != null ? ReflectionUtils.getGetter(leafObj.getClass(), explodedPropertyPath[explodedPropertyPath.length - 1]) : leafGetter;
+			return nullSafe && leafObj == null ? null : (Y) getter.invoke(leafObj);
 		}catch(RuntimeException ex){
 			throw ex;
 		}catch(Exception ex){
@@ -138,7 +149,9 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
 		initialize();
 		
 		try{
-			leafSetter.invoke(getLeafObject(target, false), value);
+			Object leafObj = getLeafObject(target, false);
+			final Method setter = leafSetter == null && leafObj != null ? ReflectionUtils.getSetter(leafObj.getClass(), explodedPropertyPath[explodedPropertyPath.length - 1]) : leafSetter;
+			setter.invoke(leafObj, value);
 		}catch(RuntimeException ex){
 			throw ex;
 		}catch(Exception ex){
@@ -156,18 +169,34 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
 		}
 		
 		Object current = target;
-
-		if(getterChain.length > 0){
-			for (Method m : getterChain) {
-				current = m.invoke(current);
+		final Method[] getters = getterChain;
+		int i = 0;
+				
+		if(getters.length > 0){
+			for (; i < getters.length; i++) {
+				current = getters[i].invoke(current);
 				
 				if(current == null){
 					if(nullSafe){
 						return null;
 					}
 					
-					throw new NullPointerException(new StringBuilder(m.getName()).append(" returned null").toString());
+					throw new NullPointerException(new StringBuilder(getters[i].getName()).append(" returned null").toString());
 				}
+			}
+		}
+		
+		final String[] properties = explodedPropertyPath;
+		
+		for (; i < properties.length - 1; i++) {
+			current = ReflectionUtils.getGetter(current.getClass(), properties[i]).invoke(current);
+			
+			if(current == null){
+				if(nullSafe){
+					return null;
+				}
+				
+				throw new NullPointerException(new StringBuilder(properties[i]).append(" returned null").toString());
 			}
 		}
 		

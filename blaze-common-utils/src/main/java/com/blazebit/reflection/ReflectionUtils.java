@@ -265,12 +265,10 @@ public final class ReflectionUtils {
 	 *            type variable must be bound in this class or a superclass.
 	 * @param typeVariable
 	 *            The type variable to resolve.
-	 * @return The resolved type as class.
+	 * @return The resolved type as class or null if the type can not be resolved.
 	 * @throws IllegalArgumentException
 	 *             Is thrown when the concrete class is not a subtype of the
-	 *             class in which the type variable has been declared, or when
-	 *             the type for the type variable is not bound within the
-	 *             hierarchy of the concrete class.
+	 *             class in which the type variable has been declared.
 	 */
 	public static Class<?> resolveTypeVariable(Class<?> concreteClass,
 			TypeVariable<?> typeVariable) {
@@ -310,8 +308,8 @@ public final class ReflectionUtils {
 		classStack.push(currentClass);
 
 		// Build a stack of the class hierarchy to be able to resolve the type
-		while (!currentClass.getSuperclass().equals(
-				typeVariable.getGenericDeclaration())) {
+		while (!Object.class.equals(currentClass.getSuperclass()) &&
+				!currentClass.getSuperclass().equals(typeVariable.getGenericDeclaration())) {
 			currentClass = currentClass.getSuperclass();
 			classStack.push(currentClass);
 		}
@@ -332,7 +330,7 @@ public final class ReflectionUtils {
 			// classToInspectType has to be a ParameterizedType
 			// otherwise we can not resolve the type variable
 			if (!(classToInspectType instanceof ParameterizedType)) {
-				throw new IllegalArgumentException("Could not resolve type");
+				return null;
 			}
 
 			ParameterizedType parameterizedClassToInspect = (ParameterizedType) classToInspectType;
@@ -364,7 +362,7 @@ public final class ReflectionUtils {
 		}
 
 		if (!(resolvedType instanceof Class<?>)) {
-			throw new IllegalArgumentException("Could not resolve type");
+			return null;
 		}
 
 		return (Class<?>) resolvedType;

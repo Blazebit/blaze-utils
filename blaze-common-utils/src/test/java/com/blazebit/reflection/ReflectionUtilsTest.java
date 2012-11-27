@@ -144,6 +144,28 @@ public class ReflectionUtilsTest {
 		concreteType = ReflectionUtils.resolveTypeVariable(ConcreteClassA.class,
 				typeVariable);
 		assertEquals(Integer.class, concreteType);
+		
+		// Resolve unresolveable field types
+
+		typeVariable = (TypeVariable<?>) ReflectionUtils
+				.getField(GenericClassA.class, "field").getGenericType();
+		concreteType = ReflectionUtils.resolveTypeVariable(
+				GenericClassA.class, typeVariable);
+		assertNull(concreteType);
+
+		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
+				.getField(GenericClassA.class, "fieldCollection")
+				.getGenericType()).getActualTypeArguments()[0];
+		concreteType = ReflectionUtils.resolveTypeVariable(GenericClassA.class,
+				typeVariable);
+		assertNull(concreteType);
+
+		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
+				.getField(GenericClassA.class, "fieldMap").getGenericType())
+				.getActualTypeArguments()[0];
+		concreteType = ReflectionUtils.resolveTypeVariable(GenericClassA.class,
+				typeVariable);
+		assertNull(concreteType);
 
 		// Resolve method return types
 
