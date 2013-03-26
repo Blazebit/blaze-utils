@@ -85,17 +85,10 @@
             <artifactId>blaze-cbav</artifactId>
         </dependency>
         <dependency>
-			<groupId>org.jboss.spec</groupId>
-			<artifactId>jboss-javaee-6.0</artifactId>
-			<version>3.0.1.Final</version>
+			<groupId>org.apache.openejb</groupId>
+			<artifactId>javaee-api</artifactId>
+			<version>6.0-4</version>
 			<scope>provided</scope>
-			<type>pom</type>
-			<exclusions>
-				<exclusion>
-					<groupId>xalan</groupId>
-					<artifactId>xalan</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
         
 		<dependency>

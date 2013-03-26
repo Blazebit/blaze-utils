@@ -78,7 +78,7 @@ public class FetchUtils {
 			// Iterate through all property names
 			for (int j = 0; j < propertyNames.length; j++) {
 				String propertyName = propertyNames[j];
-				fieldClass = ReflectionUtils.getFieldType(currentClass,
+				fieldClass = ReflectionUtils.getResolvedFieldType(currentClass,
 						propertyName);
 				fieldCollectionType = ReflectionUtils.isSubtype(fieldClass,
 						Collection.class);
@@ -136,7 +136,7 @@ public class FetchUtils {
 							.append(" is parseable and therefore it has not to be fetched explicitly.")
 							.toString());
 
-					if (i + 1 < fields.length) {
+					if (i + 1 < propertyNames.length) {
 						throw new IllegalArgumentException(
 								"Can not fetch anything from a simple property!");
 					}

@@ -48,7 +48,7 @@ public final class StringUtils {
 		return sb;
 	}
 	
-	public static String join(CharSequence delimiter, Iterable<CharSequence> parts){
+	public static String join(CharSequence delimiter, Iterable<? extends CharSequence> parts){
 		return join(new StringBuilder(), delimiter, parts).toString();
 	}
 	
@@ -56,7 +56,7 @@ public final class StringUtils {
 		return join(new StringBuilder(), delimiter, parts, expression).toString();
 	}
 	
-	public static StringBuilder join(StringBuilder sb, CharSequence delimiter, Iterable<CharSequence> parts){
+	public static StringBuilder join(StringBuilder sb, CharSequence delimiter, Iterable<? extends CharSequence> parts){
 		return join(sb, delimiter, parts.iterator());
 	}
 	
@@ -64,7 +64,7 @@ public final class StringUtils {
 		return join(sb, delimiter, parts.iterator(), expression);
 	}
 	
-	public static String join(CharSequence delimiter, Iterator<CharSequence> iter){
+	public static String join(CharSequence delimiter, Iterator<? extends CharSequence> iter){
 		return join(new StringBuilder(), delimiter, iter).toString();
 	}
 	
@@ -72,7 +72,7 @@ public final class StringUtils {
 		return join(new StringBuilder(), delimiter, iter, expression).toString();
 	}
 	
-	public static StringBuilder join(StringBuilder sb, CharSequence delimiter, Iterator<CharSequence> iter){
+	public static StringBuilder join(StringBuilder sb, CharSequence delimiter, Iterator<? extends CharSequence> iter){
 		if(!iter.hasNext()){
 			return sb;
 		}

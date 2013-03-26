@@ -24,7 +24,7 @@ import com.blazebit.reflection.ReflectionUtils;
  */
 public final class FormatUtils {
 
-	private static final Map<Class<?>, SerializableFormat<?>> parseableTypes = new HashMap<Class<?>, SerializableFormat<?>>();
+	private static final Map<Class<? extends Serializable>, SerializableFormat<? extends Serializable>> parseableTypes = new HashMap<Class<? extends Serializable>, SerializableFormat<? extends Serializable>>();
 
 	static {
 		parseableTypes.put(Integer.TYPE, new IntegerFormat());
@@ -73,7 +73,7 @@ public final class FormatUtils {
 	 * 
 	 * @return The available serializable formatters.
 	 */
-	public static Map<Class<?>, SerializableFormat<?>> getAvailableFormatters() {
+	public static Map<Class<? extends Serializable>, SerializableFormat<? extends Serializable>> getAvailableFormatters() {
 		return Collections.unmodifiableMap(parseableTypes);
 	}
 
@@ -129,7 +129,7 @@ public final class FormatUtils {
 	 * @see ReflectionUtils#getParsedValue(java.lang.Class, java.lang.String,
 	 *      java.text.DateFormat, java.text.DateFormat)
 	 */
-	public static Serializable getParsedValue(Class<?> returnType, String value)
+	public static <T extends Serializable> T getParsedValue(Class<T> returnType, String value)
 			throws ParseException {
 		return getParsedValue(returnType, value,
 				java.text.DateFormat.getDateTimeInstance());
@@ -153,10 +153,10 @@ public final class FormatUtils {
 	 *             Is thrown when the string can not be parsed
 	 * @see ReflectionUtils#isParseableType(java.lang.Class)
 	 */
-	public static Serializable getParsedValue(Class<?> returnType,
+	public static <T extends Serializable> T getParsedValue(Class<T> returnType,
 			String value, java.text.DateFormat dateFormatter)
 			throws ParseException {
-		SerializableFormat<?> formatter = parseableTypes.get(returnType);
+		SerializableFormat<T> formatter = (SerializableFormat<T>) parseableTypes.get(returnType);
 
 		if (formatter == null) {
 			throw new IllegalArgumentException("Unknown return type");
@@ -166,5 +166,24 @@ public final class FormatUtils {
 		ctx.setAttribute("format", dateFormatter);
 
 		return formatter.parse(value, ctx);
+	}
+	
+	public static <T extends Serializable> String getFormattedValue(Class<T> type,
+			T object){
+		return getFormattedValue(type, object, java.text.DateFormat.getDateTimeInstance());
+	}
+	
+	public static <T extends Serializable> String getFormattedValue(Class<T> type,
+			T object, java.text.DateFormat dateFormatter) {
+		SerializableFormat<T> formatter = (SerializableFormat<T>) parseableTypes.get(type);
+
+		if (formatter == null) {
+			throw new IllegalArgumentException("Unknown return type");
+		}
+
+		ParserContextImpl ctx = new ParserContextImpl();
+		ctx.setAttribute("format", dateFormatter);
+
+		return formatter.format(object, ctx);
 	}
 }

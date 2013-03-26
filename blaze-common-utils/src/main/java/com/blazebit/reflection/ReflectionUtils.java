@@ -7,15 +7,21 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 /**
  * Utillity class for reflection specific actions. This class only uses basic
@@ -51,8 +57,9 @@ public final class ReflectionUtils {
 		primitiveToObjectClasses.put(void.class, Void.class);
 		primitiveToObjectClasses.put(short.class, Short.class);
 	}
-	
-	private ReflectionUtils(){}
+
+	private ReflectionUtils() {
+	}
 
 	/**
 	 * Returns the class object for the specified qualified class name. Calling
@@ -168,8 +175,8 @@ public final class ReflectionUtils {
 	 * Returns the type of a field if it exists within the class. Calling this
 	 * method is equal to calling #
 	 * {@link ReflectionUtils#getField(java.lang.Class, java.lang.String)
-     * } with a
-	 * null check and finally return the type via getType().
+     * } with
+	 * a null check and finally return the type via getType().
 	 * 
 	 * @param clazz
 	 *            The class within to look for the field with the given field
@@ -265,7 +272,8 @@ public final class ReflectionUtils {
 	 *            type variable must be bound in this class or a superclass.
 	 * @param typeVariable
 	 *            The type variable to resolve.
-	 * @return The resolved type as class or null if the type can not be resolved.
+	 * @return The resolved type as class or null if the type can not be
+	 *         resolved.
 	 * @throws IllegalArgumentException
 	 *             Is thrown when the concrete class is not a subtype of the
 	 *             class in which the type variable has been declared.
@@ -308,8 +316,9 @@ public final class ReflectionUtils {
 		classStack.push(currentClass);
 
 		// Build a stack of the class hierarchy to be able to resolve the type
-		while (!Object.class.equals(currentClass.getSuperclass()) &&
-				!currentClass.getSuperclass().equals(typeVariable.getGenericDeclaration())) {
+		while (!Object.class.equals(currentClass.getSuperclass())
+				&& !currentClass.getSuperclass().equals(
+						typeVariable.getGenericDeclaration())) {
 			currentClass = currentClass.getSuperclass();
 			classStack.push(currentClass);
 		}
@@ -413,6 +422,151 @@ public final class ReflectionUtils {
 		}
 
 		return position;
+	}
+
+	/**
+	 * Returns the static field objects that are declared in the given class or
+	 * any of it's super types. Calling this method is equivalent to a call to
+	 * {@link ReflectionUtils#getNonMatchingFields(Class, int)} with the modifiers
+	 * {@link Modifier#STATIC}.
+	 * 
+	 * @param clazz
+	 *            The class within to look for the fields with the given
+	 *            modifiers
+	 * @return The array of static fields that are within the type hierarchy of
+	 *         the given class
+	 */
+	public static Field[] getInstanceFields(Class<?> clazz) {
+		return getNonMatchingFields(clazz, Modifier.STATIC);
+	}
+
+	/**
+	 * Returns the static field objects that are declared in the given class or
+	 * any of it's super types. Calling this method is equivalent to a call to
+	 * {@link ReflectionUtils#getMatchingFields(Class, int)} with the modifiers
+	 * {@link Modifier#STATIC}.
+	 * 
+	 * @param clazz
+	 *            The class within to look for the fields with the given
+	 *            modifiers
+	 * @return The array of static fields that are within the type hierarchy of
+	 *         the given class
+	 */
+	public static Field[] getStaticFields(Class<?> clazz) {
+		return getMatchingFields(clazz, Modifier.STATIC);
+	}
+	
+	private static final Comparator<Field> FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR = new Comparator<Field>() {
+
+		@Override
+		public int compare(Field o1, Field o2) {
+			int result = o1.getName().compareTo(o2.getName());
+			return result == 0 ? o1.getDeclaringClass().getName().compareTo(o2.getDeclaringClass().getName()) : result;
+		}
+	};
+
+	/**
+	 * Returns the field objects that are declared in the given class or any of
+	 * it's super types that have any of the given modifiers. The type hierarchy
+	 * is traversed upwards and all declared fields that match the given
+	 * modifiers are added to the result array.
+	 * The elements in the array are sorted by their names and declaring classes.
+	 * 
+	 * @param clazz
+	 *            The class within to look for the fields with the given
+	 *            modifiers
+	 * @param modifiers
+	 *            The OR-ed together modifiers that a field must match to be
+	 *            included into the result
+	 * @return The array of fields that match the modifiers and are within the
+	 *         type hierarchy of the given class
+	 */
+	public static Field[] getMatchingFields(Class<?> clazz, int modifiers) {
+		Set<Field> fields = new TreeSet<Field>(FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR);
+		Stack<Class<?>> classStack = new Stack<Class<?>>();
+		Class<?> traverseClass;
+		Field[] fieldArray;
+		Class<?>[] classArray;
+		
+		classStack.push(clazz);
+
+		while (!classStack.isEmpty()) {
+			traverseClass = classStack.pop();
+
+			if (traverseClass.getSuperclass() != null) {
+				classStack.add(traverseClass.getSuperclass());
+			}
+
+			fieldArray = traverseClass.getDeclaredFields();
+
+			for (int i = 0; i < fieldArray.length; i++) {
+				if ((modifiers & fieldArray[i].getModifiers()) != 0) {
+					fields.add(fieldArray[i]);
+				}
+			}
+
+			if ((modifiers & Modifier.STATIC) != 0) {
+				classArray = traverseClass.getInterfaces();
+
+				for (int i = 0; i < classArray.length; i++) {
+					classStack.add(classArray[i]);
+				}
+			}
+		}
+
+		return fields.toArray(new Field[fields.size()]);
+	}
+
+	/**
+	 * Returns the field objects that are declared in the given class or any of
+	 * it's super types that have none of the given modifiers. The type hierarchy
+	 * is traversed upwards and all declared fields that do not match the given
+	 * modifiers are added to the result array.
+	 * The elements in the array are sorted by their names and declaring classes.
+	 * 
+	 * @param clazz
+	 *            The class within to look for the fields with the given
+	 *            modifiers
+	 * @param modifiers
+	 *            The OR-ed together modifiers that a field must not match to be
+	 *            included into the result
+	 * @return The array of fields that do not match the modifiers and are within the
+	 *         type hierarchy of the given class
+	 */
+	public static Field[] getNonMatchingFields(Class<?> clazz, int modifiers) {
+		Set<Field> fields = new TreeSet<Field>(FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR);
+		Stack<Class<?>> classStack = new Stack<Class<?>>();
+		Class<?> traverseClass;
+		Field[] fieldArray;
+		Class<?>[] classArray;
+		
+		classStack.push(clazz);
+
+		while (!classStack.isEmpty()) {
+			traverseClass = classStack.pop();
+
+			if (traverseClass.getSuperclass() != null) {
+				classStack.add(traverseClass.getSuperclass());
+			}
+
+			fieldArray = traverseClass.getDeclaredFields();
+
+			for (int i = 0; i < fieldArray.length; i++) {
+				if ((modifiers & fieldArray[i].getModifiers()) == 0) {
+					fields.add(fieldArray[i]);
+				}
+			}
+
+			if ((modifiers & Modifier.STATIC) != 0) {
+				classArray = traverseClass.getInterfaces();
+
+				for (int i = 0; i < classArray.length; i++) {
+					classStack.add(classArray[i]);
+				}
+			}
+		}
+
+		return fields.toArray(new Field[fields.size()]);
 	}
 
 	/**

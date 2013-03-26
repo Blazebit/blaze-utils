@@ -109,7 +109,7 @@ public final class LocaleUtils {
 			final Locale preferredLocale = preferredLocales.next();
 
 			if (supportedLocales.contains(preferredLocale)
-					|| defaultLocale.equals(preferredLocale)) {
+					|| (defaultLocale != null && defaultLocale.equals(preferredLocale))) {
 				/* If we have a perfect match, just return it */
 				return preferredLocale;
 			}
@@ -127,51 +127,52 @@ public final class LocaleUtils {
 			boolean languageMatching = false;
 
 			for (Locale supportedLocale : supportedLocales) {
-
-				if (equal(preferredLocaleLanguage,
-						supportedLocale.getLanguage())) {
-					languageMatching = true;
-
-					if (equal(supportedLocale.getCountry(),
-							preferredLocaleCountry)) {
-						/*
-						 * the country of the language matching locale matches
-						 * the preferred locale country
-						 */
-
-						if (lastLanguageAndCountryMatch == null
-								&& (!strictVariantMatching || empty(supportedLocale
-										.getVariant()))) {
+				if(supportedLocale != null){
+					if (equal(preferredLocaleLanguage,
+							supportedLocale.getLanguage())) {
+						languageMatching = true;
+	
+						if (equal(supportedLocale.getCountry(),
+								preferredLocaleCountry)) {
 							/*
-							 * Use the first language and country matching
-							 * locale if strict variant matching is turned off
-							 * or it has no variant
+							 * the country of the language matching locale matches
+							 * the preferred locale country
 							 */
-							lastLanguageAndCountryMatch = supportedLocale;
-						} else if (lastLanguageAndCountryMatch != null
-								&& empty(supportedLocale.getVariant())) {
-							/*
-							 * Only use language and country matching locale if
-							 * it has no variant
-							 */
-							lastLanguageAndCountryMatch = supportedLocale;
+	
+							if (lastLanguageAndCountryMatch == null
+									&& (!strictVariantMatching || empty(supportedLocale
+											.getVariant()))) {
+								/*
+								 * Use the first language and country matching
+								 * locale if strict variant matching is turned off
+								 * or it has no variant
+								 */
+								lastLanguageAndCountryMatch = supportedLocale;
+							} else if (lastLanguageAndCountryMatch != null
+									&& empty(supportedLocale.getVariant())) {
+								/*
+								 * Only use language and country matching locale if
+								 * it has no variant
+								 */
+								lastLanguageAndCountryMatch = supportedLocale;
+							}
+						} else if (lastLanguageMatch == null
+								|| empty(supportedLocale.getCountry())) {
+							/* Use a language only matching locale */
+							lastLanguageMatch = supportedLocale;
 						}
-					} else if (lastLanguageMatch == null
-							|| empty(supportedLocale.getCountry())) {
-						/* Use a language only matching locale */
-						lastLanguageMatch = supportedLocale;
+					} else if (countryMatching
+							&& !languageMatching
+							&& equal(preferredLocaleCountry,
+									supportedLocale.getCountry())) {
+						/*
+						 * We only care about country matches if no language matches
+						 * can be found, since a language match is much more worth.
+						 * This is a optimization concerning memory consumption.
+						 * Preserve country match if no perfect match can be found
+						 */
+						countryMatchingLocales.add(supportedLocale);
 					}
-				} else if (countryMatching
-						&& !languageMatching
-						&& equal(preferredLocaleCountry,
-								supportedLocale.getCountry())) {
-					/*
-					 * We only care about country matches if no language matches
-					 * can be found, since a language match is much more worth.
-					 * This is a optimization concerning memory consumption.
-					 * Preserve country match if no perfect match can be found
-					 */
-					countryMatchingLocales.add(supportedLocale);
 				}
 			}
 
