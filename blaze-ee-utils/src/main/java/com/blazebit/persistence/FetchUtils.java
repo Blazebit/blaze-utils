@@ -169,7 +169,13 @@ public class FetchUtils {
 						// if not, we have to use the whole property path
 						// => Hibernate Bug
 						hasAlias = false;
-						currentAlias = parentElement + "." + propertyName;
+                                                // Fixed alias bug when doing deep nesting of many to one relations
+                                                if (j == 0) {
+                                                        currentAlias = parentElement + "." + propertyName;
+                                                } else {
+                                                        currentAlias = classBasedPropertyAliasMap.get(parentElement) + "." + propertyName;
+                                                }
+						
 					}
 
 					if (j == 0) {
