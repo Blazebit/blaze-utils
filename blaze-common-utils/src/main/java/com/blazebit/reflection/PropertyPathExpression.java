@@ -164,7 +164,7 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
 			return null;
 		}
 		
-		if(!source.isInstance(target)){
+		if(target != null && !source.isInstance(target)){
 			throw new IllegalArgumentException("Given target is not instance of the source class");
 		}
 		
