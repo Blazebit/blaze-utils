@@ -88,7 +88,7 @@ public final class ExpressionUtils {
 
 	@SuppressWarnings("unchecked")
 	public static <X, Y> Y getNullSafeValue(X target, String propertyPath, Class<Y> valueClass){
-		return getExpression((Class<X>) target.getClass(), propertyPath, valueClass).getNullSafeValue(target);
+		return target == null ? null : getExpression((Class<X>) target.getClass(), propertyPath, valueClass).getNullSafeValue(target);
 	}
 	
 	private static class PropertyPathExpressionKey {
