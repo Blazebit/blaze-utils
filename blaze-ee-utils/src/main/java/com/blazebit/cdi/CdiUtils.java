@@ -127,6 +127,6 @@ public class CdiUtils {
 			bean = bm.getBeans(clazz, new DefaultLiteral()).iterator().next();
 		}
 		CreationalContext<?> ctx = bm.createCreationalContext(bean);
-		return (T) bm.getReference(bean, bean.getBeanClass(), ctx);
+		return (T) bm.getReference(bean, clazz, ctx);
 	}
 }
