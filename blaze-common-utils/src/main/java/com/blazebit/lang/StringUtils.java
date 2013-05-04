@@ -111,4 +111,14 @@ public final class StringUtils {
 		sb.append(s, 1, s.length());
 		return sb;
 	}
+	
+	public static String firstToLower(CharSequence s){
+		return addFirstToLower(new StringBuilder(s.length()), s).toString();
+	}
+	
+	public static StringBuilder addFirstToLower(StringBuilder sb, CharSequence s){
+		sb.append(Character.toLowerCase(s.charAt(0)));
+		sb.append(s, 1, s.length());
+		return sb;
+	}
 }
