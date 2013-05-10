@@ -15,11 +15,13 @@
  */
 package com.blazebit.message.apt;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.io.Writer;
 import java.net.URI;
 import java.util.ArrayList;
@@ -87,9 +89,16 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 
 					if (!messages.isEmpty()) {
 						String baseName = messageBundle.replaceAll("\\.", "/");
-						FileObject javaFileObject = filer.getResource(
+						FileObject javaFileObject;
+						
+						try {
+							javaFileObject = filer.getResource(
 								StandardLocation.SOURCE_PATH, "", baseName
 										+ ".java");
+						} catch(FileNotFoundException ex) {
+							throw new IllegalArgumentException("Could not find the source file '" + baseName + ".java' that actually triggered the enum generation process", ex);
+						}
+						
 						long lastModified = javaFileObject.getLastModified();
 						List<Locale> locales = new ArrayList<Locale>();
 						URI baseUri = null;
@@ -99,9 +108,21 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 
 						try {
 							// Normally there is an english properties file
-							baseUri = filer.getResource(
-									StandardLocation.CLASS_OUTPUT, "",
-									baseName + "_en.properties").toUri();
+							try {
+								baseUri = filer.getResource(
+										StandardLocation.CLASS_PATH, "",
+										baseName + "_en.properties").toUri();
+							} catch (FileNotFoundException ex1) {
+								try {
+									baseUri = filer.getResource(
+											StandardLocation.CLASS_OUTPUT, "",
+											baseName + "_en.properties").toUri();
+								} catch (FileNotFoundException ex2) {
+									baseUri = filer.getResource(
+											StandardLocation.SOURCE_PATH, "",
+											baseName + "_en.properties").toUri();
+								}
+							}
 						} catch (FileNotFoundException ex1) {
 							// Otherwise we have to go through all available
 							// locales
@@ -112,25 +133,65 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 									path = baseName + "_" + l.getLanguage()
 											+ ".properties";
 									baseUri = filer.getResource(
-											StandardLocation.CLASS_OUTPUT, "",
+											StandardLocation.CLASS_PATH, "",
 											path).toUri();
 									break;
-								} catch (FileNotFoundException ex) {
-									// Nothing we can do about it
+								} catch (FileNotFoundException ex2) {
+									try {
+										path = baseName + "_" + l.getLanguage()
+												+ ".properties";
+										baseUri = filer.getResource(
+												StandardLocation.CLASS_OUTPUT, "",
+												path).toUri();
+										break;
+									} catch (FileNotFoundException ex3) {
+										try {
+											path = baseName + "_" + l.getLanguage()
+													+ ".properties";
+											baseUri = filer.getResource(
+													StandardLocation.SOURCE_PATH, "",
+													path).toUri();
+											break;
+										} catch (FileNotFoundException ex4) {
+											// Nothing we can do about it
+										}
+									}
 								}
 
 								if (l.getCountry() != null
 										&& !l.getCountry().isEmpty()) {
+
+
 									try {
 										path = baseName + "_" + l.getLanguage()
 												+ "_" + l.getCountry()
 												+ ".properties";
 										baseUri = filer.getResource(
-												StandardLocation.CLASS_OUTPUT,
+												StandardLocation.CLASS_PATH,
 												"", path).toUri();
 										break;
-									} catch (FileNotFoundException ex) {
-										// Nothing we can do about it
+									} catch (FileNotFoundException ex2) {
+										try {
+											path = baseName + "_" + l.getLanguage()
+													+ "_" + l.getCountry()
+													+ ".properties";
+											baseUri = filer.getResource(
+													StandardLocation.CLASS_OUTPUT,
+													"", path).toUri();
+											break;
+										} catch (FileNotFoundException ex3) {
+											try {
+												path = baseName + "_" + l.getLanguage()
+														+ "_" + l.getCountry()
+														+ ".properties";
+												baseUri = filer.getResource(
+														StandardLocation.SOURCE_PATH,
+														"", path).toUri();
+												break;
+											} catch (FileNotFoundException ex4) {
+												// Nothing we can do about it
+											}
+										}
 									}
 								}
 							}
@@ -143,6 +204,10 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 						}
 
 						File baseDir = new File(baseUri).getParentFile();
+						
+						if(!baseDir.exists() || !baseDir.isDirectory()) {
+							throw new IllegalArgumentException("The base directory for the properties files could not be found!");
+						}
 
 						for (File propertiesFile : baseDir.listFiles()) {
 							checkPropertiesFile(propertiesFile, messages);
@@ -189,8 +254,11 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 						.getLastModified());
 			}
 		} catch (Exception ex) {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ex.printStackTrace(new PrintStream(baos));
+			String message = baos.toString();
 			processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-					"Could not generate enums\n" + ex.getMessage());
+					"Could not generate enums\n" + message);
 			return false;
 		}
 
