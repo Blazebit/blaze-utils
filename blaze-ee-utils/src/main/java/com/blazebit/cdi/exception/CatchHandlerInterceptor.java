@@ -17,7 +17,6 @@ import javax.interceptor.InvocationContext;
 import org.apache.deltaspike.core.api.exception.control.event.ExceptionToCatchEvent;
 
 import com.blazebit.annotation.AnnotationUtils;
-import com.blazebit.annotation.constraint.NullClass;
 import com.blazebit.cdi.cleanup.annotation.Cleanup;
 import com.blazebit.cdi.exception.annotation.CatchHandler;
 import com.blazebit.cdi.exception.annotation.CatchHandling;
@@ -66,18 +65,20 @@ public class CatchHandlerInterceptor implements Serializable {
 
 		CatchHandling[] exceptionHandlingAnnotations = exceptionHandlerAnnotation
 				.value();
-		Class<? extends Throwable>[] unwrap = exceptionHandlerAnnotation.unwrap();
+		Class<? extends Throwable>[] unwrap = exceptionHandlerAnnotation
+				.unwrap();
 
 		try {
 			return ic.proceed();
 		} catch (Exception ex) {
-			if(!contains(unwrap, InvocationTargetException.class)){
+			if (!contains(unwrap, InvocationTargetException.class)) {
 				unwrap = Arrays.copyOf(unwrap, unwrap.length + 1);
 				unwrap[unwrap.length - 1] = InvocationTargetException.class;
 			}
-			
+
 			// Unwrap Exception if ex is instanceof InvocationTargetException
-			Throwable t = ExceptionUtils.unwrap(ex, InvocationTargetException.class);
+			Throwable t = ExceptionUtils.unwrap(ex,
+					InvocationTargetException.class);
 			boolean exceptionHandled = false;
 
 			if (exceptionHandlingAnnotations.length > 0) {
@@ -91,7 +92,7 @@ public class CatchHandlerInterceptor implements Serializable {
 						}
 
 						// Only invoke cleanup declared at handling level
-						if (!handling.cleanup().equals(NullClass.class)) {
+						if (!handling.cleanup().equals(Object.class)) {
 							invokeCleanups(targetClass, targetObject,
 									handling.cleanup());
 						}
@@ -113,7 +114,7 @@ public class CatchHandlerInterceptor implements Serializable {
 					}
 
 					if (!exceptionHandlerAnnotation.cleanup().equals(
-							NullClass.class)) {
+							Object.class)) {
 						invokeCleanups(targetClass, targetObject,
 								exceptionHandlerAnnotation.cleanup());
 					}
@@ -135,14 +136,15 @@ public class CatchHandlerInterceptor implements Serializable {
 
 		return null;
 	}
-	
-	private static boolean contains(Class<? extends Throwable>[] classes, Class<? extends Throwable> clazz){
-		for(int i = 0; i < classes.length; i++){
-			if(classes[i].equals(clazz)){
+
+	private static boolean contains(Class<? extends Throwable>[] classes,
+			Class<? extends Throwable> clazz) {
+		for (int i = 0; i < classes.length; i++) {
+			if (classes[i].equals(clazz)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -176,7 +178,7 @@ public class CatchHandlerInterceptor implements Serializable {
 			Class<?> cleanupClazz) throws Exception {
 		boolean invoked = false;
 
-		if (!cleanupClazz.equals(NullClass.class)) {
+		if (!cleanupClazz.equals(Object.class)) {
 			for (Method m : clazz.getMethods()) {
 				Cleanup cleanup = m.getAnnotation(Cleanup.class);
 

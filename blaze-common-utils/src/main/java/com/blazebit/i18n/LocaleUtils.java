@@ -11,39 +11,69 @@ public final class LocaleUtils {
 	private LocaleUtils() {
 	}
 
-	public static Locale getLocale(String languageCode) {
-		String[] localeParts = languageCode.split("_");
-
-		if (localeParts.length < 2) {
-			return new Locale(localeParts[0]);
-		} else if (localeParts.length < 3) {
-			return new Locale(localeParts[0], localeParts[1]);
-		} else {
-			return new Locale(localeParts[0], localeParts[1], localeParts[2]);
+	public static Locale getLocale(String string) {
+		if (string == null || string.isEmpty()) {
+			return null;
 		}
+
+		int found = 0, position = 0;
+		char[] chars = string.toCharArray();
+
+		for (int i = 0; i < chars.length; i++) {
+			if (chars[i] == '_') {
+				switch (found) {
+				case 0:
+					string = new String(chars, position, i - position);
+					position = i + 1;
+					break;
+				case 1:
+					if (chars.length > i + 1) {
+						return new Locale(string, new String(chars, position, i
+								- position), new String(chars, i + 1,
+								chars.length - i - 1));
+					} else {
+						return new Locale(string, new String(chars, position, i
+								- position), "");
+					}
+				}
+
+				found++;
+			}
+		}
+
+		switch (found) {
+		case 0:
+			return new Locale(string);
+		case 1:
+			return new Locale(string, new String(chars, position, chars.length
+					- position));
+		}
+
+		// Should never happen
+		return null;
 	}
 
-	public static Locale resolveLocale(List<Locale> preferredLocales,
-			List<Locale> supportedLocales, Locale defaultLocale) {
+	public static Locale resolveLocale(Iterable<Locale> preferredLocales,
+			Collection<Locale> supportedLocales, Locale defaultLocale) {
 		return resolveLocale(preferredLocales.iterator(), supportedLocales,
 				defaultLocale);
 	}
 
-	public static Locale resolveLocale(List<Locale> preferredLocales,
-			List<Locale> supportedLocales, Locale defaultLocale,
+	public static Locale resolveLocale(Iterable<Locale> preferredLocales,
+			Collection<Locale> supportedLocales, Locale defaultLocale,
 			boolean strictVarianMatching) {
 		return resolveLocale(preferredLocales.iterator(), supportedLocales,
 				defaultLocale, strictVarianMatching);
 	}
 
 	public static Locale resolveLocale(Iterator<Locale> preferredLocales,
-			List<Locale> supportedLocales, Locale defaultLocale) {
+			Collection<Locale> supportedLocales, Locale defaultLocale) {
 		return resolveLocale(preferredLocales, supportedLocales, defaultLocale,
 				true);
 	}
 
 	public static Locale resolveLocale(Iterator<Locale> preferredLocales,
-			List<Locale> supportedLocales, Locale defaultLocale,
+			Collection<Locale> supportedLocales, Locale defaultLocale,
 			boolean strictVarianMatching) {
 		return resolveLocale(preferredLocales, supportedLocales, defaultLocale,
 				true, strictVarianMatching);
@@ -109,7 +139,8 @@ public final class LocaleUtils {
 			final Locale preferredLocale = preferredLocales.next();
 
 			if (supportedLocales.contains(preferredLocale)
-					|| (defaultLocale != null && defaultLocale.equals(preferredLocale))) {
+					|| (defaultLocale != null && defaultLocale
+							.equals(preferredLocale))) {
 				/* If we have a perfect match, just return it */
 				return preferredLocale;
 			}
@@ -127,32 +158,32 @@ public final class LocaleUtils {
 			boolean languageMatching = false;
 
 			for (Locale supportedLocale : supportedLocales) {
-				if(supportedLocale != null){
+				if (supportedLocale != null) {
 					if (equal(preferredLocaleLanguage,
 							supportedLocale.getLanguage())) {
 						languageMatching = true;
-	
+
 						if (equal(supportedLocale.getCountry(),
 								preferredLocaleCountry)) {
 							/*
-							 * the country of the language matching locale matches
-							 * the preferred locale country
+							 * the country of the language matching locale
+							 * matches the preferred locale country
 							 */
-	
+
 							if (lastLanguageAndCountryMatch == null
 									&& (!strictVariantMatching || empty(supportedLocale
 											.getVariant()))) {
 								/*
 								 * Use the first language and country matching
-								 * locale if strict variant matching is turned off
-								 * or it has no variant
+								 * locale if strict variant matching is turned
+								 * off or it has no variant
 								 */
 								lastLanguageAndCountryMatch = supportedLocale;
 							} else if (lastLanguageAndCountryMatch != null
 									&& empty(supportedLocale.getVariant())) {
 								/*
-								 * Only use language and country matching locale if
-								 * it has no variant
+								 * Only use language and country matching locale
+								 * if it has no variant
 								 */
 								lastLanguageAndCountryMatch = supportedLocale;
 							}
@@ -166,10 +197,11 @@ public final class LocaleUtils {
 							&& equal(preferredLocaleCountry,
 									supportedLocale.getCountry())) {
 						/*
-						 * We only care about country matches if no language matches
-						 * can be found, since a language match is much more worth.
-						 * This is a optimization concerning memory consumption.
-						 * Preserve country match if no perfect match can be found
+						 * We only care about country matches if no language
+						 * matches can be found, since a language match is much
+						 * more worth. This is a optimization concerning memory
+						 * consumption. Preserve country match if no perfect
+						 * match can be found
 						 */
 						countryMatchingLocales.add(supportedLocale);
 					}

@@ -1,9 +1,9 @@
 package com.blazebit.regex.node;
 
-public class CharNode extends AbstractNode{
+public class CharNode extends AbstractNode {
 
 	private final char character;
-	
+
 	public CharNode(char character) {
 		this.character = character;
 	}

@@ -6,12 +6,12 @@ import java.util.List;
 public class OrNode extends AbstractNode {
 
 	private final List<Node> nodes = new ArrayList<Node>();
-	
-	public void add(Node node){
+
+	public void add(Node node) {
 		nodes.add(node);
 	}
-	
-	public List<Node> getNodes(){
+
+	public List<Node> getNodes() {
 		return nodes;
 	}
 }

@@ -80,6 +80,14 @@ public class FetchUtils {
 				String propertyName = propertyNames[j];
 				fieldClass = ReflectionUtils.getResolvedFieldType(currentClass,
 						propertyName);
+
+				if (fieldClass == null) {
+					throw new IllegalArgumentException("Could not find field '"
+							+ propertyName + "' on class '" + currentClass
+							+ "' of the property path '" + fields[i]
+							+ "' on class '" + f.getClazz() + "'");
+				}
+
 				fieldCollectionType = ReflectionUtils.isSubtype(fieldClass,
 						Collection.class);
 
@@ -169,13 +177,15 @@ public class FetchUtils {
 						// if not, we have to use the whole property path
 						// => Hibernate Bug
 						hasAlias = false;
-                                                // Fixed alias bug when doing deep nesting of many to one relations
-                                                if (j == 0) {
-                                                        currentAlias = parentElement + "." + propertyName;
-                                                } else {
-                                                        currentAlias = classBasedPropertyAliasMap.get(parentElement) + "." + propertyName;
-                                                }
-						
+						// Fixed alias bug when doing deep nesting of many to
+						// one relations
+						if (j == 0) {
+							currentAlias = parentElement + "." + propertyName;
+						} else {
+							currentAlias = classBasedPropertyAliasMap
+									.get(parentElement) + "." + propertyName;
+						}
+
 					}
 
 					if (j == 0) {
@@ -211,20 +221,20 @@ public class FetchUtils {
 				placeholderIndex + fetchProfilePlaceholder.length(),
 				sb.toString()).toString();
 	}
-	
-	public static <X> CriteriaQuery<X> fetch(Class<X> clazz, CriteriaBuilder cb, String... propertyPaths){
+
+	public static <X> CriteriaQuery<X> fetch(Class<X> clazz,
+			CriteriaBuilder cb, String... propertyPaths) {
 		CriteriaQuery<X> query = cb.createQuery(clazz);
 		Root<X> root = query.from(clazz);
-		
+
 		for (String propertyPath : propertyPaths) {
-            FetchParent<X, X> fetch = root;
-            
-            for (String pathSegment : propertyPath.split("\\.")) {
-                fetch = fetch.fetch(pathSegment, JoinType.LEFT);
-            }
-        }
- 
-		
+			FetchParent<X, X> fetch = root;
+
+			for (String pathSegment : propertyPath.split("\\.")) {
+				fetch = fetch.fetch(pathSegment, JoinType.LEFT);
+			}
+		}
+
 		return query;
 	}
 }

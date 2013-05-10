@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.junit.Test;
 
 import com.blazebit.reflection.ReflectionUtils;
@@ -89,7 +90,8 @@ public class AnnotationUtilsTest {
 	@Test
 	public void testGetAllAnnotationsOnMethodLevel() throws Exception {
 		Set<Annotation> annotations = AnnotationUtils
-				.getAllAnnotations(ReflectionUtils.getMethod(ClassA.class, "m1"));
+				.getAllAnnotations(ReflectionUtils
+						.getMethod(ClassA.class, "m1"));
 		List<String> expected = Arrays.asList("stereotyped");
 		List<String> values = getMemberValues(annotations, Anno.class,
 				String.class, "value");
@@ -105,12 +107,14 @@ public class AnnotationUtilsTest {
 		assertNotNull(AnnotationUtils.findAnnotation(ClassA.class, Anno.class));
 		assertNotNull(AnnotationUtils.findAnnotation(ClassA.class, Anno2.class));
 		assertEquals("classA",
-				AnnotationUtils.findAnnotation(ClassA.class, Anno.class).value());
+				AnnotationUtils.findAnnotation(ClassA.class, Anno.class)
+						.value());
 
 		assertNotNull(AnnotationUtils.findAnnotation(ClassB.class, Anno.class));
 		assertNotNull(AnnotationUtils.findAnnotation(ClassB.class, Anno2.class));
 		assertEquals("classB",
-				AnnotationUtils.findAnnotation(ClassB.class, Anno.class).value());
+				AnnotationUtils.findAnnotation(ClassB.class, Anno.class)
+						.value());
 	}
 
 	@Test

@@ -97,8 +97,8 @@ public class TransactionalInterceptor implements Serializable {
 					// have been thrown in decorators in some versions so we
 					// need to do
 					// this to be able to log the right exception
-					Throwable t1 = ExceptionUtils
-							.unwrap(t, InvocationTargetException.class);
+					Throwable t1 = ExceptionUtils.unwrap(t,
+							InvocationTargetException.class);
 
 					// Cast to or wrap the throwable into a new exception and
 					// rethrow it

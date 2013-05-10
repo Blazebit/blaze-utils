@@ -12,7 +12,6 @@ import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
 import com.blazebit.annotation.AnnotationUtils;
-import com.blazebit.annotation.constraint.NullClass;
 import com.blazebit.cdi.cleanup.annotation.Cleanup;
 import com.blazebit.cdi.cleanup.annotation.CleanupHandler;
 import com.blazebit.cdi.cleanup.annotation.CleanupHandling;
@@ -33,7 +32,7 @@ import com.blazebit.exception.ExceptionUtils;
  * @see Cleanup
  */
 @Interceptor
-@CleanupHandler(cleanup = NullClass.class)
+@CleanupHandler(cleanup = Object.class)
 public class CleanupHandlerInterceptor implements Serializable {
 
 	private static final long serialVersionUID = 2640134717545764135L;
@@ -63,7 +62,8 @@ public class CleanupHandlerInterceptor implements Serializable {
 			ret = ic.proceed();
 		} catch (Throwable t) {
 			// Unwrap Exception if t is instanceof InvocationTargetException
-			Throwable t1 = ExceptionUtils.unwrap(t, InvocationTargetException.class);
+			Throwable t1 = ExceptionUtils.unwrap(t,
+					InvocationTargetException.class);
 			handleCleanups(targetObject, cleanupHandlerAnnotation, t1);
 
 			if (t1 instanceof Exception) {

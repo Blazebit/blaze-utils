@@ -11,8 +11,8 @@ import java.lang.annotation.Target;
 import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
-import com.blazebit.annotation.constraint.ConstraintScope;
-import com.blazebit.annotation.constraint.ReferenceValueConstraint;
+import com.blazebit.apt.validation.constraint.ConstraintScope;
+import com.blazebit.apt.validation.constraint.ReferenceValueConstraint;
 import com.blazebit.cdi.cleanup.CleanupHandlerInterceptor;
 
 /**

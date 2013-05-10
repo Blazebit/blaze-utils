@@ -5,7 +5,7 @@ package com.blazebit.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Level;
@@ -38,8 +38,9 @@ public final class AnnotationUtils {
 		}
 	}
 
-	private AnnotationUtils(){}
-	
+	private AnnotationUtils() {
+	}
+
 	/**
 	 * Returns all annotations of a class, also the annotations of the super
 	 * classes, implemented interfaces and the annotations that are present in
@@ -54,7 +55,7 @@ public final class AnnotationUtils {
 	 * @return all annotations that are present for the given class
 	 */
 	public static Set<Annotation> getAllAnnotations(Class<?> clazz) {
-		Set<Annotation> annotationSet = new HashSet<Annotation>();
+		Set<Annotation> annotationSet = new LinkedHashSet<Annotation>();
 		Stack<Class<?>> annotationTypes = new Stack<Class<?>>();
 
 		// Iterate through all super types of the given class
@@ -107,7 +108,7 @@ public final class AnnotationUtils {
 	 * @return all annotations that are present for the given class
 	 */
 	public static Set<Annotation> getAllAnnotations(Method m) {
-		Set<Annotation> annotationSet = new HashSet<Annotation>();
+		Set<Annotation> annotationSet = new LinkedHashSet<Annotation>();
 		Annotation[] annotations = m.getAnnotations();
 		Stack<Class<?>> annotationTypes = new Stack<Class<?>>();
 

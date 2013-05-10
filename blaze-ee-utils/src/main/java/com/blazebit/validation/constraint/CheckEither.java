@@ -42,7 +42,8 @@ import com.blazebit.validation.constraint.validator.CheckEitherValidator;
  * @since 1.0
  * @see PopulationMode
  */
-@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER })
+@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.TYPE,
+		ElementType.CONSTRUCTOR, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = CheckEitherValidator.class)
 @Documented
@@ -67,15 +68,17 @@ public @interface CheckEither {
 	 * @return
 	 */
 	PopulationMode mode() default PopulationMode.NONE;
-	
+
 	/**
-     * Defines several @CheckEither annotations on the same element
-     * @see (@link CheckEither}
-     */
-	@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER })
+	 * Defines several @CheckEither annotations on the same element
+	 * 
+	 * @see (@link CheckEither}
+	 */
+	@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.TYPE,
+			ElementType.CONSTRUCTOR, ElementType.PARAMETER })
 	@Retention(RetentionPolicy.RUNTIME)
-    @Documented
-    @interface List {
+	@Documented
+	@interface List {
 		CheckEither[] value();
-    }  
+	}
 }

@@ -8,11 +8,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.blazebit.annotation.constraint.ConstraintScope;
-import com.blazebit.annotation.constraint.ExceptionConstraint;
-import com.blazebit.annotation.constraint.ParameterConstraint;
-import com.blazebit.annotation.constraint.ReturnTypeConstraint;
-import com.blazebit.annotation.constraint.UniqueValueConstraint;
+import com.blazebit.apt.validation.constraint.ConstraintScope;
+import com.blazebit.apt.validation.constraint.ExceptionConstraint;
+import com.blazebit.apt.validation.constraint.ParameterConstraint;
+import com.blazebit.apt.validation.constraint.ReturnTypeConstraint;
+import com.blazebit.apt.validation.constraint.UniqueValueConstraint;
 import com.blazebit.cdi.cleanup.CleanupHandlerInterceptor;
 
 /**

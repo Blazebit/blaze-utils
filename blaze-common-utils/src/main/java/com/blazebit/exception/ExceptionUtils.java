@@ -34,8 +34,9 @@ public final class ExceptionUtils {
 	 * @return The unwrapped throwable or null if no further causes can be
 	 *         unwrapped
 	 */
-	public static <T extends Throwable> Throwable unwrap(Throwable t,
-			Class<T>[] throwableClasses) {
+	@SafeVarargs
+	public static Throwable unwrap(Throwable t,
+			Class<? extends Throwable>... throwableClasses) {
 		Throwable unwrapped = t;
 
 		while (unwrapped != null && isInstance(unwrapped, throwableClasses)) {
@@ -53,9 +54,9 @@ public final class ExceptionUtils {
 
 		return unwrapped;
 	}
-	
-	public static <T extends Throwable> Throwable unwrap(Throwable t,
-			Class<T> throwableClass) {
+
+	public static Throwable unwrap(Throwable t,
+			Class<? extends Throwable> throwableClass) {
 		Throwable unwrapped = t;
 
 		while (unwrapped != null && throwableClass.isInstance(unwrapped)) {
@@ -73,14 +74,15 @@ public final class ExceptionUtils {
 
 		return unwrapped;
 	}
-	
-	private static <T extends Throwable> boolean isInstance(Throwable t, Class<T>[] throwableClasses){
-		for(int i = 0; i < throwableClasses.length; i++){
-			if(throwableClasses[i].isInstance(t)){
+
+	private static boolean isInstance(Throwable t,
+			Class<? extends Throwable>[] throwableClasses) {
+		for (int i = 0; i < throwableClasses.length; i++) {
+			if (throwableClasses[i].isInstance(t)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 }

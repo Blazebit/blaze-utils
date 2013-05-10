@@ -11,13 +11,10 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -427,8 +424,8 @@ public final class ReflectionUtils {
 	/**
 	 * Returns the static field objects that are declared in the given class or
 	 * any of it's super types. Calling this method is equivalent to a call to
-	 * {@link ReflectionUtils#getNonMatchingFields(Class, int)} with the modifiers
-	 * {@link Modifier#STATIC}.
+	 * {@link ReflectionUtils#getNonMatchingFields(Class, int)} with the
+	 * modifiers {@link Modifier#STATIC}.
 	 * 
 	 * @param clazz
 	 *            The class within to look for the fields with the given
@@ -455,13 +452,14 @@ public final class ReflectionUtils {
 	public static Field[] getStaticFields(Class<?> clazz) {
 		return getMatchingFields(clazz, Modifier.STATIC);
 	}
-	
+
 	private static final Comparator<Field> FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR = new Comparator<Field>() {
 
 		@Override
 		public int compare(Field o1, Field o2) {
 			int result = o1.getName().compareTo(o2.getName());
-			return result == 0 ? o1.getDeclaringClass().getName().compareTo(o2.getDeclaringClass().getName()) : result;
+			return result == 0 ? o1.getDeclaringClass().getName()
+					.compareTo(o2.getDeclaringClass().getName()) : result;
 		}
 	};
 
@@ -469,8 +467,8 @@ public final class ReflectionUtils {
 	 * Returns the field objects that are declared in the given class or any of
 	 * it's super types that have any of the given modifiers. The type hierarchy
 	 * is traversed upwards and all declared fields that match the given
-	 * modifiers are added to the result array.
-	 * The elements in the array are sorted by their names and declaring classes.
+	 * modifiers are added to the result array. The elements in the array are
+	 * sorted by their names and declaring classes.
 	 * 
 	 * @param clazz
 	 *            The class within to look for the fields with the given
@@ -482,12 +480,13 @@ public final class ReflectionUtils {
 	 *         type hierarchy of the given class
 	 */
 	public static Field[] getMatchingFields(Class<?> clazz, int modifiers) {
-		Set<Field> fields = new TreeSet<Field>(FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR);
+		Set<Field> fields = new TreeSet<Field>(
+				FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR);
 		Stack<Class<?>> classStack = new Stack<Class<?>>();
 		Class<?> traverseClass;
 		Field[] fieldArray;
 		Class<?>[] classArray;
-		
+
 		classStack.push(clazz);
 
 		while (!classStack.isEmpty()) {
@@ -519,10 +518,10 @@ public final class ReflectionUtils {
 
 	/**
 	 * Returns the field objects that are declared in the given class or any of
-	 * it's super types that have none of the given modifiers. The type hierarchy
-	 * is traversed upwards and all declared fields that do not match the given
-	 * modifiers are added to the result array.
-	 * The elements in the array are sorted by their names and declaring classes.
+	 * it's super types that have none of the given modifiers. The type
+	 * hierarchy is traversed upwards and all declared fields that do not match
+	 * the given modifiers are added to the result array. The elements in the
+	 * array are sorted by their names and declaring classes.
 	 * 
 	 * @param clazz
 	 *            The class within to look for the fields with the given
@@ -530,16 +529,17 @@ public final class ReflectionUtils {
 	 * @param modifiers
 	 *            The OR-ed together modifiers that a field must not match to be
 	 *            included into the result
-	 * @return The array of fields that do not match the modifiers and are within the
-	 *         type hierarchy of the given class
+	 * @return The array of fields that do not match the modifiers and are
+	 *         within the type hierarchy of the given class
 	 */
 	public static Field[] getNonMatchingFields(Class<?> clazz, int modifiers) {
-		Set<Field> fields = new TreeSet<Field>(FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR);
+		Set<Field> fields = new TreeSet<Field>(
+				FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR);
 		Stack<Class<?>> classStack = new Stack<Class<?>>();
 		Class<?> traverseClass;
 		Field[] fieldArray;
 		Class<?>[] classArray;
-		
+
 		classStack.push(clazz);
 
 		while (!classStack.isEmpty()) {

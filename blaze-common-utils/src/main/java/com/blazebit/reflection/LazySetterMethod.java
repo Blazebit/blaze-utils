@@ -134,11 +134,11 @@ public class LazySetterMethod {
 	public void invoke() throws InvocationTargetException,
 			IllegalAccessException {
 		Object valueToPass = value;
-		
+
 		if (valueToPass != null && valueToPass instanceof LazyGetterMethod) {
 			valueToPass = ((LazyGetterMethod) valueToPass).invoke();
 		}
-		
+
 		expression.setValue(target, valueToPass);
 	}
 }

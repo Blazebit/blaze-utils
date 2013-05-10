@@ -10,9 +10,10 @@ import java.lang.annotation.Target;
 
 import javax.enterprise.util.Nonbinding;
 
-import com.blazebit.annotation.constraint.ConstraintScope;
-import com.blazebit.annotation.constraint.NullClass;
-import com.blazebit.annotation.constraint.ReferenceValueConstraint;
+import org.apache.deltaspike.core.api.exception.control.annotation.ExceptionHandler;
+
+import com.blazebit.apt.validation.constraint.ConstraintScope;
+import com.blazebit.apt.validation.constraint.ReferenceValueConstraint;
 import com.blazebit.cdi.cleanup.annotation.Cleanup;
 
 /**
@@ -47,5 +48,5 @@ public @interface CatchHandling {
 	 */
 	@ReferenceValueConstraint(referencedAnnotationClass = Cleanup.class, nullable = true, scope = ConstraintScope.CLASS, errorMessage = "The given name for a cleanup can not be found within class scope!")
 	@Nonbinding
-	Class<?> cleanup() default NullClass.class;
+	Class<?> cleanup() default Object.class;
 }

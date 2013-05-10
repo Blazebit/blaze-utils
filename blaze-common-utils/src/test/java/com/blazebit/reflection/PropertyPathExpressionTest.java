@@ -1,61 +1,67 @@
 package com.blazebit.reflection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
 public class PropertyPathExpressionTest {
 
-	private PropertyPathExpression<Car, String> nameExpression = new PropertyPathExpression<Car, String>(Car.class, "name");
-	private PropertyPathExpression<Car, String> vendorNameExpression = new PropertyPathExpression<Car, String>(Car.class, "vendor.name");
-	
+	private PropertyPathExpression<Car, String> nameExpression = new PropertyPathExpression<Car, String>(
+			Car.class, "name");
+	private PropertyPathExpression<Car, String> vendorNameExpression = new PropertyPathExpression<Car, String>(
+			Car.class, "vendor.name");
+
 	@Test
 	public void testSetValue() {
 		Car o = new Car(null);
 		nameExpression.setValue(o, "Test");
 		assertEquals(o.getName(), "Test");
 	}
-	
+
 	@Test
 	public void testGetValue() {
 		Car o;
-		
+
 		o = new Car(null);
 		assertEquals(o.getName(), nameExpression.getValue(o));
-		
+
 		o = new Car("Test");
 		assertEquals(o.getName(), nameExpression.getValue(o));
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testGetValueWithUnresolveableTypeParameters() {
 		GenericId<String> genericId = new GenericId<String>("test");
-		
-		assertEquals("test", new PropertyPathExpression<GenericId<String>, String>((Class<GenericId<String>>)(Class<?>)GenericId.class, "id").getValue(genericId));
+
+		assertEquals("test",
+				new PropertyPathExpression<GenericId<String>, String>(
+						(Class<GenericId<String>>) (Class<?>) GenericId.class,
+						"id").getValue(genericId));
 	}
-	
+
 	@Test
 	public void testGetNullSafeValue() {
 		Car o;
-		
+
 		o = new Car(null);
 		assertEquals(null, vendorNameExpression.getNullSafeValue(o));
 
 		o = new Car("Test", "Test");
-		assertEquals(o.getVendor().getName(), vendorNameExpression.getNullSafeValue(o));
+		assertEquals(o.getVendor().getName(),
+				vendorNameExpression.getNullSafeValue(o));
 	}
-	
-	@Test(expected=NullPointerException.class)
+
+	@Test(expected = NullPointerException.class)
 	public void testGetValueExpectNPE() {
 		vendorNameExpression.getValue(new Car(null));
 	}
 
-	@Test(expected=NullPointerException.class)
+	@Test(expected = NullPointerException.class)
 	public void testSetValueWithNull() {
 		vendorNameExpression.setValue(new Car(null), "Test");
 	}
-	
+
 	public class GenericId<X> {
 		X id;
 
@@ -71,8 +77,8 @@ public class PropertyPathExpressionTest {
 			this.id = id;
 		}
 	}
-	
-	public class Vendor{
+
+	public class Vendor {
 		String name;
 
 		public Vendor(String name) {
@@ -87,19 +93,19 @@ public class PropertyPathExpressionTest {
 			this.name = name;
 		}
 	}
-	
-	public class Car{
+
+	public class Car {
 		String name;
 		Vendor vendor;
 
-		public Car(){
-			
+		public Car() {
+
 		}
-		
+
 		public Car(String name) {
 			this.name = name;
 		}
-		
+
 		public Car(String name, String vendorName) {
 			this.name = name;
 			this.vendor = new Vendor(vendorName);

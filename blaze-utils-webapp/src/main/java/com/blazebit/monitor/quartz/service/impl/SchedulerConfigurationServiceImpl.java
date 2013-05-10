@@ -6,14 +6,14 @@ package com.blazebit.monitor.quartz.service.impl;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import com.blazebit.monitor.quartz.model.SchedulerConfiguration;
 import com.blazebit.monitor.quartz.service.SchedulerConfigurationService;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
 
 /**
  * 
@@ -27,7 +27,7 @@ public class SchedulerConfigurationServiceImpl implements
 	@PersistenceContext(name = "QuartzManagerPU")
 	private EntityManager em;
 
-        @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+	@TransactionAttribute(TransactionAttributeType.SUPPORTS)
 	@Override
 	public List<SchedulerConfiguration> getAllConfigurations() {
 		return em.createQuery("FROM SchedulerConfiguration",

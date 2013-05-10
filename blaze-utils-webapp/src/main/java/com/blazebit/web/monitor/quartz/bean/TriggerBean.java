@@ -12,12 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.inject.Named;
 
-import org.apache.myfaces.extensions.cdi.core.api.scope.conversation.ViewAccessScoped;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.ObjectAlreadyExistsException;
@@ -37,7 +37,7 @@ import com.blazebit.web.monitor.quartz.model.Property;
  * @author Christian Beikov
  */
 @Named("triggerBean")
-@ViewAccessScoped
+@SessionScoped
 public class TriggerBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -278,11 +278,11 @@ public class TriggerBean implements Serializable {
 
 	public Trigger.TriggerState getTriggerState(Object trigger)
 			throws SchedulerException {
-                // Fixing websphere 8.0.0.1 EL Bug
-                if(!(trigger instanceof Trigger)){
-                    throw new IllegalArgumentException("No Trigger given");
-                }
-            
+		// Fixing websphere 8.0.0.1 EL Bug
+		if (!(trigger instanceof Trigger)) {
+			throw new IllegalArgumentException("No Trigger given");
+		}
+
 		return getTriggerState((Trigger) trigger);
 	}
 

@@ -15,7 +15,7 @@ import com.blazebit.validation.constraint.validator.CheckCompareValidator;
 /**
  * 
  * @author Christian Beikov
- *
+ * 
  */
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
@@ -28,7 +28,7 @@ public @interface CheckCompare {
 	Class<?>[] groups() default {};
 
 	Class<? extends Payload>[] payload() default {};
-	
+
 	/**
 	 * 
 	 * @return
@@ -46,31 +46,33 @@ public @interface CheckCompare {
 	 * @return
 	 */
 	Class<? extends Comparator<?>> comparator() default EqualsComparator.class;
-	
+
 	/**
-     * Defines several @CheckCompare annotations on the same element
-     * @see (@link CheckCompare}
-     */
-	@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER })
+	 * Defines several @CheckCompare annotations on the same element
+	 * 
+	 * @see (@link CheckCompare}
+	 */
+	@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.TYPE,
+			ElementType.CONSTRUCTOR, ElementType.PARAMETER })
 	@Retention(RetentionPolicy.RUNTIME)
-    @Documented
-    @interface List {
+	@Documented
+	@interface List {
 		CheckCompare[] value();
-    }
-	
-	class EqualsComparator implements Comparator<Object>{
+	}
+
+	class EqualsComparator implements Comparator<Object> {
 
 		@Override
 		public int compare(Object o1, Object o2) {
-			if(o1 == o2){
+			if (o1 == o2) {
 				return 0;
 			}
-			if(o1 == null || o2 == null){
+			if (o1 == null || o2 == null) {
 				return -1;
 			}
-			
+
 			return o1.equals(o2) ? 0 : -1;
 		}
-		
+
 	}
 }

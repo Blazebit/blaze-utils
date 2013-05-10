@@ -1,6 +1,6 @@
 package com.blazebit.regex.node;
 
-public abstract class AbstractNode implements Node{
+public abstract class AbstractNode implements Node {
 
 	private Node next;
 

@@ -49,15 +49,15 @@ public class Mail {
 
 		return Collections.unmodifiableList(bcc);
 	}
-	
-	public void setBcc(List<InternetAddress> bcc){
+
+	public void setBcc(List<InternetAddress> bcc) {
 		this.bcc = new ArrayList<InternetAddress>(bcc);
 	}
-	
-	public void setBcc(String bcc){
-		try{
+
+	public void setBcc(String bcc) {
+		try {
 			this.bcc = Arrays.asList(InternetAddress.parse(bcc));
-		}catch(AddressException ex){
+		} catch (AddressException ex) {
 			throw new IllegalArgumentException(ex);
 		}
 	}
@@ -91,15 +91,15 @@ public class Mail {
 
 		return Collections.unmodifiableList(cc);
 	}
-	
-	public void setCc(List<InternetAddress> cc){
+
+	public void setCc(List<InternetAddress> cc) {
 		this.cc = new ArrayList<InternetAddress>(cc);
 	}
-	
-	public void setCc(String cc){
-		try{
+
+	public void setCc(String cc) {
+		try {
 			this.cc = Arrays.asList(InternetAddress.parse(cc));
-		}catch(AddressException ex){
+		} catch (AddressException ex) {
 			throw new IllegalArgumentException(ex);
 		}
 	}
@@ -133,15 +133,15 @@ public class Mail {
 
 		return Collections.unmodifiableList(to);
 	}
-	
-	public void setTo(List<InternetAddress> to){
+
+	public void setTo(List<InternetAddress> to) {
 		this.to = new ArrayList<InternetAddress>(to);
 	}
-	
-	public void setTo(String to){
-		try{
+
+	public void setTo(String to) {
+		try {
 			this.to = Arrays.asList(InternetAddress.parse(to));
-		}catch(AddressException ex){
+		} catch (AddressException ex) {
 			throw new IllegalArgumentException(ex);
 		}
 	}

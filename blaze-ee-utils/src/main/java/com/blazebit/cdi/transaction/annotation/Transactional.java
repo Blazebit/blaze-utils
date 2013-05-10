@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
 
-import com.blazebit.annotation.constraint.BooleanValueConstraint;
+import com.blazebit.apt.validation.constraint.BooleanValueConstraint;
 import com.blazebit.cdi.transaction.TransactionalInterceptor;
 
 /**

@@ -26,21 +26,22 @@ public final class ConstraintValidatorUtils {
 		}
 
 		for (ConstraintViolation<T> violation : violations) {
-			if(name.equals(StringUtils.join(".", violation.getPropertyPath(), nodeNameValueRetriever))){
+			if (name.equals(StringUtils.join(".", violation.getPropertyPath(),
+					nodeNameValueRetriever))) {
 				return true;
 			}
 		}
 
 		return false;
 	}
-	
-	private static final ValueRetriever<Node, String> nodeNameValueRetriever = new ValueRetriever<Node, String>(){
+
+	private static final ValueRetriever<Node, String> nodeNameValueRetriever = new ValueRetriever<Node, String>() {
 
 		@Override
 		public String getValue(Node target) {
 			final String name = target.getName();
 			return name == null ? "" : name;
 		}
-		
+
 	};
 }

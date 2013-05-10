@@ -19,10 +19,12 @@ public class PropertyPathExpressionValueHolder<X, Y> implements ValueHolder<Y> {
 
 	@SuppressWarnings("unchecked")
 	public PropertyPathExpressionValueHolder(X source, String propertyPath) {
-		this(source, (PropertyPathExpression<X, Y>) ExpressionUtils.getExpression(source.getClass(), propertyPath));
+		this(source, (PropertyPathExpression<X, Y>) ExpressionUtils
+				.getExpression(source.getClass(), propertyPath));
 	}
-	
-	public PropertyPathExpressionValueHolder(X source, PropertyPathExpression<X, Y> expression) {
+
+	public PropertyPathExpressionValueHolder(X source,
+			PropertyPathExpression<X, Y> expression) {
 		this.source = source;
 		this.expression = expression;
 	}
@@ -31,7 +33,7 @@ public class PropertyPathExpressionValueHolder<X, Y> implements ValueHolder<Y> {
 	public Y getValue() {
 		return expression.getValue(source);
 	}
-	
+
 	public Y getNullSafeValue() {
 		return expression.getNullSafeValue(source);
 	}

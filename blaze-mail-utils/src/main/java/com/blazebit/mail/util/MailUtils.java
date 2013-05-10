@@ -40,7 +40,7 @@ public class MailUtils {
 				exceptionMessage = MailException.INVALID_SENDER;
 				email.getFrom().validate();
 
-				if(email.getReplyTo() != null){
+				if (email.getReplyTo() != null) {
 					exceptionMessage = MailException.INVALID_REPLYTO;
 					email.getReplyTo().validate();
 				}
@@ -112,8 +112,7 @@ public class MailUtils {
 	}
 
 	public static void sendMessage(String host, Integer port, String user,
-			String password, MailTransport t,
-			Mail m) throws MessagingException {
+			String password, MailTransport t, Mail m) throws MessagingException {
 
 		MailSender sender = new SimpleMailSender(host, port, user, password, t);
 		sender.sendMail(m);

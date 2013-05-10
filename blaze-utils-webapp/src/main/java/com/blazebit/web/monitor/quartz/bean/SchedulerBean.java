@@ -7,11 +7,11 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.enterprise.context.SessionScoped;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.myfaces.extensions.cdi.core.api.scope.conversation.ViewAccessScoped;
 import org.quartz.SchedulerException;
 import org.quartz.impl.SchedulerRepository;
 
@@ -23,7 +23,7 @@ import com.blazebit.monitor.quartz.service.SchedulerConfigurationService;
  * @author Christian Beikov
  */
 @Named("schedulerBean")
-@ViewAccessScoped
+@SessionScoped
 public class SchedulerBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;

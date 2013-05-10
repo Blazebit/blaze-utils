@@ -76,8 +76,8 @@ public class ExceptionWrappingInterceptor implements Serializable {
 		 * intercepted method
 		 */
 		Class<?>[] declaredExceptions = m.getExceptionTypes();
-		ExceptionWrapping wrappingAnnotation = AnnotationUtils.findAnnotation(m,
-				targetClass, ExceptionWrapping.class);
+		ExceptionWrapping wrappingAnnotation = AnnotationUtils.findAnnotation(
+				m, targetClass, ExceptionWrapping.class);
 		ExceptionWrap[] wraps = null;
 		Object ret;
 		boolean doWrapping = true;
@@ -102,7 +102,8 @@ public class ExceptionWrappingInterceptor implements Serializable {
 			 * versions so we need to do this to be able to handle the right
 			 * exception
 			 */
-			Throwable t1 = ExceptionUtils.unwrap(t, InvocationTargetException.class);
+			Throwable t1 = ExceptionUtils.unwrap(t,
+					InvocationTargetException.class);
 
 			if (doWrapping) {
 				/*

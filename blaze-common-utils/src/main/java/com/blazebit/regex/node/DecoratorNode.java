@@ -1,6 +1,6 @@
 package com.blazebit.regex.node;
 
-public abstract class DecoratorNode extends AbstractNode{
+public abstract class DecoratorNode extends AbstractNode {
 
 	private final Node decorated;
 

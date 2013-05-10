@@ -74,8 +74,7 @@ public abstract class AbstractExceptionHandlerInterceptor<T extends Annotation, 
 
 			// Unwrap Exception if t is instanceof InvocationTargetException
 			if (t instanceof InvocationTargetException) {
-				t = ExceptionUtils
-						.unwrap(t, InvocationTargetException.class);
+				t = ExceptionUtils.unwrap(t, InvocationTargetException.class);
 			}
 
 			// Method level exception handling is preferred
@@ -117,8 +116,7 @@ public abstract class AbstractExceptionHandlerInterceptor<T extends Annotation, 
 
 			// Unwrap Exception if t is instanceof InvocationTargetException
 			if (t instanceof InvocationTargetException) {
-				t = ExceptionUtils
-						.unwrap(t, InvocationTargetException.class);
+				t = ExceptionUtils.unwrap(t, InvocationTargetException.class);
 			}
 
 			for (Object exHandle : handlings) {
@@ -187,7 +185,8 @@ public abstract class AbstractExceptionHandlerInterceptor<T extends Annotation, 
 			for (Method m : clazz.getMethods()) {
 				Cleanup cleanup = m.getAnnotation(Cleanup.class);
 
-				if (cleanup != null && cleanup.value().getName().equals(cleanupName)) {
+				if (cleanup != null
+						&& cleanup.value().getName().equals(cleanupName)) {
 					m.invoke(target);
 					invoked = true;
 				}

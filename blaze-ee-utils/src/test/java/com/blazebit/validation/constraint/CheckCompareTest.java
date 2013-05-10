@@ -17,17 +17,17 @@ import org.junit.Test;
 public class CheckCompareTest {
 
 	private Validator validator;
-	
+
 	@Before
-	public void before(){
+	public void before() {
 		validator = getValidator();
 	}
-	
+
 	@Test
 	public void testSimpleDefaultAndCompositeValidation() {
 		Set<ConstraintViolation<User>> violations;
 		User o;
-		
+
 		o = new User();
 		violations = validator.validate(o);
 		assertTrue(violations.size() == 2);
@@ -39,13 +39,13 @@ public class CheckCompareTest {
 	public void testSimpleDefaultAndCompositeValidation1() {
 		Set<ConstraintViolation<UserComplex>> violations;
 		UserComplex o;
-		
+
 		o = new UserComplex();
 		violations = validator.validate(o);
 		assertTrue(violations.size() == 2);
 		assertTrue(containsViolation(violations, "primaryEmail"));
 		assertTrue(containsViolation(violations, "secondaryEmail"));
-		
+
 		o = new UserComplex();
 		o.primaryEmail = new Email();
 		o.secondaryEmail = new Email();
@@ -53,7 +53,7 @@ public class CheckCompareTest {
 		assertTrue(violations.size() == 2);
 		assertTrue(containsViolation(violations, "primaryEmail.email"));
 		assertTrue(containsViolation(violations, "secondaryEmail.email"));
-		
+
 		o = new UserComplex();
 		o.primaryEmail = new Email();
 		o.primaryEmail.email = "";
@@ -62,7 +62,7 @@ public class CheckCompareTest {
 		violations = validator.validate(o);
 		assertTrue(violations.isEmpty());
 	}
-	
+
 	public static class Email {
 		@NotNull
 		String email;
@@ -83,25 +83,30 @@ public class CheckCompareTest {
 		@NotNull
 		@Valid
 		Email secondaryEmail;
-		
+
 		public Email getPrimaryEmail() {
 			return primaryEmail;
 		}
+
 		public void setPrimaryEmail(Email primaryEmail) {
 			this.primaryEmail = primaryEmail;
 		}
+
 		public Email getSecondaryEmail() {
 			return secondaryEmail;
 		}
+
 		public void setSecondaryEmail(Email secondaryEmail) {
 			this.secondaryEmail = secondaryEmail;
 		}
 	}
 
-	@CheckCompare({"primaryEmail", "secondaryEmail"})
-	public static class User extends BaseUser{}
+	@CheckCompare({ "primaryEmail", "secondaryEmail" })
+	public static class User extends BaseUser {
+	}
 
-	@CheckCompare({"primaryEmail.email", "secondaryEmail.email"})
-	public static class UserComplex extends BaseUser{}
+	@CheckCompare({ "primaryEmail.email", "secondaryEmail.email" })
+	public static class UserComplex extends BaseUser {
+	}
 
 }

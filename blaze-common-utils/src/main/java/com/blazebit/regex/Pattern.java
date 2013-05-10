@@ -7,8 +7,8 @@ import com.blazebit.regex.node.DotNode;
 import com.blazebit.regex.node.EmptyNode;
 import com.blazebit.regex.node.Node;
 import com.blazebit.regex.node.OptionalNode;
-import com.blazebit.regex.node.RepeatNode;
 import com.blazebit.regex.node.OrNode;
+import com.blazebit.regex.node.RepeatNode;
 
 public class Pattern {
 
@@ -110,7 +110,7 @@ public class Pattern {
 					throw new IllegalArgumentException(
 							"integer expected at position " + cursor);
 				}
-				
+
 				int m = match(',') ? parseInteger() : n;
 
 				if (!match('}')) {
@@ -123,15 +123,15 @@ public class Pattern {
 				} else {
 					e = new RepeatNode(e, n, m);
 				}
-				
+
 				break;
 			}
 		}
 
 		return e;
 	}
-	
-	private int parseInteger(){
+
+	private int parseInteger() {
 		StringBuilder sb = new StringBuilder();
 		int start = cursor;
 

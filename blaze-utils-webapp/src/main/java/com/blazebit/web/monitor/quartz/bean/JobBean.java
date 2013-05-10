@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.enterprise.context.SessionScoped;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.ValueChangeEvent;
 import javax.inject.Named;
 
-import org.apache.myfaces.extensions.cdi.core.api.scope.conversation.ViewAccessScoped;
 import org.quartz.JobDetail;
 import org.quartz.ObjectAlreadyExistsException;
 import org.quartz.Scheduler;
@@ -37,7 +37,7 @@ import com.blazebit.web.monitor.quartz.model.Property;
  * @author Christian Beikov
  */
 @Named("jobBean")
-@ViewAccessScoped
+@SessionScoped
 public class JobBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;

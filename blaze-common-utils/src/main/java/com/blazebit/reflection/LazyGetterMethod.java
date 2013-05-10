@@ -34,7 +34,8 @@ public class LazyGetterMethod {
 	@SuppressWarnings("unchecked")
 	public LazyGetterMethod(Object source, String fieldNames) {
 		this.source = source;
-		this.expression = (PropertyPathExpression<Object, Object>) ExpressionUtils.getExpression(source.getClass(), fieldNames);
+		this.expression = (PropertyPathExpression<Object, Object>) ExpressionUtils
+				.getExpression(source.getClass(), fieldNames);
 	}
 
 	/**

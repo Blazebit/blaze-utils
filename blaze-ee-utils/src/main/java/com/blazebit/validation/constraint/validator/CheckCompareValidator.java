@@ -24,69 +24,77 @@ public class CheckCompareValidator implements
 	public void initialize(CheckCompare constraintAnnotation) {
 		this.propertyPaths = constraintAnnotation.value();
 		this.comparisonMode = constraintAnnotation.mode();
-		
-		if(this.propertyPaths.length < 2){
-			throw new IllegalArgumentException("At least two property paths have to be given for the check constraint to work properly!");
+
+		if (this.propertyPaths.length < 2) {
+			throw new IllegalArgumentException(
+					"At least two property paths have to be given for the check constraint to work properly!");
 		}
-		
+
 		try {
-			this.comparator = (Comparator<Object>) constraintAnnotation.comparator().newInstance();
+			this.comparator = (Comparator<Object>) constraintAnnotation
+					.comparator().newInstance();
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Could not instantiate comparator", e);
+			throw new IllegalArgumentException(
+					"Could not instantiate comparator", e);
 		}
 	}
 
 	@Override
 	public boolean isValid(Object target, ConstraintValidatorContext context) {
 		boolean isValid = true;
-		
-		try{
-			Object lastValue = ExpressionUtils.getNullSafeValue(target, propertyPaths[0]);
-	
+
+		try {
+			Object lastValue = ExpressionUtils.getNullSafeValue(target,
+					propertyPaths[0]);
+
 			for (int i = 1; i < propertyPaths.length; i++) {
-				Object current = ExpressionUtils.getNullSafeValue(target, propertyPaths[i]);
-				
-				if ((comparisonMode == ComparisonMode.EQUAL && comparator.compare(lastValue, current) != 0) || (comparisonMode == ComparisonMode.NOT_EQUAL && comparator.compare(lastValue, current) == 0)) {
+				Object current = ExpressionUtils.getNullSafeValue(target,
+						propertyPaths[i]);
+
+				if ((comparisonMode == ComparisonMode.EQUAL && comparator
+						.compare(lastValue, current) != 0)
+						|| (comparisonMode == ComparisonMode.NOT_EQUAL && comparator
+								.compare(lastValue, current) == 0)) {
 					isValid = false;
 					break;
 				}
-				
+
 				lastValue = current;
 			}
-	
+
 			if (!isValid) {
 				/*
-				 * if custom message was provided, don't touch it, otherwise build
-				 * the default message
+				 * if custom message was provided, don't touch it, otherwise
+				 * build the default message
 				 */
 				String message = context.getDefaultConstraintMessageTemplate();
 				message = (message.isEmpty()) ? resolveMessage() : message;
-	
+
 				context.disableDefaultConstraintViolation();
 				ConstraintViolationBuilder violationBuilder = context
 						.buildConstraintViolationWithTemplate(message);
-				
+
 				for (String propertyName : propertyPaths) {
-					NodeBuilderDefinedContext nbdc = violationBuilder.addNode(propertyName);
+					NodeBuilderDefinedContext nbdc = violationBuilder
+							.addNode(propertyName);
 					nbdc.addConstraintViolation();
 				}
 			}
-		}catch(Exception ex){
+		} catch (Exception ex) {
 			throw new IllegalArgumentException(ex);
 		}
 
 		return isValid;
 	}
 
-
 	private String resolveMessage() {
 		final StringBuilder sb = new StringBuilder(propertyPaths.length * 10);
-		
+
 		sb.append('[');
 		StringUtils.join(sb, ", ", propertyPaths);
 		sb.append(']');
 		sb.append(" must");
-		
+
 		switch (comparisonMode) {
 		case EQUAL:
 			sb.append(" be equal");
@@ -95,7 +103,7 @@ public class CheckCompareValidator implements
 			sb.append(" not be equal");
 			break;
 		}
-		
+
 		sb.append('.');
 		return sb.toString();
 	}

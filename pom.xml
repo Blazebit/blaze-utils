@@ -1,121 +1,191 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>com.blazebit</groupId>
-        <artifactId>blazebit-parent</artifactId>
-        <version>8</version>
-    </parent>
-    
-    <artifactId>blaze-utils</artifactId>
-    <version>0.1.6-SNAPSHOT</version>
-    <packaging>pom</packaging>
+	<parent>
+		<groupId>com.blazebit</groupId>
+		<artifactId>blazebit-parent</artifactId>
+		<version>8</version>
+	</parent>
 
-    <name>BlazeUtil</name>
-    <url>http://blazebit.com/util</url>
-    <description>Utilities for Blazebit Projects</description>
-    
-    <modules>
-        <module>blaze-common-utils</module>
-        <module>blaze-ai-utils</module>
-        <module>blaze-ee-utils</module>
-        <module>blaze-mail-utils</module>
-        <module>blaze-quartz-utils</module>
-        <module>blaze-utils-webapp</module>
-    </modules>
+	<artifactId>blaze-utils</artifactId>
+	<version>0.1.6-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
-    <issueManagement>
-        <system>github</system>
-        <url>https://github.com/Blazebit/blaze-utils/issues</url>
-    </issueManagement>
+	<name>Blazebit Utilities</name>
+	<url>http://blazebit.com/util</url>
+	<description>Utilities for Blazebit Projects</description>
 
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
+	<modules>
+		<module>blaze-apt-utils</module>
+		<module>blaze-common-utils</module>
+		<module>blaze-ai-utils</module>
+		<module>blaze-ee-utils</module>
+		<module>blaze-ee-apt</module>
+		<module>blaze-template-utils</module>
+		<module>blaze-mail-utils</module>
+		<module>blaze-quartz-utils</module>
+		<module>blaze-utils-webapp</module>
+	</modules>
 
-    <organization>
-        <name>Blazebit</name>
-        <url>http://www.blazebit.com</url>
-    </organization>
-    
-    <scm>
-        <connection>scm:git:git@github.com:Blazebit/blaze-utils.git</connection>
-        <developerConnection>scm:git:git@github.com:Blazebit/blaze-utils.git</developerConnection>
-        <url>git@github.com:Blazebit/blaze-utils.git</url>
-    </scm>
+	<issueManagement>
+		<system>github</system>
+		<url>https://github.com/Blazebit/blaze-utils/issues</url>
+	</issueManagement>
 
-    <developers>
-        <developer>
-            <id>christian</id>
-            <name>Christian Beikov</name>
-            <email>christian@blazebit.com</email>
-            <organization>Blazebit</organization>
-            <organizationUrl>http://www.blazebit.com</organizationUrl>
-            <timezone>UTC+1</timezone>
-            <roles>
-                <role>Project Owner</role>
-                <role>Committer</role>
-            </roles>
-        </developer>
-        <developer>
-            <id>cchet</id>
-            <name>Thomas Herzog</name>
-            <email>t.herzog@curecomp.com</email>
-            <organization>Curecomp</organization>
-            <organizationUrl>http://www.curecomp.com</organizationUrl>
-            <timezone>UTC+1</timezone>
-            <roles>
-                <role>Committer</role>
-            </roles>
-        </developer>
-    </developers>
-    
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.deltaspike.core</groupId>
-                <artifactId>deltaspike-core-api</artifactId>
-                <version>0.2-incubating</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.deltaspike.core</groupId>
-                <artifactId>deltaspike-core-impl</artifactId>
-                <version>0.2-incubating</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>blaze-common-utils</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>blaze-ee-utils</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>blaze-quartz-utils</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>blaze-mail-utils</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>blaze-utils-webapp</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>blaze-cbav</artifactId>
-                <version>0.1.8</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+
+	<organization>
+		<name>Blazebit</name>
+		<url>http://www.blazebit.com</url>
+	</organization>
+
+	<scm>
+		<connection>scm:git:git@github.com:Blazebit/blaze-utils.git</connection>
+		<developerConnection>scm:git:git@github.com:Blazebit/blaze-utils.git</developerConnection>
+		<url>git@github.com:Blazebit/blaze-utils.git</url>
+	</scm>
+
+	<developers>
+		<developer>
+			<id>christian</id>
+			<name>Christian Beikov</name>
+			<email>christian@blazebit.com</email>
+			<organization>Blazebit</organization>
+			<organizationUrl>http://www.blazebit.com</organizationUrl>
+			<timezone>UTC+1</timezone>
+			<roles>
+				<role>Project Owner</role>
+				<role>Committer</role>
+			</roles>
+		</developer>
+		<developer>
+			<id>cchet</id>
+			<name>Thomas Herzog</name>
+			<email>t.herzog@curecomp.com</email>
+			<organization>Curecomp</organization>
+			<organizationUrl>http://www.curecomp.com</organizationUrl>
+			<timezone>UTC+1</timezone>
+			<roles>
+				<role>Committer</role>
+			</roles>
+		</developer>
+	</developers>
+
+	<properties>
+		<version.blazecbav>0.1.9-SNAPSHOT</version.blazecbav>
+		<version.deltaspike>0.3-incubating</version.deltaspike>
+		<version.freemarker>2.3.19</version.freemarker>
+		<version.junit>4.11</version.junit>
+		
+		<!-- Plugin versions -->
+		<version.processor.plugin>2.2.1</version.processor.plugin>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.deltaspike.core</groupId>
+				<artifactId>deltaspike-core-api</artifactId>
+				<version>${version.deltaspike}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.deltaspike.core</groupId>
+				<artifactId>deltaspike-core-impl</artifactId>
+				<version>${version.deltaspike}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.freemarker</groupId>
+				<artifactId>freemarker</artifactId>
+				<version>${version.freemarker}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blaze-apt-utils</artifactId>
+				<version>${project.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blaze-common-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blaze-ee-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blaze-template-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blaze-quartz-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blaze-mail-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blaze-utils-webapp</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>blaze-cbav</artifactId>
+				<version>${version.blazecbav}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.openejb</groupId>
+				<artifactId>javaee-api</artifactId>
+				<version>6.0-4</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>mail</artifactId>
+				<version>1.4.7</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<!-- Test -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${version.junit}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.bsc.maven</groupId>
+				<artifactId>maven-processor-plugin</artifactId>
+				<version>${version.processor.plugin}</version>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${maven.compiler.argument.source}</source>
+					<target>${maven.compiler.argument.target}</target>
+					<!-- Disable annotation processing via compiler plugin. -->
+					<compilerArgument>-proc:none</compilerArgument>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>

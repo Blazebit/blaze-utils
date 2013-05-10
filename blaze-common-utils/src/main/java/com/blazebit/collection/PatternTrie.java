@@ -75,7 +75,7 @@ public class PatternTrie<V> implements Serializable {
 		public V getValue();
 
 		public String getParameter(String patternKey);
-		
+
 		public Set<String> getParameterNames();
 	}
 
@@ -238,7 +238,191 @@ public class PatternTrie<V> implements Serializable {
 	}
 
 	public Set<ParameterizedValue<V>> resolve(String key) {
-		throw new UnsupportedOperationException();
+		if (key == null) {
+			throw new NullPointerException("key");
+		}
+
+		Set<ParameterizedValue<V>> result = new HashSet<ParameterizedValue<V>>();
+		final char[] chars = key.toString().toCharArray();
+		Map<TrieNode<V>, Map<PatternParameter, ParameterResult>> currentNodes = new HashMap<TrieNode<V>, Map<PatternParameter, ParameterResult>>(
+				1);
+
+		if (root != null) {
+			currentNodes.put(root,
+					new HashMap<PatternParameter, ParameterResult>(0));
+		}
+
+		for (int i = 0; i < chars.length && !currentNodes.isEmpty(); i++) {
+			currentNodes = findMatchingNodes(currentNodes, chars[i]);
+		}
+
+		for (Map.Entry<TrieNode<V>, Map<PatternParameter, ParameterResult>> nodeEntry : currentNodes
+				.entrySet()) {
+			System.out.println(nodeEntry.getKey().value + " ----");
+			for (ParameterResult parameterResult : nodeEntry.getValue()
+					.values()) {
+				System.out.println(parameterResult.parameter.name + " - "
+						+ parameterResult.parameter.patternId + " - "
+						+ parameterResult.value.toString());
+			}
+		}
+
+		if (!currentNodes.isEmpty()) {
+			for (Map.Entry<TrieNode<V>, Map<PatternParameter, ParameterResult>> nodeEntry : currentNodes
+					.entrySet()) {
+				TrieNode<V> node = nodeEntry.getKey();
+
+				if (node.inUse) {
+					for (V nodeValue : node.value) {
+						ParameterizedValueImpl<V> value = new ParameterizedValueImpl<V>(
+								nodeValue);
+
+						for (ParameterResult parameterResult : nodeEntry
+								.getValue().values()) {
+							if (parameterResult.ended) {
+								value.setParameter(
+										parameterResult.parameter.name,
+										parameterResult.value.toString());
+							}
+						}
+
+						result.add(value);
+					}
+				}
+			}
+		}
+
+		return result;
+	}
+
+	private static class ParameterResult {
+		private PatternParameter parameter;
+		private StringBuilder value;
+		private boolean ended = false;
+
+		public ParameterResult(PatternParameter parameter) {
+			this.parameter = parameter;
+			this.value = new StringBuilder();
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((parameter == null) ? 0 : parameter.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (!(obj instanceof ParameterResult)) {
+				return false;
+			}
+			ParameterResult other = (ParameterResult) obj;
+			if (parameter == null) {
+				if (other.parameter != null) {
+					return false;
+				}
+			} else if (!parameter.equals(other.parameter)) {
+				return false;
+			}
+			return true;
+		}
+	}
+
+	private Map<TrieNode<V>, Map<PatternParameter, ParameterResult>> findMatchingNodes(
+			Map<TrieNode<V>, Map<PatternParameter, ParameterResult>> nodes,
+			char c) {
+		Map<TrieNode<V>, Map<PatternParameter, ParameterResult>> matchingNodes = new HashMap<TrieNode<V>, Map<PatternParameter, ParameterResult>>(
+				1);
+
+		for (Map.Entry<TrieNode<V>, Map<PatternParameter, ParameterResult>> nodeEntry : nodes
+				.entrySet()) {
+			TrieNode<V> node = nodeEntry.getKey();
+			TrieNode<V> childNode = node.anyCharChild;
+
+			if (childNode != null) {
+				matchingNodes.put(
+						childNode,
+						getParameterResult(nodeEntry.getValue(), c,
+								childNode.associatedParameters,
+								childNode.associatedParametersEnd));
+			}
+
+			childNode = node.children.get(c);
+
+			if (childNode != null) {
+				matchingNodes.put(
+						childNode,
+						getParameterResult(nodeEntry.getValue(), c,
+								childNode.associatedParameters,
+								childNode.associatedParametersEnd));
+			}
+
+			for (Map.Entry<Character, TrieNode<V>> complementNodeEntry : node.complementChildren
+					.entrySet()) {
+				childNode = complementNodeEntry.getValue();
+
+				if (complementNodeEntry.getKey() != c
+						|| !childNode.associatedParametersEnd.isEmpty()) {
+					matchingNodes.put(
+							childNode,
+							getParameterResult(nodeEntry.getValue(), c,
+									childNode.associatedParameters,
+									childNode.associatedParametersEnd));
+				}
+			}
+
+			// Consume the rest of the characters
+			if (node.anyCharChild == null && node.children.isEmpty()
+					&& node.complementChildren.isEmpty()) {
+				for (Map.Entry<PatternParameter, ParameterResult> resultEntry : nodeEntry
+						.getValue().entrySet()) {
+					if (node.associatedParametersEnd.contains(resultEntry
+							.getKey())) {
+						matchingNodes.put(
+								node,
+								getParameterResult(nodeEntry.getValue(), c,
+										node.associatedParameters,
+										node.associatedParametersEnd));
+					}
+				}
+			}
+		}
+
+		return matchingNodes;
+	}
+
+	private Map<PatternParameter, ParameterResult> getParameterResult(
+			Map<PatternParameter, ParameterResult> parameterResults, char c,
+			Set<PatternParameter> associatedParameters,
+			Set<PatternParameter> associatedParametersEnd) {
+		parameterResults = new HashMap<PatternParameter, ParameterResult>(
+				parameterResults);
+
+		for (PatternParameter parameter : associatedParameters) {
+			ParameterResult parameterResult = parameterResults.get(parameter);
+
+			if (parameterResult == null) {
+				parameterResult = new ParameterResult(parameter);
+				parameterResults.put(parameter, parameterResult);
+			}
+
+			parameterResult.value.append(c);
+
+			if (associatedParametersEnd.contains(parameter)) {
+				parameterResult.ended = true;
+			}
+		}
+
+		return parameterResults;
 	}
 
 	private static final class PatternParameter {
@@ -333,6 +517,10 @@ public class PatternTrie<V> implements Serializable {
 		private V value;
 		private final Map<String, String> parameters = new HashMap<String, String>();
 
+		public ParameterizedValueImpl(V value) {
+			this.value = value;
+		}
+
 		@Override
 		public V getValue() {
 			return value;
@@ -342,13 +530,52 @@ public class PatternTrie<V> implements Serializable {
 		public String getParameter(String patternKey) {
 			return parameters.get(patternKey);
 		}
-		
-		public Set<String> getParameterNames(){
+
+		public Set<String> getParameterNames() {
 			return parameters.keySet();
 		}
 
 		public void setParameter(String patternKey, String value) {
 			parameters.put(patternKey, value);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result
+					+ ((parameters == null) ? 0 : parameters.hashCode());
+			result = prime * result + ((value == null) ? 0 : value.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (!(obj instanceof ParameterizedValueImpl)) {
+				return false;
+			}
+			ParameterizedValueImpl<V> other = (ParameterizedValueImpl<V>) obj;
+			if (parameters == null) {
+				if (other.parameters != null) {
+					return false;
+				}
+			} else if (!parameters.equals(other.parameters)) {
+				return false;
+			}
+			if (value == null) {
+				if (other.value != null) {
+					return false;
+				}
+			} else if (!value.equals(other.value)) {
+				return false;
+			}
+			return true;
 		}
 
 	}
@@ -373,6 +600,31 @@ public class PatternTrie<V> implements Serializable {
 		public TrieNode() {
 			this.inUse = false;
 		}
+
+		@Override
+		public String toString() {
+			return toString(0);
+		}
+
+		private String toString(int depth) {
+			StringBuilder sb = new StringBuilder();
+
+			for (Map.Entry<Character, TrieNode<V>> entry : children.entrySet()) {
+				for (int i = 0; i < depth; i++) {
+					sb.append(' ');
+				}
+				sb.append('[').append(entry.getKey()).append("] = {\n")
+						.append(entry.getValue().toString(depth + 1));
+
+				sb.append("\n");
+				for (int i = 0; i < depth; i++) {
+					sb.append(' ');
+				}
+				sb.append("}");
+			}
+
+			return sb.toString();
+		}
 	}
 
 	private void add(final char[] pattern, final V value, final int patternId,
@@ -381,11 +633,9 @@ public class PatternTrie<V> implements Serializable {
 			update(root, value);
 		}
 
-		final List<Map.Entry<Parameter, ExtendedPattern>> parameterEntries = new ArrayList<Map.Entry<Parameter, ExtendedPattern>>(
-				parameters.entrySet());
 		int cursor = 0;
 
-		if (parameterEntries.isEmpty()) {
+		if (parameters.isEmpty()) {
 			TrieNode<V> currentNode = root;
 			TrieNode<V> lastNode = null;
 			/* Simple key */
@@ -410,14 +660,17 @@ public class PatternTrie<V> implements Serializable {
 				update(currentNode, value);
 			}
 		} else {
+			final List<Map.Entry<Parameter, ExtendedPattern>> parameterEntries = new ArrayList<Map.Entry<Parameter, ExtendedPattern>>(
+					parameters.entrySet());
 			List<TrieNode<V>> currentNodes = new ArrayList<TrieNode<V>>();
 			currentNodes.add(root);
+
+			patternParameters.put(patternId, new ArrayList<PatternParameter>());
 
 			/* Parameterized key */
 			int currentParameterIndex = 0;
 			Parameter currentParameter = parameterEntries.get(
 					currentParameterIndex).getKey();
-			patternParameters.put(patternId, new ArrayList<PatternParameter>());
 			int currentParameterStart = currentParameter.startPosition;
 
 			for (; cursor < pattern.length - 1; cursor++) {
@@ -599,10 +852,10 @@ public class PatternTrie<V> implements Serializable {
 					.addAll(node.associatedParametersEnd);
 		}
 
-		if(node.anyCharChild != null){
+		if (node.anyCharChild != null) {
 			mergeIntoNodes(newTargetNodes, node.anyCharChild);
 		}
-		
+
 		if (node.inUse) {
 			for (int i = 0; i < nodes.size(); i++) {
 				for (int j = 0; j < node.value.size(); j++) {
@@ -625,7 +878,8 @@ public class PatternTrie<V> implements Serializable {
 			context.complement();
 		}
 
-		traverse(Pattern.parse(pattern.pattern), context, lastNodes);
+		traverse(Pattern.parse(pattern.pattern), context, lastNodes,
+				pattern.negated);
 
 		List<TrieNode<V>> result = new ArrayList<TrieNode<V>>(context
 				.getEndStates().size());
@@ -690,7 +944,7 @@ public class PatternTrie<V> implements Serializable {
 	}
 
 	private List<TrieNode<V>> traverse(Node node, TraverseContext<V> context,
-			List<TrieNode<V>> trieNodes) {
+			List<TrieNode<V>> trieNodes, boolean negated) {
 		List<TrieNode<V>> newNodes = null;
 		boolean moreRequiredSet = false;
 
@@ -706,7 +960,8 @@ public class PatternTrie<V> implements Serializable {
 					* nodes.size());
 
 			for (int i = 0; i < nodes.size(); i++) {
-				newNodes.addAll(traverse(nodes.get(i), context, trieNodes));
+				newNodes.addAll(traverse(nodes.get(i), context, trieNodes,
+						negated));
 			}
 		} else if (node instanceof RepeatNode) {
 			RepeatNode repeatNode = (RepeatNode) node;
@@ -715,7 +970,7 @@ public class PatternTrie<V> implements Serializable {
 			tempNodeList.add(tempNode);
 
 			newNodes = traverse(repeatNode.getDecorated(), context,
-					tempNodeList);
+					tempNodeList, negated);
 
 			if (repeatNode.getMax() != Integer.MAX_VALUE) {
 				List<TrieNode<V>> tempNodes = newNodes;
@@ -723,7 +978,7 @@ public class PatternTrie<V> implements Serializable {
 
 				for (int i = 1; i < repeatNode.getMax(); i++) {
 					tempNodes = traverse(repeatNode.getDecorated(), context,
-							tempNodes);
+							tempNodes, negated);
 
 					if (i + 1 >= repeatNode.getMin()) {
 						newNodes.addAll(tempNodes);
@@ -735,17 +990,18 @@ public class PatternTrie<V> implements Serializable {
 
 				for (int i = 1; i < repeatNode.getMin() - 1; i++) {
 					tempNodes = traverse(repeatNode.getDecorated(), context,
-							tempNodes);
+							tempNodes, negated);
 				}
-				
-				if(repeatNode.getMin() != 1){
+
+				if (repeatNode.getMin() != 1) {
 					TrieNode<V> minFulfilledNode = new TrieNode<V>();
-					List<TrieNode<V>> minFulfilledNodeList = new ArrayList<TrieNode<V>>(1);
+					List<TrieNode<V>> minFulfilledNodeList = new ArrayList<TrieNode<V>>(
+							1);
 					minFulfilledNodeList.add(minFulfilledNode);
-					
+
 					newNodes = traverse(repeatNode.getDecorated(), context,
-							minFulfilledNodeList);
-					
+							minFulfilledNodeList, negated);
+
 					mergeIntoNodes(tempNodes, minFulfilledNode);
 					mergeIntoNodes(newNodes, minFulfilledNode);
 				} else {
@@ -763,12 +1019,12 @@ public class PatternTrie<V> implements Serializable {
 			}
 		} else if (node instanceof OptionalNode) {
 			newNodes = traverse(((OptionalNode) node).getDecorated(), context,
-					trieNodes);
+					trieNodes, negated);
 			newNodes.addAll(trieNodes);
 		} else if (node instanceof ComplementNode) {
 			context.complement();
 			newNodes = traverse(((ComplementNode) node).getDecorated(),
-					context, trieNodes);
+					context, trieNodes, negated);
 			context.complement();
 		} else if (node instanceof CharRangeNode) {
 			newNodes = new ArrayList<TrieNode<V>>(trieNodes.size());
@@ -804,7 +1060,7 @@ public class PatternTrie<V> implements Serializable {
 		}
 
 		if (newNodes != null) {
-			if (!context.hasMoreRequired()) {
+			if (!context.hasMoreRequired() || negated) {
 				for (int i = 0; i < newNodes.size(); i++) {
 					context.addEndState(newNodes.get(i));
 				}
@@ -815,7 +1071,7 @@ public class PatternTrie<V> implements Serializable {
 			}
 
 			if (node.getNext() != null) {
-				newNodes = traverse(node.getNext(), context, newNodes);
+				newNodes = traverse(node.getNext(), context, newNodes, negated);
 			}
 		}
 
@@ -847,8 +1103,9 @@ public class PatternTrie<V> implements Serializable {
 		return false;
 	}
 
-	private StringBuilder toString(TrieNode<V> node, StringBuilder sb,
-			int depth, Map<PatternParameter, Integer> parameterCount,
+	private static <V> StringBuilder toString(TrieNode<V> node,
+			StringBuilder sb, int depth,
+			Map<PatternParameter, Integer> parameterCount,
 			int charCountThreshold) {
 		if (node.inUse) {
 			sb.append(" => ");

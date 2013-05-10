@@ -134,23 +134,23 @@ public class ReflectionUtilsTest {
 		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
 				.getField(ConcreteClassA.class, "fieldCollection")
 				.getGenericType()).getActualTypeArguments()[0];
-		concreteType = ReflectionUtils.resolveTypeVariable(ConcreteClassA.class,
-				typeVariable);
+		concreteType = ReflectionUtils.resolveTypeVariable(
+				ConcreteClassA.class, typeVariable);
 		assertEquals(Integer.class, concreteType);
 
 		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
 				.getField(ConcreteClassA.class, "fieldMap").getGenericType())
 				.getActualTypeArguments()[0];
-		concreteType = ReflectionUtils.resolveTypeVariable(ConcreteClassA.class,
-				typeVariable);
+		concreteType = ReflectionUtils.resolveTypeVariable(
+				ConcreteClassA.class, typeVariable);
 		assertEquals(Integer.class, concreteType);
-		
+
 		// Resolve unresolveable field types
 
-		typeVariable = (TypeVariable<?>) ReflectionUtils
-				.getField(GenericClassA.class, "field").getGenericType();
-		concreteType = ReflectionUtils.resolveTypeVariable(
-				GenericClassA.class, typeVariable);
+		typeVariable = (TypeVariable<?>) ReflectionUtils.getField(
+				GenericClassA.class, "field").getGenericType();
+		concreteType = ReflectionUtils.resolveTypeVariable(GenericClassA.class,
+				typeVariable);
 		assertNull(concreteType);
 
 		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
@@ -171,44 +171,44 @@ public class ReflectionUtilsTest {
 
 		typeVariable = (TypeVariable<?>) ReflectionUtils.getGetter(
 				ConcreteClassA.class, "field").getGenericReturnType();
-		concreteType = ReflectionUtils.resolveTypeVariable(ConcreteClassA.class,
-				typeVariable);
+		concreteType = ReflectionUtils.resolveTypeVariable(
+				ConcreteClassA.class, typeVariable);
 		assertEquals(Integer.class, concreteType);
 
 		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
 				.getGetter(ConcreteClassA.class, "fieldCollection")
 				.getGenericReturnType()).getActualTypeArguments()[0];
-		concreteType = ReflectionUtils.resolveTypeVariable(ConcreteClassA.class,
-				typeVariable);
+		concreteType = ReflectionUtils.resolveTypeVariable(
+				ConcreteClassA.class, typeVariable);
 		assertEquals(Integer.class, concreteType);
 
 		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
 				.getGetter(ConcreteClassA.class, "fieldMap")
 				.getGenericReturnType()).getActualTypeArguments()[0];
-		concreteType = ReflectionUtils.resolveTypeVariable(ConcreteClassA.class,
-				typeVariable);
+		concreteType = ReflectionUtils.resolveTypeVariable(
+				ConcreteClassA.class, typeVariable);
 		assertEquals(Integer.class, concreteType);
 
 		// Resolve method parameter types
 
 		typeVariable = (TypeVariable<?>) ReflectionUtils.getSetter(
 				ConcreteClassA.class, "field").getGenericParameterTypes()[0];
-		concreteType = ReflectionUtils.resolveTypeVariable(ConcreteClassA.class,
-				typeVariable);
+		concreteType = ReflectionUtils.resolveTypeVariable(
+				ConcreteClassA.class, typeVariable);
 		assertEquals(Integer.class, concreteType);
 
 		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
 				.getSetter(ConcreteClassA.class, "fieldCollection")
 				.getGenericParameterTypes()[0]).getActualTypeArguments()[0];
-		concreteType = ReflectionUtils.resolveTypeVariable(ConcreteClassA.class,
-				typeVariable);
+		concreteType = ReflectionUtils.resolveTypeVariable(
+				ConcreteClassA.class, typeVariable);
 		assertEquals(Integer.class, concreteType);
 
 		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
 				.getSetter(ConcreteClassA.class, "fieldMap")
 				.getGenericParameterTypes()[0]).getActualTypeArguments()[0];
-		concreteType = ReflectionUtils.resolveTypeVariable(ConcreteClassA.class,
-				typeVariable);
+		concreteType = ReflectionUtils.resolveTypeVariable(
+				ConcreteClassA.class, typeVariable);
 		assertEquals(Integer.class, concreteType);
 
 		// Resolve method throws types
@@ -216,8 +216,8 @@ public class ReflectionUtilsTest {
 		typeVariable = (TypeVariable<?>) ReflectionUtils.getMethod(
 				ConcreteClassA.class, "throwsException")
 				.getGenericExceptionTypes()[0];
-		concreteType = ReflectionUtils.resolveTypeVariable(ConcreteClassA.class,
-				typeVariable);
+		concreteType = ReflectionUtils.resolveTypeVariable(
+				ConcreteClassA.class, typeVariable);
 		assertEquals(Exception.class, concreteType);
 	}
 
@@ -228,8 +228,8 @@ public class ReflectionUtilsTest {
 	public void testGetMethodExceptionTypes() throws Exception {
 		assertEquals(Exception.class, ReflectionUtils.getMethodExceptionTypes(
 				ConcreteClassA.class, "throwsException")[0]);
-		assertNull(ReflectionUtils.getMethodExceptionTypes(ConcreteClassA.class,
-				""));
+		assertNull(ReflectionUtils.getMethodExceptionTypes(
+				ConcreteClassA.class, ""));
 	}
 
 	/**
@@ -237,9 +237,10 @@ public class ReflectionUtilsTest {
 	 */
 	@Test
 	public void testGetResolvedMethodReturnType() throws Exception {
-		assertEquals(Integer.class, ReflectionUtils.getResolvedMethodReturnType(
-				ConcreteClassA.class,
-				ReflectionUtils.getGetter(ConcreteClassA.class, "field")));
+		assertEquals(Integer.class,
+				ReflectionUtils.getResolvedMethodReturnType(
+						ConcreteClassA.class, ReflectionUtils.getGetter(
+								ConcreteClassA.class, "field")));
 		assertNull(ReflectionUtils.getResolvedMethodReturnType(
 				ConcreteClassA.class, ""));
 	}
@@ -270,11 +271,10 @@ public class ReflectionUtilsTest {
 	 */
 	@Test
 	public void testGetResolvedMethodParameterTypes() throws Exception {
-		assertEquals(
-				Integer.class,
+		assertEquals(Integer.class,
 				ReflectionUtils.getResolvedMethodParameterTypes(
-						ConcreteClassA.class,
-						ReflectionUtils.getSetter(ConcreteClassA.class, "field"))[0]);
+						ConcreteClassA.class, ReflectionUtils.getSetter(
+								ConcreteClassA.class, "field"))[0]);
 		assertArrayEquals(new Class<?>[0],
 				ReflectionUtils.getResolvedMethodParameterTypes(
 						ConcreteClassA.class, "throwsException"));
@@ -341,11 +341,14 @@ public class ReflectionUtilsTest {
 				ClassB.class));
 		assertTrue(ReflectionUtils.getSuperTypes(ClassB.class).contains(
 				ClassA.class));
-		assertTrue(ReflectionUtils.getSuperTypes(ClassB.class).contains(A.class));
-		assertTrue(ReflectionUtils.getSuperTypes(ClassB.class).contains(B.class));
+		assertTrue(ReflectionUtils.getSuperTypes(ClassB.class)
+				.contains(A.class));
+		assertTrue(ReflectionUtils.getSuperTypes(ClassB.class)
+				.contains(B.class));
 		assertTrue(ReflectionUtils.getSuperTypes(ClassA.class).contains(
 				ClassA.class));
-		assertTrue(ReflectionUtils.getSuperTypes(ClassA.class).contains(A.class));
+		assertTrue(ReflectionUtils.getSuperTypes(ClassA.class)
+				.contains(A.class));
 		assertTrue(ReflectionUtils.getSuperTypes(C.class).contains(C.class));
 		assertTrue(ReflectionUtils.getSuperTypes(C.class).contains(A.class));
 		assertTrue(ReflectionUtils.getSuperTypes(B.class).contains(B.class));

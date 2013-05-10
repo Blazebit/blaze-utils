@@ -23,7 +23,8 @@ import javax.naming.NamingException;
  */
 public class CdiUtils {
 
-	private static final Logger log = Logger.getLogger(CdiUtils.class.getName());
+	private static final Logger log = Logger
+			.getLogger(CdiUtils.class.getName());
 
 	/**
 	 * Retrieves the #{@link BeanManager} instance via JNDI.
