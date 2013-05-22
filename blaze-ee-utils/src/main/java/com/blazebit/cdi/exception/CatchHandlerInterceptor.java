@@ -80,6 +80,7 @@ public class CatchHandlerInterceptor implements Serializable {
 			Throwable t = ExceptionUtils.unwrap(ex,
 					InvocationTargetException.class);
 			boolean exceptionHandled = false;
+                        boolean cleanupInvoked = false;
 
 			if (exceptionHandlingAnnotations.length > 0) {
 				for (CatchHandling handling : exceptionHandlingAnnotations) {
@@ -93,8 +94,8 @@ public class CatchHandlerInterceptor implements Serializable {
 
 						// Only invoke cleanup declared at handling level
 						if (!handling.cleanup().equals(Object.class)) {
-							invokeCleanups(targetClass, targetObject,
-									handling.cleanup());
+                                                        cleanupInvoked = invokeCleanups(targetClass, targetObject,
+                                                                    handling.cleanup());
 						}
 
 						break;
@@ -114,9 +115,11 @@ public class CatchHandlerInterceptor implements Serializable {
 					}
 
 					if (!exceptionHandlerAnnotation.cleanup().equals(
-							Object.class)) {
-						invokeCleanups(targetClass, targetObject,
+							Object.class) && !cleanupInvoked) {
+						if(!cleanupInvoked) {
+                                                    invokeCleanups(targetClass, targetObject,
 								exceptionHandlerAnnotation.cleanup());
+                                                }
 					}
 				}
 			}
