@@ -21,6 +21,7 @@ import com.blazebit.cdi.cleanup.annotation.Cleanup;
 import com.blazebit.cdi.exception.annotation.CatchHandler;
 import com.blazebit.cdi.exception.annotation.CatchHandling;
 import com.blazebit.exception.ExceptionUtils;
+import com.blazebit.reflection.ReflectionUtils;
 
 /**
  * 
@@ -143,7 +144,7 @@ public class CatchHandlerInterceptor implements Serializable {
 	private static boolean contains(Class<? extends Throwable>[] classes,
 			Class<? extends Throwable> clazz) {
 		for (int i = 0; i < classes.length; i++) {
-			if (classes[i].equals(clazz)) {
+			if (classes[i].getName().equals(clazz.getName())) {
 				return true;
 			}
 		}
@@ -182,15 +183,17 @@ public class CatchHandlerInterceptor implements Serializable {
 		boolean invoked = false;
 
 		if (!cleanupClazz.equals(Object.class)) {
-			for (Method m : clazz.getMethods()) {
-				Cleanup cleanup = m.getAnnotation(Cleanup.class);
-
-				if (cleanup != null && cleanup.value().equals(cleanupClazz)) {
-					m.invoke(target);
-					invoked = true;
-				}
-			}
+                        // Christian Beikov 29.07.2013: Traverse whole hierarchy
+                        // instead of retrieving the annotation directly from
+                        // the class object.
+                        Method m = ReflectionUtils.getMethod(clazz, Cleanup.class);
+                        
+                        if(m != null) {
+                            m.invoke(target);
+                            invoked = true;
+                        }
 		}
+                
 		return invoked;
 	}
 }

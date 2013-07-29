@@ -3,6 +3,7 @@
  */
 package com.blazebit.reflection;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericDeclaration;
@@ -11,10 +12,12 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -827,6 +830,107 @@ public final class ReflectionUtils {
 		}
 
 		return null;
+	}
+        
+	/**
+	 * Returns the method object for a method which is annotated with the
+         * given annotation of the given class. This method traverses through
+         * the super classes of the given class and tries to find the method as 
+         * declared method within these classes that is annotated with an
+         * annotation of the given annotation type.
+	 * When the object class is reached the traversing stops. If the method can
+	 * not be found, null is returned.
+         * This methods immediatelly returns the first method found that is
+         * annotated with an annotation of the given type.
+         * To retrieve all methods annotated with the given annotation type see
+         * {@link ReflectionUtils#getMethods(java.lang.Class, java.lang.Class)}
+	 * 
+	 * @param clazz
+	 *            The class within to look for the method
+	 * @param annotation
+	 *            The annotation type a method must be annotated with to be 
+         *            returned
+	 * @return The method object for the method annotated with the given
+         *         annotation type if the method can be found, otherwise null
+	 */
+        public static Method getMethod(Class<?> clazz, Class<? extends Annotation> annotation) {
+                //TODO: Write test
+		Class<?> traverseClass = clazz;
+		Method method = null;
+
+		while (traverseClass != null) {
+			method = findMethodWithAnnotation(annotation, traverseClass);
+
+			if (method != null) {
+				break;
+			}
+
+			// Look for the method in all interfaces of the traverse class
+			method = findMethodWithAnnotation(annotation, traverseClass.getInterfaces());
+
+			if (method != null) {
+				break;
+			}
+
+			traverseClass = traverseClass.getSuperclass();
+		}
+
+		return method;
+	}
+        
+	/**
+	 * Returns the method objects for methods which are annotated with the
+         * given annotation of the given class. This method traverses through
+         * the super classes of the given class and tries to find methods as 
+         * declared methods within these classes which are annotated with an
+         * annotation of the given annotation type.
+	 * When the object class is reached the traversing stops. If no methods 
+         * can be found, an empty list is returned.
+         * The order of the methods is random.
+	 * 
+	 * @param clazz
+	 *            The class within to look for the methods
+	 * @param annotation
+	 *            The annotation type a method must be annotated with to be 
+         *            included in the list
+	 * @return A list of method objects for methods annotated with the given
+         *         annotation type or an emtpy list
+	 */
+        public static List<Method> getMethods(Class<?> clazz, Class<? extends Annotation> annotation) {
+                //TODO: Write test
+                List<Method> methods = new ArrayList<Method>();
+		Class<?> traverseClass = clazz;
+
+		while (traverseClass != null) {
+			findMethodsWithAnnotation(methods, annotation, traverseClass);
+			// Look for the method in all interfaces of the traverse class
+			findMethodsWithAnnotation(methods, annotation, traverseClass.getInterfaces());
+			traverseClass = traverseClass.getSuperclass();
+		}
+
+		return methods;
+	}
+
+	private static Method findMethodWithAnnotation(Class<? extends Annotation> annotation, Class<?>... classes) {
+		for (Class<?> clazz : classes) {
+			for (Method m : clazz.getDeclaredMethods()) {
+				if (m.getAnnotation(annotation) != null) {
+					return m;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private static void findMethodsWithAnnotation(List<Method> methods, Class<? extends Annotation> annotation, Class<?>... classes) {
+                for (Class<?> clazz : classes) {
+			for (Method m : clazz.getDeclaredMethods()) {
+				if (m.getAnnotation(annotation) != null) {
+					methods.add(m);
+				}
+			}
+		}
 	}
 
 	/**

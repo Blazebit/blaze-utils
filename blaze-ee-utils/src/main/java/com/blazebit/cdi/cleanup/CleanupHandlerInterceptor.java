@@ -16,6 +16,7 @@ import com.blazebit.cdi.cleanup.annotation.Cleanup;
 import com.blazebit.cdi.cleanup.annotation.CleanupHandler;
 import com.blazebit.cdi.cleanup.annotation.CleanupHandling;
 import com.blazebit.exception.ExceptionUtils;
+import com.blazebit.reflection.ReflectionUtils;
 
 /**
  * Invokes cleanup methods after the invocation of a method. The specified
@@ -88,7 +89,7 @@ public class CleanupHandlerInterceptor implements Serializable {
 				if (handling.always()) {
 					doInvokeCleanup(target, handler, handling);
 				} else if (t != null
-						&& t.getClass().equals(handling.exception())) {
+						&& t.getClass().getName().equals(handling.exception().getName())) {
 					doInvokeCleanup(target, handler, handling);
 				}
 			}
@@ -108,22 +109,23 @@ public class CleanupHandlerInterceptor implements Serializable {
 	}
 
 	private boolean invokeCleanups(Object target, Class<?> cleanupClazz)
-			throws Exception {
+			throws Exception {                
 		if (cleanupClazz != null) {
-			for (Method m : target.getClass().getMethods()) {
-				Cleanup cleanup = m.getAnnotation(Cleanup.class);
-
-				if (cleanup != null && cleanup.value().equals(cleanupClazz)) {
-					m.invoke(target);
-					return true;
-				}
-			}
+                        // Christian Beikov 29.07.2013: Traverse whole hierarchy
+                        // instead of retrieving the annotation directly from
+                        // the class object.
+                        Method m = ReflectionUtils.getMethod(target.getClass(), Cleanup.class);
+                        
+                        if(m != null) {
+                            m.invoke(target);
+                            return true;
+                        }
 		} else {
 			return false;
 		}
 
-		throw new IllegalArgumentException("Cleanup methode with name '"
-				+ cleanupClazz + "' not found in "
+		throw new IllegalArgumentException("Cleanup method with name '"
+				+ cleanupClazz.getName() + "' not found in "
 				+ target.getClass().getName());
 	}
 }
