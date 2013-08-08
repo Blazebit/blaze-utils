@@ -1,1 +1,1 @@
-com.blazebit.annotation.apt.service.ServiceProviderAnnotationProcessor
+com.blazebit.apt.service.ServiceProviderAnnotationProcessor
