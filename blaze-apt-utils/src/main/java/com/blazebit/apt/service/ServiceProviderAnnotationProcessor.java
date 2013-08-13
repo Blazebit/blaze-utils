@@ -32,7 +32,7 @@ import com.blazebit.apt.AnnotationProcessingUtils;
  * @author Christian Beikov
  * @since 0.1.2
  */
-@SupportedAnnotationTypes("com.blazebit.annotation.apt.service.ServiceProvider")
+@SupportedAnnotationTypes("com.blazebit.apt.service.ServiceProvider")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public class ServiceProviderAnnotationProcessor extends AbstractProcessor {
 
