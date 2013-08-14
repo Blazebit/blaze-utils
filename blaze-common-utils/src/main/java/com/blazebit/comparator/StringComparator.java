@@ -22,16 +22,14 @@ import java.text.Collator;
 import java.util.Locale;
 
 /**
- * This Comparator implementation compares the string values of the resolved
- * property path via a Collator instantiated witht he defined locale. If
- * resolved value of property path is not of instance String then toString() on
- * the value will get called. This collator will compare the strings with locale
- * aware and without case sinsitivity.
+ * This Comparator implementation compares the string values via a Collator
+ * instantiated witht he defined locale if the given objects are of instance
+ * String, if they are not toString() will get called on the given objects.
  *
  * @author Thomas Herzog
  * @see BaseComparator
  */
-public class StringComparator extends BaseComparator<String> {
+public class StringComparator extends BaseComparator<Object> {
 
     private final Collator collator;
 
@@ -60,12 +58,12 @@ public class StringComparator extends BaseComparator<String> {
     }
 
     @Override
-    public int compare(String object1, String object2) {
+    public int compare(Object object1, Object object2) {
         try {
             Integer result = compareNullObjects(object1, object2);
 
             if (result == null) {
-                result = collator.compare(object1, object2);
+                result = collator.compare((object1 instanceof String) ? (String) object1 : object1.toString(), (object2 instanceof String) ? (String) object2 : object2.toString());
             }
             return result;
         } catch (Throwable e) {

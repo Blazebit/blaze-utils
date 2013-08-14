@@ -16,7 +16,7 @@ import com.blazebit.reflection.ExpressionUtils;
  */
 public class GenericComparator<T> extends BaseComparator<T> {
 
-    protected String propertyPath;
+    protected final String propertyPath;
 
     /**
      * Be arware that if one of the elements in the list does not have the

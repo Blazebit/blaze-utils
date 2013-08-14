@@ -23,127 +23,74 @@ import java.util.Locale;
 import org.junit.Test;
 
 /**
+ * This test class test the #{@link PropertyPathStringComparator}.
  *
- * @author cchet
+ * @author Thomas Herzog
  */
 public class PropertyPathStringComparatorTest {
 
-    public class StringCompareModel {
-
-        private final String id;
-        private final StringCompareModel model;
-
-        public StringCompareModel(final String value) {
-            this.id = value;
-            model = null;
-        }
-
-        public StringCompareModel(final StringCompareModel value) {
-            this.id = value.toString();
-            this.model = value;
-        }
-
-        public String getId() {
-            return id;
-        }
-
-        public StringCompareModel getModel() {
-            return model;
-        }
-
-        @Override
-        public int hashCode() {
-            int hash = 7;
-            hash = 23 * hash + (this.id != null ? this.id.hashCode() : 0);
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final StringCompareModel other = (StringCompareModel) obj;
-            if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            return id != null ? id : super.toString();
-        }
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testPropertyPathStringComparator_null_locale() {
-        new PropertyPathStringComparator<StringCompareModel>(null, "member.string");
+        new PropertyPathStringComparator<CompareModel>(null, CompareModel.PATH_MODEL_VALUE);
+        fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testPropertyPathStringComparator_null_propertypath() {
-        new PropertyPathStringComparator<StringCompareModel>(Locale.getDefault(), null);
+        new PropertyPathStringComparator<CompareModel>(Locale.getDefault(), null);
+        fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testPropertyPathStringComparator_empty_propertypath() {
-        new PropertyPathStringComparator<StringCompareModel>(Locale.getDefault(), "");
+        new PropertyPathStringComparator<CompareModel>(Locale.getDefault(), "");
+        fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testPropertyPathStringComparator_invalid_propertypath() {
-        List<StringCompareModel> actual = Arrays.asList(
-                new StringCompareModel("ABD"),
-                new StringCompareModel("ABb"),
-                new StringCompareModel((String) null),
-                new StringCompareModel("abc"));
-        List<StringCompareModel> expected = Arrays.asList(
-                new StringCompareModel((String) null),
-                new StringCompareModel("ABb"),
-                new StringCompareModel("abc"),
-                new StringCompareModel("ABD"));
+        List<CompareModel> actual = Arrays.asList(
+                new CompareModel("ABD"),
+                new CompareModel("ABb"));
         Collections.sort(actual,
-                new PropertyPathStringComparator<StringCompareModel>(Locale.getDefault(), "seghdshsdfhsdf"));
-        assertEquals(expected, actual);
+                new PropertyPathStringComparator<CompareModel>(Locale.getDefault(), CompareModel.PATH_INVALID));
     }
 
     @Test
     public void testPropertyPathStringComparator_string_value() {
-        List<StringCompareModel> actual = Arrays.asList(
-                new StringCompareModel("ABD"),
-                new StringCompareModel("ABb"),
-                new StringCompareModel((String) null),
-                new StringCompareModel("abc"));
-        List<StringCompareModel> expected = Arrays.asList(
-                new StringCompareModel("ABb"),
-                new StringCompareModel("abc"),
-                new StringCompareModel("ABD"),
-                new StringCompareModel((String) null));
+        List<CompareModel> actual = Arrays.asList(
+                new CompareModel("ÄBb"),
+                new CompareModel("ABD"),
+                new CompareModel("ABb"),
+                new CompareModel((String) null),
+                new CompareModel("abc"));
+        List<CompareModel> expected = Arrays.asList(
+                new CompareModel("ABb"),
+                new CompareModel("ÄBb"),
+                new CompareModel("abc"),
+                new CompareModel("ABD"),
+                new CompareModel((String) null));
         Collections.sort(actual,
-                new PropertyPathStringComparator<StringCompareModel>(Locale.getDefault(), "id"));
+                new PropertyPathStringComparator<CompareModel>(Locale.GERMAN, CompareModel.PATH_VALUE));
 
         assertEquals(expected, actual);
     }
 
     @Test
-    public void testPropertyPathStringComparator_member_value() {
-        List<StringCompareModel> actual = Arrays.asList(
-                new StringCompareModel(new StringCompareModel("ABD")),
-                new StringCompareModel(new StringCompareModel("ABb")),
-                new StringCompareModel(new StringCompareModel((String) null)),
-                new StringCompareModel(new StringCompareModel("abc")));
-        List<StringCompareModel> expected = Arrays.asList(
-                new StringCompareModel(new StringCompareModel("ABb")),
-                new StringCompareModel(new StringCompareModel("abc")),
-                new StringCompareModel(new StringCompareModel("ABD")),
-                new StringCompareModel(new StringCompareModel((String)null)));
+    public void testPropertyPathStringComparator_model_value() {
+        List<CompareModel> actual = Arrays.asList(
+                new CompareModel(new CompareModel("ABD")),
+                new CompareModel(new CompareModel("ABb")),
+                new CompareModel(new CompareModel((String) null)),
+                new CompareModel(new CompareModel("abc")));
+        List<CompareModel> expected = Arrays.asList(
+                new CompareModel(new CompareModel("ABb")),
+                new CompareModel(new CompareModel("abc")),
+                new CompareModel(new CompareModel("ABD")),
+                new CompareModel(new CompareModel((String) null)));
         Collections.sort(actual,
                 new PropertyPathStringComparator<
-               StringCompareModel>(Locale.getDefault(), "model"));
+               CompareModel>(Locale.getDefault(), CompareModel.PATH_MODEL));
 
         assertEquals(expected, actual);
     }

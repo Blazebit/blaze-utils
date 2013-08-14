@@ -23,10 +23,9 @@ import java.util.Locale;
 
 /**
  * This Comparator implementation compares the string values of the resolved
- * property path via a Collator instantiated witht he defined locale. If
+ * property path via a Collator instantiated witht he defined locale. If the
  * resolved value of property path is not of instance String then toString() on
- * the value will get called. This collator will compare the strings with
- * locale aware and without case sinsitivity.
+ * the value will get called.
  *
  * @author Thomas Herzog
  * @see BaseComparator
@@ -37,8 +36,8 @@ public class PropertyPathStringComparator<T> extends BaseComparator<T> {
     private final String propertyPath;
 
     /**
-     * @param locale
-     * @param propertyPath
+     * @param locale null not allowed
+     * @param propertyPath null or empty string not allowed
      */
     public PropertyPathStringComparator(Locale locale, String propertyPath) {
         super();
@@ -53,12 +52,13 @@ public class PropertyPathStringComparator<T> extends BaseComparator<T> {
     }
 
     /**
-     * Sets the default Locale
+     * Sets the JVM default Locale.
      *
      * @param propertyPath
      * @see
      * PropertyPathStringComparator#PropertyPathStringComparator(java.util.Locale,
      * java.lang.String)
+     * @see Locale#getDefault()
      */
     public PropertyPathStringComparator(String propertyPath) {
         this(Locale.getDefault(), propertyPath);

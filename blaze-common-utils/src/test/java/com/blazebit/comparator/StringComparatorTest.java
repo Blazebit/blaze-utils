@@ -31,12 +31,13 @@ public class StringComparatorTest {
     @Test(expected = IllegalArgumentException.class)
     public void testStringComparator_null_locale() {
         new StringComparator(null);
+        fail();
     }
 
     @Test
     public void testStringComparator() {
-        final List<String> expected = Arrays.asList("ABb", "Abc", "abd", "aBe");
-        final List<String> actual = Arrays.asList("Abc", "aBe", "abd", "ABb");
+        final List<String> expected = Arrays.asList("ABb", "ÄBb", "Abc", "abd", "aBe");
+        final List<String> actual = Arrays.asList("Abc", "aBe", "abd", "ABb", "ÄBb");
         Collections.sort(actual, new StringComparator());
         assertEquals(expected, actual);
     }
