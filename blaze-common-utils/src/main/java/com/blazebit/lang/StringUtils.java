@@ -57,7 +57,7 @@ public final class StringUtils {
 		return join(new StringBuilder(), delimiter, parts).toString();
 	}
 
-	public static <X, Y> String join(CharSequence delimiter, Iterable<X> parts,
+	public static <X, Y extends CharSequence> String join(CharSequence delimiter, Iterable<X> parts,
 			ValueRetriever<X, Y> expression) {
 		return join(new StringBuilder(), delimiter, parts, expression)
 				.toString();
@@ -68,7 +68,7 @@ public final class StringUtils {
 		return join(sb, delimiter, parts.iterator());
 	}
 
-	public static <X, Y> StringBuilder join(StringBuilder sb,
+	public static <X, Y extends CharSequence> StringBuilder join(StringBuilder sb,
 			CharSequence delimiter, Iterable<X> parts,
 			ValueRetriever<X, Y> expression) {
 		return join(sb, delimiter, parts.iterator(), expression);
@@ -79,7 +79,7 @@ public final class StringUtils {
 		return join(new StringBuilder(), delimiter, iter).toString();
 	}
 
-	public static <X, Y> String join(CharSequence delimiter, Iterator<X> iter,
+	public static <X, Y extends CharSequence> String join(CharSequence delimiter, Iterator<X> iter,
 			ValueRetriever<X, Y> expression) {
 		return join(new StringBuilder(), delimiter, iter, expression)
 				.toString();
@@ -101,7 +101,7 @@ public final class StringUtils {
 		return sb;
 	}
 
-	public static <X, Y> StringBuilder join(StringBuilder sb,
+	public static <X, Y extends CharSequence> StringBuilder join(StringBuilder sb,
 			CharSequence delimiter, Iterator<X> iter,
 			ValueRetriever<X, Y> expression) {
 		if (!iter.hasNext()) {
