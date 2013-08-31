@@ -1,4 +1,4 @@
-package com.blazebit.validation.util;
+package com.blazebit.validation;
 
 import java.util.Set;
 

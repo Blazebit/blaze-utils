@@ -15,6 +15,8 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.deltaspike.core.api.literal.DefaultLiteral;
+
 /**
  * Utillity class for Cdi related actions.
  * 

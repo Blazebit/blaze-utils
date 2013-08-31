@@ -1,7 +1,7 @@
 package com.blazebit.validation.constraint;
 
-import static com.blazebit.validation.util.ConstraintValidatorUtils.containsViolation;
-import static com.blazebit.validation.util.ConstraintValidatorUtils.getValidator;
+import static com.blazebit.validation.ConstraintValidatorUtils.containsViolation;
+import static com.blazebit.validation.ConstraintValidatorUtils.getValidator;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
