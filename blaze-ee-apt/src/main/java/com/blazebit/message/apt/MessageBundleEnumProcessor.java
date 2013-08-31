@@ -48,7 +48,7 @@ import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
 
-import org.apache.deltaspike.core.api.message.annotation.MessageBundle;
+import org.apache.deltaspike.core.api.message.MessageBundle;
 
 import com.blazebit.i18n.LocaleUtils;
 

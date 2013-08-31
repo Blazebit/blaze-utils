@@ -45,9 +45,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-validator</artifactId>
-			<version>4.3.0.Final</version>
+			<groupId>org.apache.openejb</groupId>
+			<artifactId>openejb-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

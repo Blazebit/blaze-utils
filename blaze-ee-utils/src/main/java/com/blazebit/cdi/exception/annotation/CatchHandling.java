@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 
 import javax.enterprise.util.Nonbinding;
 
-import org.apache.deltaspike.core.api.exception.control.annotation.ExceptionHandler;
+import org.apache.deltaspike.core.api.exception.control.ExceptionHandler;
 
 import com.blazebit.apt.validation.constraint.ConstraintScope;
 import com.blazebit.apt.validation.constraint.ReferenceValueConstraint;
