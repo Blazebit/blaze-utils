@@ -16,6 +16,20 @@ public final class ExceptionUtils {
 
     private ExceptionUtils() {
     }
+    
+    /**
+     * Throws the given throwable even if it is a checked exception.
+     * 
+     * @param e The throwable to throw.
+     */
+    public static void doThrow(Throwable e) {
+        ExceptionUtils.<RuntimeException> doThrow0(e);
+    }
+     
+    @SuppressWarnings("unchecked")
+    private static <T extends Throwable> void doThrow0(Throwable e) throws T {
+        throw (T) e;
+    }
 
     /**
      * Unwraps the throwable until it is no instance of the throwableClass.
@@ -99,7 +113,7 @@ public final class ExceptionUtils {
 
     /**
      * Gets the cause which are one of the given expected causes. This method is
-     * usefull when you have to find a cause within unexpected or unpredictable
+     * useful when you have to find a cause within unexpected or unpredictable
      * exception wrappings.
      *
      * @param e      the exception instance to search the cause on
