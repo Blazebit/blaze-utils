@@ -1,16 +1,16 @@
 package com.blazebit.message.apt;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Locale;
 
 public class MessageBundleInfo {
 	private final String baseName;
 	private final long lastModified;
-	private final List<Locale> locales;
-	private final List<String> messages;
+	private final Collection<Locale> locales;
+	private final Collection<String> messages;
 
 	public MessageBundleInfo(String baseName, long lastModified,
-			List<Locale> locales, List<String> messages) {
+	    Collection<Locale> locales, Collection<String> messages) {
 		this.baseName = baseName;
 		this.lastModified = lastModified;
 		this.locales = locales;
@@ -25,11 +25,11 @@ public class MessageBundleInfo {
 		return lastModified;
 	}
 
-	public List<Locale> getLocales() {
+	public Collection<Locale> getLocales() {
 		return locales;
 	}
 
-	public List<String> getMessages() {
+	public Collection<String> getMessages() {
 		return messages;
 	}
 }

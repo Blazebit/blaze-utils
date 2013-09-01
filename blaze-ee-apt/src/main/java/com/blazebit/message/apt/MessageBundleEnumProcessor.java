@@ -24,14 +24,17 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
@@ -59,6 +62,15 @@ import com.blazebit.i18n.LocaleUtils;
 @SupportedAnnotationTypes("org.apache.deltaspike.core.api.message.annotation.MessageBundle")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
+    
+    private static final Comparator<Locale> LOCALE_COMPARATOR = new Comparator<Locale>() {
+
+        @Override
+        public int compare(Locale o1, Locale o2) {
+            return o1.toString().compareTo(o2.toString());
+        }
+        
+    };
 
 	@Override
 	public boolean process(Set<? extends TypeElement> annotations,
@@ -77,8 +89,9 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 					TypeElement messageBundleElement = (TypeElement) e;
 					String messageBundle = messageBundleElement
 							.getQualifiedName().toString();
+					String messageBundleSimpleName = messageBundleElement.getSimpleName().toString();
 					String messageBundleEnumName = messageBundle + "Enum";
-					List<String> messages = new ArrayList<String>();
+					Set<String> messages = new HashSet<String>();
 
 					for (Element messageBundleChild : messageBundleElement
 							.getEnclosedElements()) {
@@ -100,7 +113,7 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 						}
 						
 						long lastModified = javaFileObject.getLastModified();
-						List<Locale> locales = new ArrayList<Locale>();
+						Set<Locale> locales = new TreeSet<Locale>(LOCALE_COMPARATOR);
 						URI baseUri = null;
 
 						// Here we assume that the resources are present in the
@@ -210,15 +223,18 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 						}
 
 						for (File propertiesFile : baseDir.listFiles()) {
-							checkPropertiesFile(propertiesFile, messages);
-							String name = propertiesFile.getName();
-							int index = name.indexOf('_');
-							int dotIndex = name.lastIndexOf('.');
-
-							if (index > -1 && dotIndex > -1) {
-								locales.add(LocaleUtils.getLocale(name
-										.substring(index + 1, dotIndex)));
-							}
+						    // Only check properties files that belong to the message bundle
+						    if(propertiesFile.getName().startsWith(messageBundleSimpleName + "_") || propertiesFile.getName().equals(messageBundleSimpleName + ".properties")) {
+    							checkPropertiesFile(propertiesFile, messages);
+    							String name = propertiesFile.getName();
+    							int index = name.indexOf('_');
+    							int dotIndex = name.lastIndexOf('.');
+    
+    							if (index > -1 && dotIndex > -1) {
+    								locales.add(LocaleUtils.getLocale(name
+    										.substring(index + 1, dotIndex)));
+    							}
+						    }
 						}
 
 						MessageBundleInfo info = new MessageBundleInfo(
@@ -266,7 +282,7 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 	}
 
 	protected void checkPropertiesFile(File propertiesFile,
-			List<String> messages) {
+			Collection<String> messages) {
 		// Check if the messages from the list all exist in the file
 		InputStream is = null;
 
@@ -325,14 +341,14 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 			Writer writer) throws Exception {
 		String packageName = className.substring(0, className.lastIndexOf('.'));
 		String simpleName = className.substring(packageName.length() + 1);
-		List<String> imports = getImports(className);
-		List<String> keys = info.getMessages();
+		Collection<String> imports = getImports(className);
+		Collection<String> keys = info.getMessages();
 
 		writer.append("package ").append(packageName).append(";\n\n");
 
 		if (!imports.isEmpty()) {
-			for (int i = 0; i < imports.size(); i++) {
-				writer.append("import ").append(imports.get(i)).append(";\n");
+			for (String importElement : imports) {
+				writer.append("import ").append(importElement).append(";\n");
 			}
 
 			writer.append("\n");
@@ -341,10 +357,11 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 		writer.append("public enum ").append(simpleName).append(" {\n\n");
 
 		if (!keys.isEmpty()) {
-			writer.append("\t").append(keys.get(0));
+		    Iterator<String> keysIter = keys.iterator();
+			writer.append("\t").append(keysIter.next());
 
-			for (int i = 1; i < keys.size(); i++) {
-				writer.append(",\n\t").append(keys.get(i));
+			while (keysIter.hasNext()) {
+				writer.append(",\n\t").append(keysIter.next());
 			}
 
 			writer.append(";\n\n");
@@ -355,7 +372,7 @@ public abstract class MessageBundleEnumProcessor extends AbstractProcessor {
 		writer.append("}\n");
 	}
 
-	protected List<String> getImports(String enumClassName) {
+	protected Collection<String> getImports(String enumClassName) {
 		return Collections.emptyList();
 	}
 
