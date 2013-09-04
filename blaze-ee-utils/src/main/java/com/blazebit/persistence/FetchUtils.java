@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -29,6 +31,37 @@ public class FetchUtils {
 
 	private static final Logger log = Logger.getLogger(FetchUtils.class
 			.getName());
+	private static final boolean HIBERNATE_WORKAROUND;
+	
+	static {
+	    Pattern versionPattern = Pattern.compile("([1-9]+)\\.([0-9]+)\\.([0-9]+)(.+)");
+	    String versionString = null;
+	    Matcher versionMatcher = null;
+	    
+	    try{
+	        versionString = (String) Class.forName("org.hibernate.Version").getMethod("getVersionString").invoke(null);
+	    } catch(Exception ex) {
+	        // Ignore
+	    }
+	    
+	    if(versionString != null && (versionMatcher = versionPattern.matcher(versionString)).matches()) {
+	        int majorVersion = Integer.parseInt(versionMatcher.group(1));
+            int minorVersion1 = Integer.parseInt(versionMatcher.group(2));
+            int minorVersion2 = Integer.parseInt(versionMatcher.group(3));
+            
+            if(majorVersion > 5 || (majorVersion == 4 && minorVersion1 == 2 && minorVersion2 >= 5) || (majorVersion == 4 && minorVersion1 > 2)){
+                HIBERNATE_WORKAROUND = false;
+            } else {
+                HIBERNATE_WORKAROUND = true;
+            }
+	    } else {
+	        HIBERNATE_WORKAROUND = false;
+	    }
+	}
+	
+	static boolean isHibernateBug() {
+	    return HIBERNATE_WORKAROUND;
+	}
 
 	public static String getFetchProfilePlaceholder(Class<?> clazz) {
 		return "FETCH_PROFILE_" + clazz.getSimpleName();
@@ -171,12 +204,12 @@ public class FetchUtils {
 
 					sb.append(" LEFT OUTER JOIN FETCH ");
 
-					if (!fieldCollectionType && !fieldMapType) {
+					if (!fieldCollectionType && !fieldMapType && HIBERNATE_WORKAROUND) {
 						// FIXED: Check for collection type of the fieldClass
 						// if it is a collection type, just prepend the alias
 						// if not, we have to use the whole property path
 						// => Hibernate Bug
-						hasAlias = false;
+				        hasAlias = false;
 						// Fixed alias bug when doing deep nesting of many to
 						// one relations
 						if (j == 0) {
