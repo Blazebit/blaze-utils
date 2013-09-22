@@ -166,10 +166,12 @@ public class FetchUtils {
 
 				// Parseable types do not need to be fetched, so also sub
 				// properties would not have to be fetched
-				if (FormatUtils.isParseableType(fieldClass)
+				// Christian Beikov 14.09.13:
+				// Added check for collection and map types since fieldClass evaluates to V if the field is of type Map<K, V>
+				if (!fieldCollectionType && !fieldMapType && (FormatUtils.isParseableType(fieldClass)
 						|| Blob.class.equals(fieldClass)
 						|| Clob.class.equals(fieldClass)
-						|| new byte[0].getClass().equals(fieldClass)) {
+						|| new byte[0].getClass().equals(fieldClass))) {
 					log.info(new StringBuilder("Field with name ")
 							.append(propertyName)
 							.append(" of class ")
