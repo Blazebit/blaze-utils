@@ -131,6 +131,7 @@ public class CheckEitherValidator implements
 			final ConstraintViolationBuilder builder = context
 					.buildConstraintViolationWithTemplate(violation
 							.getMessageTemplate());
+            ConstraintValidatorContext nodeContext;
 
 			if (nodeIter.hasNext()) {
 				StringBuilder sb = new StringBuilder(nodeIter.next().getName());
@@ -141,10 +142,10 @@ public class CheckEitherValidator implements
 					}
 				}
 
-				builder.addNode(sb.toString());
-			}
-
-			builder.addConstraintViolation();
+				builder.addNode(sb.toString()).addConstraintViolation();
+			} else {
+                builder.addConstraintViolation();
+            }
 		}
 	}
 
