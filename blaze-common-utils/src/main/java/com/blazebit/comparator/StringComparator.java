@@ -15,9 +15,6 @@
  */
 package com.blazebit.comparator;
 
-import com.blazebit.lang.StringUtils;
-import com.blazebit.reflection.ExpressionUtils;
-import com.sun.rowset.internal.BaseRow;
 import java.text.Collator;
 import java.util.Locale;
 
@@ -35,7 +32,6 @@ public class StringComparator extends BaseComparator<Object> {
 
     /**
      * @param locale
-     * @param propertyPath
      */
     public StringComparator(Locale locale) {
         super();
@@ -48,7 +44,6 @@ public class StringComparator extends BaseComparator<Object> {
     /**
      * Sets the default Locale
      *
-     * @param propertyPath
      * @see
      * PropertyPathStringComparator#PropertyPathStringComparator(java.util.Locale,
      * java.lang.String)

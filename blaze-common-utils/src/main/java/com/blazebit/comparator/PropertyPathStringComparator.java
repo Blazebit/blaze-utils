@@ -17,7 +17,6 @@ package com.blazebit.comparator;
 
 import com.blazebit.lang.StringUtils;
 import com.blazebit.reflection.ExpressionUtils;
-import com.sun.rowset.internal.BaseRow;
 import java.text.Collator;
 import java.util.Locale;
 
@@ -27,6 +26,7 @@ import java.util.Locale;
  * resolved value of property path is not of instance String then toString() on
  * the value will get called.
  *
+ * @param <T> The types that should be compared
  * @author Thomas Herzog
  * @see BaseComparator
  */
