@@ -84,7 +84,7 @@
 		<version.freemarker>2.3.19</version.freemarker>
 		<version.junit>4.11</version.junit>
 
-		<version.openejb>4.6.0-SNAPSHOT</version.openejb>
+		<version.openejb>4.6.0</version.openejb>
 		<version.openejb.javaee-api>6.0-4</version.openejb.javaee-api>
 
 		<!-- Plugin versions -->
