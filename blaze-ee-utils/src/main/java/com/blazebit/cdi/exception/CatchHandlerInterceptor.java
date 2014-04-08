@@ -96,7 +96,7 @@ public class CatchHandlerInterceptor implements Serializable {
 						// Only invoke cleanup declared at handling level
 						if (!handling.cleanup().equals(Object.class)) {
                                                         cleanupInvoked = invokeCleanups(targetClass, targetObject,
-                                                                    handling.cleanup());
+                                                                    handling.cleanup(), t);
 						}
 
 						break;
@@ -119,7 +119,7 @@ public class CatchHandlerInterceptor implements Serializable {
 							Object.class) && !cleanupInvoked) {
 						if(!cleanupInvoked) {
                                                     invokeCleanups(targetClass, targetObject,
-								exceptionHandlerAnnotation.cleanup());
+								exceptionHandlerAnnotation.cleanup(), t);
                                                 }
 					}
 				}
@@ -179,7 +179,7 @@ public class CatchHandlerInterceptor implements Serializable {
 	 *             if an reflection specific exception occurs
 	 */
 	private boolean invokeCleanups(Class<?> clazz, Object target,
-			Class<?> cleanupClazz) throws Exception {
+			Class<?> cleanupClazz, Throwable exception) throws Exception {
 		boolean invoked = false;
 
 		if (!cleanupClazz.equals(Object.class)) {
@@ -189,8 +189,18 @@ public class CatchHandlerInterceptor implements Serializable {
                         Method m = ReflectionUtils.getMethod(clazz, Cleanup.class);
                         
                         if(m != null) {
-                            m.invoke(target);
-                            invoked = true;
+                            final Class<?>[] parameterTypes = m.getParameterTypes();
+                            if (parameterTypes.length == 1) {
+                                if (ReflectionUtils.isSubtype(exception.getClass(), parameterTypes[0])) {
+                                    m.invoke(target, exception);
+                                    invoked = true;
+                                } else {
+                                    throw new IllegalArgumentException("Cleanup method with name " + cleanupClazz.getName() + " requires a parameter that is not a subtype of the exception class " + exception.getClass().getName());
+                                }
+                            } else {
+                                m.invoke(target);
+                                invoked = true;
+                            }
                         }
 		}
                 
