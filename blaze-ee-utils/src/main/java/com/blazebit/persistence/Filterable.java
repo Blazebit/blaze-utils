@@ -21,5 +21,5 @@ package com.blazebit.persistence;
  */
 public interface Filterable<T> {
     
-    public T where(String property);
+    public T where(String expression);
 }

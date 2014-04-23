@@ -15,6 +15,12 @@
  */
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.expression.ExpressionUtils;
+import com.blazebit.persistence.expression.PropertyExpression;
+import com.blazebit.persistence.predicate.OrPredicate;
+import com.blazebit.persistence.predicate.Predicate;
+import com.blazebit.persistence.predicate.PredicateBuilder;
+
 /**
  *
  * @author cpbec
@@ -22,15 +28,28 @@ package com.blazebit.persistence;
 public class OrBuilderImpl<T extends BuilderEndedListener> extends AbstractBuilderEndedListener implements OrBuilder<T> {
 
     private final T result;
+    private final OrPredicate predicate;
     
     public OrBuilderImpl(T result) {
         this.result = result;
+        this.predicate = new OrPredicate();
     }
     
     @Override
     public T endOr() {
         result.onBuilderEnded(this);
         return result;
+    }
+
+    @Override
+    public Predicate getPredicate() {
+        return predicate;
+    }
+    
+    @Override
+    public void onBuilderEnded(PredicateBuilder o) {
+        super.onBuilderEnded(o);
+        predicate.getChildren().add(o.getPredicate());
     }
 
     @Override
@@ -42,7 +61,7 @@ public class OrBuilderImpl<T extends BuilderEndedListener> extends AbstractBuild
 
     @Override
     public RestrictionBuilder<? extends OrBuilder<T>> where(String property) {
-        RestrictionBuilder<OrBuilderImpl<T>> builder = new RestrictionBuilderImpl<OrBuilderImpl<T>>(this, property);
+        RestrictionBuilder<OrBuilderImpl<T>> builder = new RestrictionBuilderImpl<OrBuilderImpl<T>>(this, ExpressionUtils.parse(property));
         startedBuilders.add(builder);
         return builder;
     }

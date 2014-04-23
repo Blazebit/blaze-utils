@@ -13,29 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+package com.blazebit.persistence.predicate;
 
 import com.blazebit.persistence.expression.Expression;
-import com.blazebit.persistence.predicate.Predicate;
 
 /**
  *
  * @author cpbec
  */
-public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends AbstractRestrictionBuilder<T> {
+public class LikePredicate extends BinaryExpressionPredicate {
 
-    private final T result;
+    private final boolean caseSensitive;
+    private final Character escapeCharacter;
     
-    public RestrictionBuilderImpl(T result, Expression expression) {
-        super(expression);
-        this.result = result;
+    public LikePredicate(Expression left, Expression right, boolean caseSensitive, Character escapeCharacter) {
+        super(left, right);
+        this.caseSensitive = caseSensitive;
+        this.escapeCharacter = escapeCharacter;
     }
     
     @Override
-    protected T chain(Predicate predicate) {
-        this.predicate = predicate;
-        result.onBuilderEnded(this);
-        return result;
+    public void accept(Visitor visitor) {
+        visitor.visit(this);
+    }
+
+    public boolean isCaseSensitive() {
+        return caseSensitive;
+    }
+
+    public Character getEscapeCharacter() {
+        return escapeCharacter;
     }
     
 }

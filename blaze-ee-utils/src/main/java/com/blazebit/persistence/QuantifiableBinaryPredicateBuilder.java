@@ -15,24 +15,15 @@
  */
 package com.blazebit.persistence;
 
-import com.blazebit.persistence.predicate.PredicateBuilder;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Set;
-
 /**
  *
  * @author cpbec
  */
-public class AbstractBuilderEndedListener implements BuilderEndedListener{
+public interface QuantifiableBinaryPredicateBuilder<T> extends BinaryPredicateBuilder<T> {
     
-    protected final Set<PredicateBuilder> startedBuilders = Collections.newSetFromMap(new IdentityHashMap<PredicateBuilder, Boolean>());
-
-    @Override
-    public void onBuilderEnded(PredicateBuilder o) {
-        if (!startedBuilders.remove(o)) {
-            throw new IllegalArgumentException("Invalid builder ended notification! " + o);
-        }
-    }
+    public BinaryPredicateBuilder<T> all();
     
+    public BinaryPredicateBuilder<T> any();
+    
+    public BinaryPredicateBuilder<T> some();
 }

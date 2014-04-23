@@ -13,26 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
-
-import com.blazebit.persistence.predicate.PredicateBuilder;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Set;
+package com.blazebit.persistence.predicate;
 
 /**
  *
  * @author cpbec
  */
-public class AbstractBuilderEndedListener implements BuilderEndedListener{
+public interface Predicate {
     
-    protected final Set<PredicateBuilder> startedBuilders = Collections.newSetFromMap(new IdentityHashMap<PredicateBuilder, Boolean>());
-
-    @Override
-    public void onBuilderEnded(PredicateBuilder o) {
-        if (!startedBuilders.remove(o)) {
-            throw new IllegalArgumentException("Invalid builder ended notification! " + o);
-        }
+    public static interface Visitor {
+        
+        public void visit(AndPredicate predicate);
+        
+        public void visit(OrPredicate predicate);
+        
+        public void visit(NotPredicate predicate);
+        
+        public void visit(EqPredicate predicate);
+        
+        public void visit(IsNullPredicate predicate);
+        
+        public void visit(LikePredicate predicate);
     }
     
+    /**
+     * The predicate tree is traversed in pre-order.
+     * 
+     * @param visitor 
+     */
+    public void accept(Visitor visitor);
 }

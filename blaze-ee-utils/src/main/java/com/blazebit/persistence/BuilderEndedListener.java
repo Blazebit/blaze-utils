@@ -15,11 +15,13 @@
  */
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.predicate.PredicateBuilder;
+
 /**
  *
  * @author cpbec
  */
 public interface BuilderEndedListener {
     
-    public void onBuilderEnded(Object o);
+    public void onBuilderEnded(PredicateBuilder o);
 }

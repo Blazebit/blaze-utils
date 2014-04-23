@@ -15,11 +15,13 @@
  */
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.predicate.PredicateBuilder;
+
 /**
  *
  * @author cpbec
  */
-public interface AndBuilder<T extends BuilderEndedListener> extends Filterable<RestrictionBuilder<? extends AndBuilder<T>>> {
+public interface AndBuilder<T extends BuilderEndedListener> extends Filterable<RestrictionBuilder<? extends AndBuilder<T>>>, PredicateBuilder {
     
     public T endAnd();
     

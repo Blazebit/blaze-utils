@@ -16,6 +16,10 @@
 package com.blazebit.persistence;
 
 import com.blazebit.lang.StringUtils;
+import com.blazebit.persistence.expression.ExpressionUtils;
+import com.blazebit.persistence.expression.PropertyExpression;
+import com.blazebit.persistence.predicate.AndPredicate;
+import com.blazebit.persistence.predicate.PredicateBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,7 +36,7 @@ import javax.persistence.TypedQuery;
  *
  * @author cpbec
  */
-public class CriteriaBuilder<T> extends AbstractBuilderEndedListener {
+public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements Filterable<RestrictionBuilder<? extends CriteriaBuilder<T>>> {
     
     private final Class<T> clazz;
     private final AliasInfo rootAliasInfo;
@@ -40,7 +44,7 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener {
     private final Map<String, AliasInfo> aliasInfos = new HashMap<String, AliasInfo>();
     private final JoinNode rootNode;
     private final Map<String, OrderByInfo> orderByInfos = new HashMap<String, OrderByInfo>();
-//    private final List<Condition> conditions = new ArrayList<Condition>();
+    private final AndPredicate rootPredicate;
     private final Map<String, Object> parameters = new HashMap<String, Object>();
 
     public CriteriaBuilder(Class<T> clazz, String alias) {
@@ -48,6 +52,7 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener {
         this.rootAliasInfo = new AliasInfo(alias, "", true);
         this.aliasInfos.put(alias, rootAliasInfo);
         this.rootNode = new JoinNode(rootAliasInfo, null, false);
+        this.rootPredicate = new AndPredicate();
     }
     
     public static <T> CriteriaBuilder<T> from(Class<T> clazz) {
@@ -59,19 +64,21 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener {
     }
     
     @Override
-    public void onBuilderEnded(Object o) {
+    public void onBuilderEnded(PredicateBuilder o) {
         super.onBuilderEnded(o);
-        
+        rootPredicate.getChildren().add(o.getPredicate());
     }
     
     /* 
      * Where methods
      */
-    public RestrictionBuilder<CriteriaBuilder<T>> where(String property) {
-        RestrictionBuilder<CriteriaBuilder<T>> builder = new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, property);
+    @Override
+    public RestrictionBuilder<CriteriaBuilder<T>> where(String expression) {
+        RestrictionBuilder<CriteriaBuilder<T>> builder = new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, ExpressionUtils.parse(expression));
         startedBuilders.add(builder);
         return builder;
     }
+    
     public OrBuilder<CriteriaBuilder<T>> whereOr() {
         OrBuilder<CriteriaBuilder<T>> builder = new OrBuilderImpl<CriteriaBuilder<T>>(this);
         startedBuilders.add(builder);
