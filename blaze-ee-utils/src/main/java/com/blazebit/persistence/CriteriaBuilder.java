@@ -21,6 +21,7 @@ import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.persistence.EntityManager;
@@ -30,16 +31,18 @@ import javax.persistence.TypedQuery;
  *
  * @author cpbec
  */
-public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? extends CriteriaBuilder<T>>> {
+public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? extends CriteriaBuilder<T>>>, Aggregateable<RestrictionBuilder<? extends CriteriaBuilder<T>>> {
     
     private final Class<T> clazz;
     private final AliasInfo rootAliasInfo;
     // Maps alias to join path with the root as base
     private final Map<String, AliasInfo> aliasInfos = new HashMap<String, AliasInfo>();
     private final JoinNode rootNode;
-    private final Map<String, OrderByInfo> orderByInfos = new HashMap<String, OrderByInfo>();
+    private final Map<String, OrderByInfo> orderByInfos = new LinkedHashMap<String, OrderByInfo>();
     private final RootPredicate rootWherePredicate;
     private final RootPredicate rootHavingPredicate;
+    private final Map<String, SelectInfo> selectInfos = new LinkedHashMap<String, SelectInfo>();
+    private final Map<String, GroupByInfo> groupByInfos = new LinkedHashMap<String, GroupByInfo>();
     private final Map<String, Object> parameters = new HashMap<String, Object>();
 
     public CriteriaBuilder(Class<T> clazz, String alias) {
@@ -60,6 +63,82 @@ public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? exten
     }
     
     /* 
+     * Select methods
+     */
+    public CriteriaBuilder<T> select(String... paths) {
+        for (String path : paths) {
+            select(path);
+        }
+        
+        return this;
+    }
+    
+    public CriteriaBuilder<T> select(String path) {
+        verifyBuilderEnded();
+        
+        JoinNode node;
+        String normalizedPath;
+        String selectField;
+        
+        if (startsAtRootAlias(path)) {
+            // The given path is relative to the root
+            normalizedPath = path.substring(rootAliasInfo.alias.length() + 1);
+        } else {
+            // The path is either already normalized or uses a specific alias as base
+            normalizedPath = path;
+        }
+
+        int dotIndex;
+        int fieldStartDotIndex;
+        if ((fieldStartDotIndex = normalizedPath.lastIndexOf('.')) != -1) {
+            // First we extract the field by which should be ordered
+            selectField = normalizedPath.substring(fieldStartDotIndex + 1);
+            String joinPath = normalizedPath.substring(0, fieldStartDotIndex);
+            AliasInfo potentialBaseInfo;
+            
+            if ((dotIndex = joinPath.indexOf('.')) != -1) {
+                // We found a dot in the path, so it either uses an alias or does chained joining
+                String potentialBase = normalizedPath.substring(0, dotIndex);
+                potentialBaseInfo = aliasInfos.get(potentialBase);
+            } else {
+                potentialBaseInfo = aliasInfos.get(joinPath);
+            }
+            
+            if (potentialBaseInfo != null) {
+                // We found an alias for the first part of the path
+                String potentialBasePath = potentialBaseInfo.absolutePath;
+                JoinNode aliasNode = findNode(rootNode, potentialBasePath);
+                String relativePath = normalizedPath.substring(aliasNode.aliasInfo.alias.length() + 1);
+                normalizedPath = potentialBasePath + '.' + relativePath;
+                String relativeJoinPath = relativePath.substring(0, relativePath.length() - selectField.length());
+                
+                if (relativeJoinPath.isEmpty()) {
+                    node = aliasNode;
+                } else {
+                    node = createOrUpdateNodeForOrderBy(aliasNode, potentialBasePath, relativeJoinPath);
+                }
+            } else {
+                // The given path is relative to the root
+                node = createOrUpdateNodeForOrderBy(rootNode, "", joinPath);
+            }
+        } else {
+            // The given path is relative to the root, an alias or the root itself
+            AliasInfo alias = aliasInfos.get(normalizedPath);
+            
+            if (alias != null) {
+                node = findNode(rootNode, alias.absolutePath);
+                selectField = null;
+            } else {
+                node = rootNode;
+                selectField = normalizedPath;
+            }
+        }
+        
+        selectInfos.put(normalizedPath, new SelectInfo(node.aliasInfo, selectField));
+        return this;
+    }
+    
+    /* 
      * Where methods
      */
     @Override
@@ -71,6 +150,83 @@ public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? exten
         return rootWherePredicate.startBuilder(new WhereOrBuilderImpl<CriteriaBuilder<T>>(this, rootWherePredicate));
     }
     
+    public CriteriaBuilder<T> groupBy(String... paths) {
+        for (String path : paths) {
+            groupBy(path);
+        }
+        
+        return this;
+    }
+    
+    public CriteriaBuilder<T> groupBy(String path) {
+        verifyBuilderEnded();
+        
+        JoinNode node;
+        String normalizedPath;
+        String groupByField;
+        
+        if (startsAtRootAlias(path)) {
+            // The given path is relative to the root
+            normalizedPath = path.substring(rootAliasInfo.alias.length() + 1);
+        } else {
+            // The path is either already normalized or uses a specific alias as base
+            normalizedPath = path;
+        }
+
+        int dotIndex;
+        int fieldStartDotIndex;
+        if ((fieldStartDotIndex = normalizedPath.lastIndexOf('.')) != -1) {
+            // First we extract the field by which should be ordered
+            groupByField = normalizedPath.substring(fieldStartDotIndex + 1);
+            String joinPath = normalizedPath.substring(0, fieldStartDotIndex);
+            AliasInfo potentialBaseInfo;
+            
+            if ((dotIndex = joinPath.indexOf('.')) != -1) {
+                // We found a dot in the path, so it either uses an alias or does chained joining
+                String potentialBase = normalizedPath.substring(0, dotIndex);
+                potentialBaseInfo = aliasInfos.get(potentialBase);
+            } else {
+                potentialBaseInfo = aliasInfos.get(joinPath);
+            }
+            
+            if (potentialBaseInfo != null) {
+                // We found an alias for the first part of the path
+                String potentialBasePath = potentialBaseInfo.absolutePath;
+                JoinNode aliasNode = findNode(rootNode, potentialBasePath);
+                String relativePath = normalizedPath.substring(aliasNode.aliasInfo.alias.length() + 1);
+                normalizedPath = potentialBasePath + '.' + relativePath;
+                String relativeJoinPath = relativePath.substring(0, relativePath.length() - groupByField.length());
+                
+                if (relativeJoinPath.isEmpty()) {
+                    node = aliasNode;
+                } else {
+                    node = createOrUpdateNodeForOrderBy(aliasNode, potentialBasePath, relativeJoinPath);
+                }
+            } else {
+                // The given path is relative to the root
+                node = createOrUpdateNodeForOrderBy(rootNode, "", joinPath);
+            }
+        } else {
+            // The given path is relative to the root, an alias or the root itself
+            AliasInfo alias = aliasInfos.get(normalizedPath);
+            
+            if (alias != null) {
+                node = findNode(rootNode, alias.absolutePath);
+                groupByField = null;
+            } else {
+                node = rootNode;
+                groupByField = normalizedPath;
+            }
+        }
+        
+        groupByInfos.put(normalizedPath, new GroupByInfo(node.aliasInfo, groupByField));
+        return this;
+    }
+    
+    /* 
+     * Having methods
+     */
+    @Override
     public RestrictionBuilder<CriteriaBuilder<T>> having(String expression) {
         return rootHavingPredicate.startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootHavingPredicate, ExpressionUtils.parse(expression)));
     }
@@ -333,6 +489,35 @@ public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? exten
         return node;
     }
     
+    /*
+     * Apply methods
+     */
+
+    private void applySelects(StringBuilder sb, Map<String, SelectInfo> selects) {
+        if (selects.isEmpty()) {
+            return;
+        }
+        
+        sb.append("SELECT ");
+        Iterator<SelectInfo> iter = selects.values().iterator();
+        applySelect(sb, iter.next());
+        
+        while(iter.hasNext()) {
+            sb.append(", ");
+            applySelect(sb, iter.next());
+        }
+        
+        sb.append(" ");
+    }
+
+    private void applySelect(StringBuilder sb, SelectInfo select) {
+        sb.append(select.baseAliasInfo.alias);
+        
+        if (select.field != null) {
+            sb.append('.').append(select.field);
+        }
+    }
+    
     private static void applyJoins(StringBuilder sb, AliasInfo joinBase, Map<String, JoinNode> nodes) {
         for (Map.Entry<String, JoinNode> nodeEntry : nodes.entrySet()) {
             String relation = nodeEntry.getKey();
@@ -364,6 +549,29 @@ public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? exten
             if (!node.nodes.isEmpty()) {
                 applyJoins(sb, node.aliasInfo, node.nodes);
             }
+        }
+    }
+
+    private void applyGroupBys(StringBuilder sb, Map<String, GroupByInfo> groupBys) {
+        if (groupBys.isEmpty()) {
+            return;
+        }
+        
+        sb.append(" GROUP BY ");
+        Iterator<GroupByInfo> iter = groupBys.values().iterator();
+        applyGroupBy(sb, iter.next());
+        
+        while(iter.hasNext()) {
+            sb.append(", ");
+            applyGroupBy(sb, iter.next());
+        }
+    }
+
+    private void applyGroupBy(StringBuilder sb, GroupByInfo groupBy) {
+        sb.append(groupBy.baseAliasInfo.alias);
+        
+        if (groupBy.field != null) {
+            sb.append('.').append(groupBy.field);
         }
     }
     
@@ -399,18 +607,17 @@ public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? exten
             sb.append(" NULLS LAST");
         }
     }
-
-//    private void applyConditions(StringBuilder sb, List<Condition> conditions) {
-//        
-//    }
     
     public String getQueryString() {
         verifyBuilderEnded();
         StringBuilder sb = new StringBuilder();
         
+        applySelects(sb, selectInfos);
         sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(rootAliasInfo.alias);
         applyJoins(sb, rootAliasInfo, rootNode.nodes);
-//        applyConditions(sb, conditions);
+//        applyWheres(sb, conditions);
+        applyGroupBys(sb, groupByInfos);
+//        applyHavings();
         applyOrderBys(sb, orderByInfos);
         
         return sb.toString();
@@ -463,6 +670,26 @@ public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? exten
             this.field = field;
             this.ascending = ascending;
             this.nullFirst = nullFirst;
+        }
+    }
+    
+    private static class GroupByInfo {
+        private AliasInfo baseAliasInfo;
+        private String field;
+
+        public GroupByInfo(AliasInfo baseAliasInfo, String field) {
+            this.baseAliasInfo = baseAliasInfo;
+            this.field = field;
+        }
+    }
+    
+    private static class SelectInfo {
+        private AliasInfo baseAliasInfo;
+        private String field;
+
+        public SelectInfo(AliasInfo baseAliasInfo, String field) {
+            this.baseAliasInfo = baseAliasInfo;
+            this.field = field;
         }
     }
     
