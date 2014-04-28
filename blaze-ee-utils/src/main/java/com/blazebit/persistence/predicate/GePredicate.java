@@ -49,8 +49,8 @@ public class GePredicate extends BinaryExpressionPredicate {
 
     public static class GePredicateBuilder<T extends BuilderEndedListener> extends AbstractQuantifiablePredicateBuilder<T> {
 
-        public GePredicateBuilder(T result, Expression leftExpression) {
-            super(result, leftExpression, false);
+        public GePredicateBuilder(T result, BuilderEndedListener listener, Expression leftExpression) {
+            super(result, listener, leftExpression, false);
         }
 
         @Override

@@ -24,24 +24,26 @@ import com.blazebit.persistence.expression.Expression;
  *
  * @author cpbec
  */
-public abstract class AbstractQuantifiablePredicateBuilder<T extends BuilderEndedListener> implements
+public abstract class AbstractQuantifiablePredicateBuilder<T> implements
     QuantifiableBinaryPredicateBuilder<T>, QuantizedBinaryPredicateBuilder<T>, PredicateBuilder {
 
     private final T result;
+    private final BuilderEndedListener listener;
     private final boolean wrapNot;
     protected final Expression leftExpression;
     protected PredicateQuantifier quantifier = PredicateQuantifier.ONE;
     private Predicate predicate;
 
-    public AbstractQuantifiablePredicateBuilder(T result, Expression leftExpression, boolean wrapNot) {
+    public AbstractQuantifiablePredicateBuilder(T result, BuilderEndedListener listener, Expression leftExpression, boolean wrapNot) {
         this.result = result;
+        this.listener = listener;
         this.wrapNot = wrapNot;
         this.leftExpression = leftExpression;
     }
     
     protected T chain(Predicate predicate) {
         this.predicate = wrapNot ? new NotPredicate(predicate) : predicate;
-        result.onBuilderEnded(this);
+        listener.onBuilderEnded(this);
         return result;
     }
 

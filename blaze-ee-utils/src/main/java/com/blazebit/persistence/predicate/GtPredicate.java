@@ -49,8 +49,8 @@ public class GtPredicate extends BinaryExpressionPredicate {
 
     public static class GtPredicateBuilder<T extends BuilderEndedListener> extends AbstractQuantifiablePredicateBuilder<T> {
 
-        public GtPredicateBuilder(T result, Expression leftExpression) {
-            super(result, leftExpression, false);
+        public GtPredicateBuilder(T result, BuilderEndedListener listener, Expression leftExpression) {
+            super(result, listener, leftExpression, false);
         }
 
         @Override

@@ -49,8 +49,8 @@ public class LtPredicate extends BinaryExpressionPredicate {
 
     public static class LtPredicateBuilder<T extends BuilderEndedListener> extends AbstractQuantifiablePredicateBuilder<T> {
 
-        public LtPredicateBuilder(T result, Expression leftExpression) {
-            super(result, leftExpression, false);
+        public LtPredicateBuilder(T result, BuilderEndedListener listener, Expression leftExpression) {
+            super(result, listener, leftExpression, false);
         }
 
         @Override
