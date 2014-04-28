@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+package com.blazebit.persistence.predicate;
 
 /**
  *
  * @author cpbec
  */
-public interface BinaryPredicateBuilder<T> {
-    
-    public T value(Object value);
-    
-    public T expression(String expression);
-    
-    // TODO: subquery
-    
-    //public T subquery(CriteriaBuilder builder);
+public enum PredicateQuantifier {
+    ONE,
+    ALL,
+    ANY,
+    SOME;
 }

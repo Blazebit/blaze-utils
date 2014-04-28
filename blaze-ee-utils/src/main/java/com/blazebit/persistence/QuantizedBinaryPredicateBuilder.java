@@ -19,13 +19,9 @@ package com.blazebit.persistence;
  *
  * @author cpbec
  */
-public interface BinaryPredicateBuilder<T> {
+public interface QuantizedBinaryPredicateBuilder<T> extends BinaryPredicateBuilder<T> {
     
-    public T value(Object value);
+    public T elements(String expression);
     
-    public T expression(String expression);
-    
-    // TODO: subquery
-    
-    //public T subquery(CriteriaBuilder builder);
+    public T indices(String expression);
 }

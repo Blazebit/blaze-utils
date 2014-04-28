@@ -25,15 +25,15 @@ import com.blazebit.persistence.expression.ParameterExpression;
  *
  * @author cpbec
  */
-public class EqPredicate  extends BinaryExpressionPredicate {
+public class GtPredicate extends BinaryExpressionPredicate {
 
     private final PredicateQuantifier quantifier;
-    
-    public EqPredicate(Expression left, Expression right) {
+
+    public GtPredicate(Expression left, Expression right) {
         this(left, right, PredicateQuantifier.ONE);
     }
-    
-    public EqPredicate(Expression left, Expression right, PredicateQuantifier quantifier) {
+
+    public GtPredicate(Expression left, Expression right, PredicateQuantifier quantifier) {
         super(left, right);
         this.quantifier = quantifier;
     }
@@ -41,38 +41,36 @@ public class EqPredicate  extends BinaryExpressionPredicate {
     public PredicateQuantifier getQuantifier() {
         return quantifier;
     }
-    
+
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
-    
-    public static class EqPredicateBuilder<T extends BuilderEndedListener> extends AbstractQuantifiablePredicateBuilder<T> {
 
-        public EqPredicateBuilder(T result, Expression leftExpression, boolean wrapNot) {
-            super(result, leftExpression, wrapNot);
+    public static class GtPredicateBuilder<T extends BuilderEndedListener> extends AbstractQuantifiablePredicateBuilder<T> {
+
+        public GtPredicateBuilder(T result, Expression leftExpression) {
+            super(result, leftExpression, false);
         }
-       
+
         @Override
         public T value(Object value) {
-            return chain(new EqPredicate(leftExpression, new ParameterExpression(value), quantifier));
+            return chain(new GtPredicate(leftExpression, new ParameterExpression(value), quantifier));
         }
 
         @Override
         public T expression(String expression) {
-            return chain(new EqPredicate(leftExpression, ExpressionUtils.parse(expression), quantifier));
+            return chain(new GtPredicate(leftExpression, ExpressionUtils.parse(expression), quantifier));
         }
 
         @Override
         public T elements(String expression) {
-            return chain(new EqPredicate(leftExpression, FunctionExpression.elements(expression), quantifier));
+            return chain(new GtPredicate(leftExpression, FunctionExpression.elements(expression), quantifier));
         }
 
         @Override
         public T indices(String expression) {
-            return chain(new EqPredicate(leftExpression, FunctionExpression.indices(expression), quantifier));
+            return chain(new GtPredicate(leftExpression, FunctionExpression.indices(expression), quantifier));
         }
-        
     }
-    
 }

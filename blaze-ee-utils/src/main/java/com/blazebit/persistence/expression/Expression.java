@@ -26,6 +26,8 @@ public interface Expression {
         public void visit(PropertyExpression expression);
         
         public void visit(ParameterExpression expression);
+        
+        public void visit(FunctionExpression expression);
     }
     
     /**

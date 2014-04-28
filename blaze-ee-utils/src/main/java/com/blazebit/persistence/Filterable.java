@@ -22,4 +22,10 @@ package com.blazebit.persistence;
 public interface Filterable<T> {
     
     public T where(String expression);
+    
+//    public T whereExists(CriteriaBuilder builder);
+//    
+//    public T whereExistsElements(String expression);
+//    
+//    public T whereExistsIndices(String expression);
 }

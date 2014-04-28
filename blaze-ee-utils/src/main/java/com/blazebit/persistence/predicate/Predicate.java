@@ -33,7 +33,20 @@ public interface Predicate {
         
         public void visit(IsNullPredicate predicate);
         
+        public void visit(IsEmptyPredicate predicate);
+        
+        public void visit(IsMemberOfPredicate predicate);
+        
         public void visit(LikePredicate predicate);
+        
+        public void visit(BetweenPredicate predicate);
+        
+        public void visit(InPredicate predicate);
+        
+        public void visit(GtPredicate predicate);
+        public void visit(GePredicate predicate);
+        public void visit(LtPredicate predicate);
+        public void visit(LePredicate predicate);
     }
     
     /**
