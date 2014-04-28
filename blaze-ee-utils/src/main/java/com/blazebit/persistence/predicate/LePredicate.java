@@ -47,7 +47,7 @@ public class LePredicate extends BinaryExpressionPredicate {
         visitor.visit(this);
     }
 
-    public static class LePredicateBuilder<T extends BuilderEndedListener> extends AbstractQuantifiablePredicateBuilder<T> {
+    public static class LePredicateBuilder<T> extends AbstractQuantifiablePredicateBuilder<T> {
 
         public LePredicateBuilder(T result, BuilderEndedListener listener, Expression leftExpression) {
             super(result, listener, leftExpression, false);

@@ -74,9 +74,11 @@ public interface RestrictionBuilder<T> extends PredicateBuilder {
     
     //public T in(CriteriaBuilder builder);
     
-    public BinaryPredicateBuilder<T> in();
+    //public T notIn(CriteriaBuilder builder);
     
     public T in(List<?> values);
+    
+    public T notIn(List<?> values);
     
 //    public T inElements(String expression);
 //    
