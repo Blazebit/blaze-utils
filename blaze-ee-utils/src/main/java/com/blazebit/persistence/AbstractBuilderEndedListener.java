@@ -28,6 +28,12 @@ public class AbstractBuilderEndedListener implements BuilderEndedListener{
     
     private PredicateBuilder currentBuilder;
     
+    protected void verifyBuilderEnded() {
+        if (currentBuilder != null) {
+            throw new IllegalStateException("A builder was not ended properly.");
+        }
+    }
+    
     protected <T extends PredicateBuilder> T startBuilder(T builder) {
         if (currentBuilder != null) {
             throw new IllegalStateException("There was an attempt to start a builder but a previous builder was not ended.");

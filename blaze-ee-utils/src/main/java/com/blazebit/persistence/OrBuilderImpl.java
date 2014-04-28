@@ -37,6 +37,7 @@ public class OrBuilderImpl<T extends BuilderEndedListener> extends AbstractBuild
     
     @Override
     public T endOr() {
+        verifyBuilderEnded();
         result.onBuilderEnded(this);
         return result;
     }

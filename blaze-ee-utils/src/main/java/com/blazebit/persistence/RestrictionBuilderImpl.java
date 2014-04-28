@@ -50,6 +50,7 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
     }
     
     private T chain(Predicate predicate) {
+        verifyBuilderEnded();
         this.predicate = predicate;
         result.onBuilderEnded(this);
         return result;
@@ -176,16 +177,6 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
     public T in(List<?> values) {
         return chain(new InPredicate(leftExpression, new ParameterExpression(values)));
     }
-
-//    @Override
-//    public T inElements(String expression) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
-//
-//    @Override
-//    public T inIndices(String expression) {
-//        throw new UnsupportedOperationException("Not supported yet.");
-//    }
     
     @Override
     public T isNull() {

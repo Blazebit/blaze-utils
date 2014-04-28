@@ -37,6 +37,7 @@ public class AndBuilderImpl<T extends BuilderEndedListener> extends AbstractBuil
     
     @Override
     public T endAnd() {
+        verifyBuilderEnded();
         result.onBuilderEnded(this);
         return result;
     }

@@ -30,7 +30,7 @@ public interface RestrictionBuilder<T> extends PredicateBuilder {
     //                 COUNT, AVG, MIN, MAX, SUM
     
     // Operators TODO: IN [subquery], 
-    //                 EXISTS [subquery | indices() | elements()]
+    //                 EXISTS [subquery]
     
     public T between(Object start, Object end);
     

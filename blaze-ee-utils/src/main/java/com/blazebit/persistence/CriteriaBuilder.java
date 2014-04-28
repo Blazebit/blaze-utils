@@ -101,6 +101,8 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
     }
     
     public CriteriaBuilder<T> orderBy(String path, boolean ascending, boolean nullFirst) {
+        verifyBuilderEnded();
+        
         JoinNode node;
         String normalizedPath;
         String orderByField;
@@ -193,6 +195,8 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
     }
     
     public CriteriaBuilder<T> join(String path, String alias, JoinType type, boolean fetch) {
+        verifyBuilderEnded();
+        
         String normalizedPath;
         
         if (startsAtRootAlias(path)) {
@@ -396,6 +400,7 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
 //    }
     
     public String getQueryString() {
+        verifyBuilderEnded();
         StringBuilder sb = new StringBuilder();
         
         sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(rootAliasInfo.alias);
