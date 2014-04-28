@@ -21,9 +21,10 @@ import com.blazebit.persistence.predicate.PredicateBuilder;
  *
  * @author cpbec
  */
-public interface BinaryPredicateBuilder<T> extends SubqueryPredicateBuilder<T> {
+public interface SubqueryPredicateBuilder<T> extends PredicateBuilder {
     
-    public T value(Object value);
     
-    public T expression(String expression);
+    // TODO: subquery
+    
+    //public T subquery(CriteriaBuilder builder);
 }
