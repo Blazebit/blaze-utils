@@ -152,8 +152,4 @@ public class CriteriaBuilderTest {
             
         System.out.println(criteria.getQueryString());
     }
-    
-    public static class Document {
-        
-    }
 }

@@ -16,6 +16,9 @@
 
 package com.blazebit.persistence;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -27,8 +30,40 @@ public class InTest {
     @Test
     public void testIn(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").in();
+        List<Integer> ages = new ArrayList<Integer>(Arrays.asList(new Integer[]{1,2,3,4,5}));
+        criteria.where("d.age").in(ages);
         
-        assertEquals("FROM Document d WHERE d.age BETWEEN 1 and 10", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE d.age IN (1,2,3,4,5)", criteria.getQueryString());
     }
+    
+    @Test(expected = NullPointerException.class)
+    public void testInNull(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.age").in(null);   
+    }
+    
+    @Test
+    public void testNotIn(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        List<Integer> ages = new ArrayList<Integer>(Arrays.asList(new Integer[]{1,2,3,4,5}));
+        criteria.where("d.age").notIn(ages);
+        
+        assertEquals("FROM Document d WHERE d.age NOT IN (1,2,3,4,5)", criteria.getQueryString());
+    }
+    
+    @Test(expected = NullPointerException.class)
+    public void testNotInNull(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.age").notIn(null);
+    }
+    
+    
+    //TODO: test with subqueries
+//    @Test
+//    public void testIn(){
+//        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+//        criteria.where("d.age").in().expression("d.partners.a");
+//        
+//        assertEquals("FROM Document d WHERE d.age BETWEEN 1 and 10", criteria.getQueryString());
+//    }
 }

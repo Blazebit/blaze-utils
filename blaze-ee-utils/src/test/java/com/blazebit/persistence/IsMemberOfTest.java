@@ -23,44 +23,44 @@ import org.junit.Test;
  *
  * @author ccbem
  */
-public class BetweenTest {
+public class IsMemberOfTest {
     @Test
-    public void testBetween(){
+    public void testIsMemberOf(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").between(1, 10);
+        criteria.where("d.name").isMemberOf("d.parentDocuments.childDocuments.name");
         
-        assertEquals("FROM Document d WHERE d.age BETWEEN 1 and 10", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.parentDocuments parentDocuments LEFT JOIN parentDocuments.childDocuments childDocuments WHERE d.name MEMBER OF childDocuments", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
-    public void testBetweenValueAndNull(){
+    public void testIsMemberOfNull(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").between(1, null);        
+        criteria.where("d.name").isMemberOf(null);
     }
     
-    @Test(expected = NullPointerException.class)
-    public void testBetweenNullAndValue(){
+    @Test(expected = IllegalArgumentException.class)
+    public void testIsMemberOfEmpty(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").between(null, 10);        
+        criteria.where("d.name").isMemberOf("");
     }
     
     @Test
-    public void testNotBetween(){
+    public void testIsNotMemberOf(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notBetween(1, 10);
+        criteria.where("d.name").isNotMemberOf("d.parentDocuments.childDocuments.name");
         
-        assertEquals("FROM Document d WHERE d.age NOT BETWEEN 1 and 10", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.parentDocuments parentDocuments LEFT JOIN parentDocuments.childDocuments childDocuments WHERE d.name NOT MEMBER OF childDocuments", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
-    public void testNotBetweenValueAndNull(){
+    public void testIsNotMemberOfNull(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notBetween(1, null);        
+        criteria.where("d.name").isNotMemberOf(null);
     }
     
-    @Test(expected = NullPointerException.class)
-    public void testNotBetweenNullAndValue(){
+    @Test(expected = IllegalArgumentException.class)
+    public void testIsNotMemberOfEmpty(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notBetween(null, 10);        
+        criteria.where("d.name").isNotMemberOf("");
     }
 }

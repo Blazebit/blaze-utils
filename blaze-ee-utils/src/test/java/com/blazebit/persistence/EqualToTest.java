@@ -73,4 +73,54 @@ public class EqualToTest {
         
         assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age = ANY(partners.age)", criteria.getQueryString());
     }
+    
+    @Test
+    public void testNotEqualTo(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.age").notEqualTo(20);
+        
+        assertEquals("FROM Document d WHERE d.age != 20", criteria.getQueryString());
+    }
+    
+     @Test(expected = NullPointerException.class)
+    public void testNotEqualToNull(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.age").notEqualTo(null);
+    }
+    
+    @Test
+    public void testNotEqualToExpression(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.age").notEqualToExpression("d.age2 + 1");
+        
+        assertEquals("FROM Document d WHERE d.age != d.age2 + 1", criteria.getQueryString());
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testNotEqualToEmptyExpression(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.age").notEqualToExpression("");        
+    }
+    
+    @Test(expected = NullPointerException.class)
+    public void testNotEqualToNullExpression(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.age").notEqualToExpression(null);        
+    }
+    
+    @Test
+    public void testNotEqualToAll(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.age").notEqualTo().all().expression("d.partners.age");
+        
+        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age != ALL(partners.age)", criteria.getQueryString());
+    }
+    
+    @Test
+    public void testNotEqualToAny(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.age").notEqualTo().any().expression("d.partners.age");
+        
+        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age != ANY(partners.age)", criteria.getQueryString());
+    }
 }
