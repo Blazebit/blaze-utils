@@ -17,7 +17,7 @@ package com.blazebit.persistence;
 
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.PropertyExpression;
-import com.blazebit.persistence.predicate.AndPredicate;
+import com.blazebit.persistence.predicate.OrPredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 
@@ -25,20 +25,22 @@ import com.blazebit.persistence.predicate.PredicateBuilder;
  *
  * @author cpbec
  */
-public class AndBuilderImpl<T extends BuilderEndedListener> extends AbstractBuilderEndedListener implements AndBuilder<T> {
-    
+public class WhereOrBuilderImpl<T> extends AbstractBuilderEndedListener implements WhereOrBuilder<T> {
+
     private final T result;
-    private final AndPredicate predicate;
+    private final BuilderEndedListener listener;
+    private final OrPredicate predicate;
     
-    public AndBuilderImpl(T result) {
+    public WhereOrBuilderImpl(T result, BuilderEndedListener listener) {
         this.result = result;
-        this.predicate = new AndPredicate();
+        this.listener = listener;
+        this.predicate = new OrPredicate();
     }
     
     @Override
-    public T endAnd() {
+    public T endOr() {
         verifyBuilderEnded();
-        result.onBuilderEnded(this);
+        listener.onBuilderEnded(this);
         return result;
     }
 
@@ -54,12 +56,13 @@ public class AndBuilderImpl<T extends BuilderEndedListener> extends AbstractBuil
     }
 
     @Override
-    public OrBuilder<AndBuilderImpl<T>> whereOr() {
-        return startBuilder(new OrBuilderImpl<AndBuilderImpl<T>>(this));
+    public WhereAndBuilder<WhereOrBuilderImpl<T>> whereAnd() {
+        return startBuilder(new WhereAndBuilderImpl<WhereOrBuilderImpl<T>>(this, this));
     }
 
     @Override
-    public RestrictionBuilder<? extends AndBuilder<T>> where(String property) {
-        return startBuilder(new RestrictionBuilderImpl<AndBuilderImpl<T>>(this, ExpressionUtils.parse(property)));
+    public RestrictionBuilder<? extends WhereOrBuilder<T>> where(String expression) {
+        return startBuilder(new RestrictionBuilderImpl<WhereOrBuilderImpl<T>>(this, this, ExpressionUtils.parse(expression)));
     }
+    
 }
