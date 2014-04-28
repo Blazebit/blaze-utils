@@ -49,8 +49,8 @@ public class GtPredicate extends BinaryExpressionPredicate {
 
     public static class GtPredicateBuilder<T extends BuilderEndedListener> extends AbstractQuantifiablePredicateBuilder<T> {
 
-        public GtPredicateBuilder(T result, Expression leftExpression) {
-            super(result, leftExpression, false);
+        public GtPredicateBuilder(T result, BuilderEndedListener listener, Expression leftExpression) {
+            super(result, listener, leftExpression, false);
         }
 
         @Override
@@ -61,16 +61,6 @@ public class GtPredicate extends BinaryExpressionPredicate {
         @Override
         public T expression(String expression) {
             return chain(new GtPredicate(leftExpression, ExpressionUtils.parse(expression), quantifier));
-        }
-
-        @Override
-        public T elements(String expression) {
-            return chain(new GtPredicate(leftExpression, FunctionExpression.elements(expression), quantifier));
-        }
-
-        @Override
-        public T indices(String expression) {
-            return chain(new GtPredicate(leftExpression, FunctionExpression.indices(expression), quantifier));
         }
     }
 }

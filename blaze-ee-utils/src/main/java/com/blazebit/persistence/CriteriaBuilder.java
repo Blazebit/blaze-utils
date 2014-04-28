@@ -58,9 +58,9 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
     }
     
     @Override
-    public void onBuilderEnded(PredicateBuilder o) {
-        super.onBuilderEnded(o);
-        rootPredicate.getChildren().add(o.getPredicate());
+    public void onBuilderEnded(PredicateBuilder builder) {
+        super.onBuilderEnded(builder);
+        rootPredicate.getChildren().add(builder.getPredicate());
     }
     
     /* 
@@ -68,15 +68,11 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
      */
     @Override
     public RestrictionBuilder<CriteriaBuilder<T>> where(String expression) {
-        RestrictionBuilder<CriteriaBuilder<T>> builder = new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, ExpressionUtils.parse(expression));
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, ExpressionUtils.parse(expression)));
     }
     
     public OrBuilder<CriteriaBuilder<T>> whereOr() {
-        OrBuilder<CriteriaBuilder<T>> builder = new OrBuilderImpl<CriteriaBuilder<T>>(this);
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new OrBuilderImpl<CriteriaBuilder<T>>(this));
     }
     
     /* 
@@ -99,6 +95,8 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
     }
     
     public CriteriaBuilder<T> orderBy(String path, boolean ascending, boolean nullFirst) {
+        verifyBuilderEnded();
+        
         JoinNode node;
         String normalizedPath;
         String orderByField;
@@ -191,6 +189,8 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
     }
     
     public CriteriaBuilder<T> join(String path, String alias, JoinType type, boolean fetch) {
+        verifyBuilderEnded();
+        
         String normalizedPath;
         
         if (startsAtRootAlias(path)) {
@@ -396,6 +396,7 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
 //    }
     
     public String getQueryString() {
+        verifyBuilderEnded();
         StringBuilder sb = new StringBuilder();
         
         sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(rootAliasInfo.alias);

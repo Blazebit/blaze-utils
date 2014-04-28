@@ -37,6 +37,7 @@ public class OrBuilderImpl<T extends BuilderEndedListener> extends AbstractBuild
     
     @Override
     public T endOr() {
+        verifyBuilderEnded();
         result.onBuilderEnded(this);
         return result;
     }
@@ -47,23 +48,19 @@ public class OrBuilderImpl<T extends BuilderEndedListener> extends AbstractBuild
     }
     
     @Override
-    public void onBuilderEnded(PredicateBuilder o) {
-        super.onBuilderEnded(o);
-        predicate.getChildren().add(o.getPredicate());
+    public void onBuilderEnded(PredicateBuilder builder) {
+        super.onBuilderEnded(builder);
+        predicate.getChildren().add(builder.getPredicate());
     }
 
     @Override
     public AndBuilder<OrBuilderImpl<T>> whereAnd() {
-        AndBuilder<OrBuilderImpl<T>> builder =  new AndBuilderImpl<OrBuilderImpl<T>>(this);
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new AndBuilderImpl<OrBuilderImpl<T>>(this));
     }
 
     @Override
     public RestrictionBuilder<? extends OrBuilder<T>> where(String property) {
-        RestrictionBuilder<OrBuilderImpl<T>> builder = new RestrictionBuilderImpl<OrBuilderImpl<T>>(this, ExpressionUtils.parse(property));
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new RestrictionBuilderImpl<OrBuilderImpl<T>>(this, ExpressionUtils.parse(property)));
     }
     
 }

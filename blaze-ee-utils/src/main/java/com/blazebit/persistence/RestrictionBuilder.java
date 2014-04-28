@@ -30,7 +30,7 @@ public interface RestrictionBuilder<T> extends PredicateBuilder {
     //                 COUNT, AVG, MIN, MAX, SUM
     
     // Operators TODO: IN [subquery], 
-    //                 EXISTS [subquery | indices() | elements()]
+    //                 EXISTS [subquery]
     
     public T between(Object start, Object end);
     
@@ -60,21 +60,21 @@ public interface RestrictionBuilder<T> extends PredicateBuilder {
     
     public T greaterOrEqualThanExpression(String expression);
     
-    public QuantifiableBinaryPredicateBuilder<T> lowerThan();
+    public QuantifiableBinaryPredicateBuilder<T> lessThan();
     
-    public T lowerThan(Object value);
+    public T lessThan(Object value);
     
-    public T lowerThanExpression(String expression);
+    public T lessThanExpression(String expression);
     
-    public QuantifiableBinaryPredicateBuilder<T> lowerOrEqualThan();
+    public QuantifiableBinaryPredicateBuilder<T> lessOrEqualThan();
     
-    public T lowerOrEqualThan(Object value);
+    public T lessOrEqualThan(Object value);
     
-    public T lowerOrEqualThanExpression(String expression);
+    public T lessOrEqualThanExpression(String expression);
     
     //public T in(CriteriaBuilder builder);
     
-    public QuantizedBinaryPredicateBuilder<T> in();
+    public BinaryPredicateBuilder<T> in();
     
     public T in(List<?> values);
     

@@ -15,51 +15,47 @@
  */
 package com.blazebit.persistence.predicate;
 
+import com.blazebit.persistence.BinaryPredicateBuilder;
 import com.blazebit.persistence.BuilderEndedListener;
 import com.blazebit.persistence.QuantifiableBinaryPredicateBuilder;
-import com.blazebit.persistence.QuantizedBinaryPredicateBuilder;
 import com.blazebit.persistence.expression.Expression;
 
 /**
  *
  * @author cpbec
  */
-public abstract class AbstractQuantifiablePredicateBuilder<T extends BuilderEndedListener> implements
-    QuantifiableBinaryPredicateBuilder<T>, QuantizedBinaryPredicateBuilder<T>, PredicateBuilder {
+public abstract class AbstractQuantifiablePredicateBuilder<T> implements
+    QuantifiableBinaryPredicateBuilder<T>, PredicateBuilder {
 
     private final T result;
+    private final BuilderEndedListener listener;
     private final boolean wrapNot;
     protected final Expression leftExpression;
     protected PredicateQuantifier quantifier = PredicateQuantifier.ONE;
     private Predicate predicate;
 
-    public AbstractQuantifiablePredicateBuilder(T result, Expression leftExpression, boolean wrapNot) {
+    public AbstractQuantifiablePredicateBuilder(T result, BuilderEndedListener listener, Expression leftExpression, boolean wrapNot) {
         this.result = result;
+        this.listener = listener;
         this.wrapNot = wrapNot;
         this.leftExpression = leftExpression;
     }
     
     protected T chain(Predicate predicate) {
         this.predicate = wrapNot ? new NotPredicate(predicate) : predicate;
-        result.onBuilderEnded(this);
+        listener.onBuilderEnded(this);
         return result;
     }
 
     @Override
-    public QuantizedBinaryPredicateBuilder<T> all() {
+    public BinaryPredicateBuilder<T> all() {
         this.quantifier = PredicateQuantifier.ALL;
         return this;
     }
 
     @Override
-    public QuantizedBinaryPredicateBuilder<T> any() {
+    public BinaryPredicateBuilder<T> any() {
         this.quantifier = PredicateQuantifier.ANY;
-        return this;
-    }
-
-    @Override
-    public QuantizedBinaryPredicateBuilder<T> some() {
-        this.quantifier = PredicateQuantifier.SOME;
         return this;
     }
 

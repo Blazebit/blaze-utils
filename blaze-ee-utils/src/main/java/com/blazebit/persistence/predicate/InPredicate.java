@@ -49,8 +49,8 @@ public class InPredicate extends BinaryExpressionPredicate {
 
     public static class InPredicateBuilder<T extends BuilderEndedListener> extends AbstractQuantifiablePredicateBuilder<T> {
 
-        public InPredicateBuilder(T result, Expression leftExpression) {
-            super(result, leftExpression, false);
+        public InPredicateBuilder(T result, BuilderEndedListener listener, Expression leftExpression) {
+            super(result, listener, leftExpression, false);
         }
 
         @Override
@@ -61,16 +61,6 @@ public class InPredicate extends BinaryExpressionPredicate {
         @Override
         public T expression(String expression) {
             return chain(new InPredicate(leftExpression, ExpressionUtils.parse(expression), quantifier));
-        }
-
-        @Override
-        public T elements(String expression) {
-            return chain(new InPredicate(leftExpression, FunctionExpression.elements(expression), quantifier));
-        }
-
-        @Override
-        public T indices(String expression) {
-            return chain(new InPredicate(leftExpression, FunctionExpression.indices(expression), quantifier));
         }
     }
 }

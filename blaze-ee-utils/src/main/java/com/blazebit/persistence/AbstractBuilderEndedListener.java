@@ -26,13 +26,29 @@ import java.util.Set;
  */
 public class AbstractBuilderEndedListener implements BuilderEndedListener{
     
-    protected final Set<PredicateBuilder> startedBuilders = Collections.newSetFromMap(new IdentityHashMap<PredicateBuilder, Boolean>());
+    private PredicateBuilder currentBuilder;
+    
+    protected void verifyBuilderEnded() {
+        if (currentBuilder != null) {
+            throw new IllegalStateException("A builder was not ended properly.");
+        }
+    }
+    
+    protected <T extends PredicateBuilder> T startBuilder(T builder) {
+        if (currentBuilder != null) {
+            throw new IllegalStateException("There was an attempt to start a builder but a previous builder was not ended.");
+        }
+        
+        currentBuilder = builder;
+        return builder;
+    }
 
     @Override
-    public void onBuilderEnded(PredicateBuilder o) {
-        if (!startedBuilders.remove(o)) {
-            throw new IllegalArgumentException("Invalid builder ended notification! " + o);
+    public void onBuilderEnded(PredicateBuilder builder) {
+        if (currentBuilder == null) {
+            throw new IllegalStateException("There was an attempt to end a builder that was not started or already closed.");
         }
+        currentBuilder = builder;
     }
     
 }

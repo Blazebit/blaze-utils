@@ -49,8 +49,8 @@ public class EqPredicate  extends BinaryExpressionPredicate {
     
     public static class EqPredicateBuilder<T extends BuilderEndedListener> extends AbstractQuantifiablePredicateBuilder<T> {
 
-        public EqPredicateBuilder(T result, Expression leftExpression, boolean wrapNot) {
-            super(result, leftExpression, wrapNot);
+        public EqPredicateBuilder(T result, BuilderEndedListener listener, Expression leftExpression, boolean wrapNot) {
+            super(result, listener, leftExpression, wrapNot);
         }
        
         @Override
@@ -61,16 +61,6 @@ public class EqPredicate  extends BinaryExpressionPredicate {
         @Override
         public T expression(String expression) {
             return chain(new EqPredicate(leftExpression, ExpressionUtils.parse(expression), quantifier));
-        }
-
-        @Override
-        public T elements(String expression) {
-            return chain(new EqPredicate(leftExpression, FunctionExpression.elements(expression), quantifier));
-        }
-
-        @Override
-        public T indices(String expression) {
-            return chain(new EqPredicate(leftExpression, FunctionExpression.indices(expression), quantifier));
         }
         
     }

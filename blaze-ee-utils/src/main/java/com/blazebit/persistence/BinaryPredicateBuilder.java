@@ -15,11 +15,13 @@
  */
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.predicate.PredicateBuilder;
+
 /**
  *
  * @author cpbec
  */
-public interface BinaryPredicateBuilder<T> {
+public interface BinaryPredicateBuilder<T> extends PredicateBuilder {
     
     public T value(Object value);
     
