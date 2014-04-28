@@ -23,13 +23,13 @@ import org.junit.Test;
  *
  * @author ccbem
  */
-public class EqualToTest {
+public class EqTest {
     @Test
     public void testEqualTo(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").eq(20);
         
-        assertEquals("FROM Document d WHERE d.age = 20", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE d.age = :param_0", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
@@ -58,21 +58,22 @@ public class EqualToTest {
         criteria.where("d.age").eqExpression(null);        
     }
     
-    @Test
-    public void testEqualToAll(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").eq().all().expression("d.partners.age");
-        
-        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age = ALL(partners.age)", criteria.getQueryString());
-    }
-    
-    @Test
-    public void testEqualToAny(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").eq().any().expression("d.partners.age");
-        
-        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age = ANY(partners.age)", criteria.getQueryString());
-    }
+    // TODO: for subqueries
+//    @Test
+//    public void testEqualToAll(){
+//        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+//        criteria.where("d.age").eq().all().expression("d.partners.age");
+//        
+//        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age = ALL(partners.age)", criteria.getQueryString());
+//    }
+//    
+//    @Test
+//    public void testEqualToAny(){
+//        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+//        criteria.where("d.age").eq().any().expression("d.partners.age");
+//        
+//        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age = ANY(partners.age)", criteria.getQueryString());
+//    }
     
     @Test
     public void testNotEqualTo(){
@@ -108,19 +109,20 @@ public class EqualToTest {
         criteria.where("d.age").notEqExpression(null);        
     }
     
-    @Test
-    public void testNotEqualToAll(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notEq().all().expression("d.partners.age");
-        
-        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age != ALL(partners.age)", criteria.getQueryString());
-    }
-    
-    @Test
-    public void testNotEqualToAny(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notEq().any().expression("d.partners.age");
-        
-        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age != ANY(partners.age)", criteria.getQueryString());
-    }
+    // TODO: for subqueries
+//    @Test
+//    public void testNotEqualToAll(){
+//        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+//        criteria.where("d.age").notEq().all().expression("d.partners.age");
+//        
+//        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age != ALL(partners.age)", criteria.getQueryString());
+//    }
+//    
+//    @Test
+//    public void testNotEqualToAny(){
+//        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+//        criteria.where("d.age").notEq().any().expression("d.partners.age");
+//        
+//        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age != ANY(partners.age)", criteria.getQueryString());
+//    }
 }

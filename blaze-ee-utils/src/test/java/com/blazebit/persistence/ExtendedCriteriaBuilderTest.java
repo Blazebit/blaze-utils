@@ -186,67 +186,14 @@ public class ExtendedCriteriaBuilderTest {
         criteria.join("owner", "", JoinType.LEFT, true);
     }
 
-    @Test
-    public void testOrderByAscNullsFirst(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.orderBy("d.age", true, true);
-        assertEquals("FROM Document d ORDER BY d.age ASC NULLS FIRST", criteria.getQueryString());
-    }
     
-    @Test
-    public void testOrderByAscNullsLast(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.orderBy("d.age", true, false);
-        assertEquals("FROM Document d ORDER BY d.age ASC NULLS LAST", criteria.getQueryString());
-    }
-    
-    @Test
-    public void testOrderByDescNullsFirst(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.orderBy("d.age", false, true);
-        assertEquals("FROM Document d ORDER BY d.age DESC NULLS FIRST", criteria.getQueryString());
-    }
-    
-    @Test
-    public void testOrderByDescNullsLast(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.orderBy("d.age", false, false);
-        assertEquals("FROM Document d ORDER BY d.age DESC NULLS LAST", criteria.getQueryString());
-    }
-    
-    @Test
-    public void testOrderByNested(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.orderBy("d.employees.contacts.age", false, false);
-        assertEquals("FROM Document d LEFT JOIN d.employees employees LEFT JOIN employees.contacts contacts ORDER BY contacts.age DESC NULLS LAST", criteria.getQueryString());
-    }
-    
-    @Test
-    public void testOrderByMultiple(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.orderBy("d.employees.contacts.age", false, false).orderBy("d.employees.supervisors.joinDate", true, true);
-
-        assertEquals("FROM Document d LEFT JOIN d.employees employees LEFT JOIN employees.contacts contacts LEFT JOIN employees.supervisors supervisors ORDER BY contacts.age DESC NULLS LAST, supervisors.joinDate ASC NULLS FIRST", criteria.getQueryString());
-    }
-    
-    @Test(expected = NullPointerException.class)
-    public void testOrderByNullAlias(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.orderBy(null, false, false);
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testOrderByEmptyAlias(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.orderBy("", false, false);
-    }
     
     @Test
     public void testWhereProperty(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").ge(25);
 
-        assertEquals("FROM Document d d.age >= 25", criteria.getQueryString());
+        assertEquals("FROM Document d d.age >= :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -254,7 +201,7 @@ public class ExtendedCriteriaBuilderTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age + 1").ge(25);
 
-        assertEquals("FROM Document d d.age + 1 >= 25", criteria.getQueryString());
+        assertEquals("FROM Document d d.age + 1 >= :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -262,7 +209,7 @@ public class ExtendedCriteriaBuilderTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.owner.partners.age + 1").ge(25);
 
-        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.partners partners WHERE partners.age + 1 >= 25", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.partners partners WHERE partners.age + 1 >= :param_0", criteria.getQueryString());
     }
     
     @Test(expected = javax.jms.IllegalStateException.class)

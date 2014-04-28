@@ -22,7 +22,7 @@ package com.blazebit.persistence.expression;
 public final class ExpressionUtils {
     
     public static Expression parse(String expression) {
-        if(expression.matches("[\\W.]+"))
+        if(expression.matches("[\\w.]+"))
             return new PropertyExpression(expression);
         throw new UnsupportedOperationException();
     }
