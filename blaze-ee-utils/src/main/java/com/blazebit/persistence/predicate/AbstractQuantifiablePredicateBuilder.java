@@ -60,12 +60,6 @@ public abstract class AbstractQuantifiablePredicateBuilder<T> implements
     }
 
     @Override
-    public BinaryPredicateBuilder<T> some() {
-        this.quantifier = PredicateQuantifier.SOME;
-        return this;
-    }
-
-    @Override
     public Predicate getPredicate() {
         return predicate;
     }

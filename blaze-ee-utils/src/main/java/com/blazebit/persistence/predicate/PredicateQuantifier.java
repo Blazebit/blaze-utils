@@ -22,6 +22,5 @@ package com.blazebit.persistence.predicate;
 public enum PredicateQuantifier {
     ONE,
     ALL,
-    ANY,
-    SOME;
+    ANY;
 }

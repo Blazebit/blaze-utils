@@ -24,6 +24,4 @@ public interface QuantifiableBinaryPredicateBuilder<T> extends BinaryPredicateBu
     public BinaryPredicateBuilder<T> all();
     
     public BinaryPredicateBuilder<T> any();
-    
-    public BinaryPredicateBuilder<T> some();
 }
