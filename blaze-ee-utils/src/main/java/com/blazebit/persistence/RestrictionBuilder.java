@@ -36,41 +36,41 @@ public interface RestrictionBuilder<T> extends PredicateBuilder {
     
     public T notBetween(Object start, Object end);
     
-    public QuantifiableBinaryPredicateBuilder<T> equalTo();
+    public QuantifiableBinaryPredicateBuilder<T> eq();
     
-    public T equalTo(Object value);
+    public T eq(Object value);
     
-    public T equalToExpression(String expression);
+    public T eqExpression(String expression);
     
-    public QuantifiableBinaryPredicateBuilder<T> notEqualTo();
+    public QuantifiableBinaryPredicateBuilder<T> notEq();
     
-    public T notEqualTo(Object value);
+    public T notEq(Object value);
     
-    public T notEqualToExpression(String expression);
+    public T notEqExpression(String expression);
     
-    public QuantifiableBinaryPredicateBuilder<T> greaterThan();
+    public QuantifiableBinaryPredicateBuilder<T> gt();
     
-    public T greaterThan(Object value);
+    public T gt(Object value);
     
-    public T greaterThanExpression(String expression);
+    public T gtExpression(String expression);
     
-    public QuantifiableBinaryPredicateBuilder<T> greaterOrEqualThan();
+    public QuantifiableBinaryPredicateBuilder<T> ge();
     
-    public T greaterOrEqualThan(Object value);
+    public T ge(Object value);
     
-    public T greaterOrEqualThanExpression(String expression);
+    public T geExpression(String expression);
     
-    public QuantifiableBinaryPredicateBuilder<T> lessThan();
+    public QuantifiableBinaryPredicateBuilder<T> lt();
     
-    public T lessThan(Object value);
+    public T lt(Object value);
     
-    public T lessThanExpression(String expression);
+    public T ltExpression(String expression);
     
-    public QuantifiableBinaryPredicateBuilder<T> lessOrEqualThan();
+    public QuantifiableBinaryPredicateBuilder<T> le();
     
-    public T lessOrEqualThan(Object value);
+    public T le(Object value);
     
-    public T lessOrEqualThanExpression(String expression);
+    public T leExpression(String expression);
     
     //public T in(CriteriaBuilder builder);
     

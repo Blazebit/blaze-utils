@@ -137,10 +137,10 @@ public class CriteriaBuilderTest {
         
         criteria
             .whereOr()
-                .where("owner.id").equalTo(1)
+                .where("owner.id").eq(1)
                 .whereAnd()
                     .where("owner.id").isNull()
-                    .where("owner.isGlobal").equalTo(true)
+                    .where("owner.isGlobal").eq(true)
                 .endAnd()
             .endOr()
             .where("name").like("Test");

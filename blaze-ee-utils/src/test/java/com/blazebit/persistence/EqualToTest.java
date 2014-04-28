@@ -27,7 +27,7 @@ public class EqualToTest {
     @Test
     public void testEqualTo(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").equalTo(20);
+        criteria.where("d.age").eq(20);
         
         assertEquals("FROM Document d WHERE d.age = 20", criteria.getQueryString());
     }
@@ -35,13 +35,13 @@ public class EqualToTest {
     @Test(expected = NullPointerException.class)
     public void testEqualToNull(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").equalTo(null);
+        criteria.where("d.age").eq(null);
     }
     
     @Test
     public void testEqualToExpression(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").equalToExpression("d.age2 + 1");
+        criteria.where("d.age").eqExpression("d.age2 + 1");
         
         assertEquals("FROM Document d WHERE d.age = d.age2 + 1", criteria.getQueryString());
     }
@@ -49,19 +49,19 @@ public class EqualToTest {
     @Test(expected = IllegalArgumentException.class)
     public void testEqualToEmptyExpression(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").equalToExpression("");        
+        criteria.where("d.age").eqExpression("");        
     }
     
     @Test(expected = NullPointerException.class)
     public void testEqualToNullExpression(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").equalToExpression(null);        
+        criteria.where("d.age").eqExpression(null);        
     }
     
     @Test
     public void testEqualToAll(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").equalTo().all().expression("d.partners.age");
+        criteria.where("d.age").eq().all().expression("d.partners.age");
         
         assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age = ALL(partners.age)", criteria.getQueryString());
     }
@@ -69,7 +69,7 @@ public class EqualToTest {
     @Test
     public void testEqualToAny(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").equalTo().any().expression("d.partners.age");
+        criteria.where("d.age").eq().any().expression("d.partners.age");
         
         assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age = ANY(partners.age)", criteria.getQueryString());
     }
@@ -77,7 +77,7 @@ public class EqualToTest {
     @Test
     public void testNotEqualTo(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notEqualTo(20);
+        criteria.where("d.age").notEq(20);
         
         assertEquals("FROM Document d WHERE d.age != 20", criteria.getQueryString());
     }
@@ -85,13 +85,13 @@ public class EqualToTest {
      @Test(expected = NullPointerException.class)
     public void testNotEqualToNull(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notEqualTo(null);
+        criteria.where("d.age").notEq(null);
     }
     
     @Test
     public void testNotEqualToExpression(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notEqualToExpression("d.age2 + 1");
+        criteria.where("d.age").notEqExpression("d.age2 + 1");
         
         assertEquals("FROM Document d WHERE d.age != d.age2 + 1", criteria.getQueryString());
     }
@@ -99,19 +99,19 @@ public class EqualToTest {
     @Test(expected = IllegalArgumentException.class)
     public void testNotEqualToEmptyExpression(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notEqualToExpression("");        
+        criteria.where("d.age").notEqExpression("");        
     }
     
     @Test(expected = NullPointerException.class)
     public void testNotEqualToNullExpression(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notEqualToExpression(null);        
+        criteria.where("d.age").notEqExpression(null);        
     }
     
     @Test
     public void testNotEqualToAll(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notEqualTo().all().expression("d.partners.age");
+        criteria.where("d.age").notEq().all().expression("d.partners.age");
         
         assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age != ALL(partners.age)", criteria.getQueryString());
     }
@@ -119,7 +119,7 @@ public class EqualToTest {
     @Test
     public void testNotEqualToAny(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notEqualTo().any().expression("d.partners.age");
+        criteria.where("d.age").notEq().any().expression("d.partners.age");
         
         assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age != ANY(partners.age)", criteria.getQueryString());
     }

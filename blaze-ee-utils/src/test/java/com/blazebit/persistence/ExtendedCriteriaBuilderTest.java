@@ -244,7 +244,7 @@ public class ExtendedCriteriaBuilderTest {
     @Test
     public void testWhereProperty(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").greaterOrEqualThan(25);
+        criteria.where("d.age").ge(25);
 
         assertEquals("FROM Document d d.age >= 25", criteria.getQueryString());
     }
@@ -252,7 +252,7 @@ public class ExtendedCriteriaBuilderTest {
     @Test
     public void testWhereExpression(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age + 1").greaterOrEqualThan(25);
+        criteria.where("d.age + 1").ge(25);
 
         assertEquals("FROM Document d d.age + 1 >= 25", criteria.getQueryString());
     }
@@ -260,7 +260,7 @@ public class ExtendedCriteriaBuilderTest {
     @Test
     public void testWherePath(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.owner.partners.age + 1").greaterOrEqualThan(25);
+        criteria.where("d.owner.partners.age + 1").ge(25);
 
         assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.partners partners WHERE partners.age + 1 >= 25", criteria.getQueryString());
     }

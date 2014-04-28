@@ -81,92 +81,92 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
     }
 
     @Override
-    public QuantifiableBinaryPredicateBuilder<T> equalTo() {
+    public QuantifiableBinaryPredicateBuilder<T> eq() {
         return startBuilder(new EqPredicate.EqPredicateBuilder<T>(result, this, leftExpression, false));
     }
 
     @Override
-    public T equalTo(Object value) {
+    public T eq(Object value) {
         return chain(new EqPredicate(leftExpression, new ParameterExpression(value)));
     }
 
     @Override
-    public T equalToExpression(String expression) {
+    public T eqExpression(String expression) {
         return chain(new EqPredicate(leftExpression, ExpressionUtils.parse(expression)));
     }
 
     @Override
-    public QuantifiableBinaryPredicateBuilder<T> notEqualTo() {
+    public QuantifiableBinaryPredicateBuilder<T> notEq() {
         return startBuilder(new EqPredicate.EqPredicateBuilder<T>(result, this, leftExpression, true));
     }
 
     @Override
-    public T notEqualTo(Object value) {
+    public T notEq(Object value) {
         return chain(new NotPredicate(new EqPredicate(leftExpression, new ParameterExpression(value))));
     }
 
     @Override
-    public T notEqualToExpression(String expression) {
+    public T notEqExpression(String expression) {
         return chain(new NotPredicate(new EqPredicate(leftExpression, ExpressionUtils.parse(expression))));
     }
 
     @Override
-    public QuantifiableBinaryPredicateBuilder<T> greaterThan() {
+    public QuantifiableBinaryPredicateBuilder<T> gt() {
         return startBuilder(new GtPredicate.GtPredicateBuilder<T>(result, this, leftExpression));
     }
 
     @Override
-    public T greaterThan(Object value) {
+    public T gt(Object value) {
         return chain(new GtPredicate(leftExpression, new ParameterExpression(value)));
     }
 
     @Override
-    public T greaterThanExpression(String expression) {
+    public T gtExpression(String expression) {
         return chain(new GtPredicate(leftExpression, ExpressionUtils.parse(expression)));
     }
 
     @Override
-    public QuantifiableBinaryPredicateBuilder<T> greaterOrEqualThan() {
+    public QuantifiableBinaryPredicateBuilder<T> ge() {
         return startBuilder(new GePredicate.GePredicateBuilder<T>(result, this, leftExpression));
     }
 
     @Override
-    public T greaterOrEqualThan(Object value) {
+    public T ge(Object value) {
         return chain(new GePredicate(leftExpression, new ParameterExpression(value)));
     }
 
     @Override
-    public T greaterOrEqualThanExpression(String expression) {
+    public T geExpression(String expression) {
         return chain(new GePredicate(leftExpression, ExpressionUtils.parse(expression)));
     }
 
     @Override
-    public QuantifiableBinaryPredicateBuilder<T> lessThan() {
+    public QuantifiableBinaryPredicateBuilder<T> lt() {
         return startBuilder(new LtPredicate.LtPredicateBuilder<T>(result, this, leftExpression));
     }
 
     @Override
-    public T lessThan(Object value) {
+    public T lt(Object value) {
         return chain(new LtPredicate(leftExpression, new ParameterExpression(value)));
     }
 
     @Override
-    public T lessThanExpression(String expression) {
+    public T ltExpression(String expression) {
         return chain(new LtPredicate(leftExpression, ExpressionUtils.parse(expression)));
     }
 
     @Override
-    public QuantifiableBinaryPredicateBuilder<T> lessOrEqualThan() {
+    public QuantifiableBinaryPredicateBuilder<T> le() {
         return startBuilder(new LePredicate.LePredicateBuilder<T>(result, this, leftExpression));
     }
 
     @Override
-    public T lessOrEqualThan(Object value) {
+    public T le(Object value) {
         return chain(new LePredicate(leftExpression, new ParameterExpression(value)));
     }
 
     @Override
-    public T lessOrEqualThanExpression(String expression) {
+    public T leExpression(String expression) {
         return chain(new LePredicate(leftExpression, ExpressionUtils.parse(expression)));
     }
 
