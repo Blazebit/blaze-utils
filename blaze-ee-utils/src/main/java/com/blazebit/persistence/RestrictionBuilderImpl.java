@@ -38,21 +38,23 @@ import java.util.List;
  *
  * @author cpbec
  */
-public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends AbstractBuilderEndedListener implements RestrictionBuilder<T> {
+public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener implements RestrictionBuilder<T> {
 
     private final T result;
+    private final BuilderEndedListener listener;
     private final Expression leftExpression;
     private Predicate predicate;
     
-    public RestrictionBuilderImpl(T result, Expression leftExpression) {
+    public RestrictionBuilderImpl(T result, BuilderEndedListener listener, Expression leftExpression) {
         this.leftExpression = leftExpression;
+        this.listener = listener;
         this.result = result;
     }
     
     private T chain(Predicate predicate) {
         verifyBuilderEnded();
         this.predicate = predicate;
-        result.onBuilderEnded(this);
+        listener.onBuilderEnded(this);
         return result;
     }
     
@@ -60,7 +62,7 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
     public void onBuilderEnded(PredicateBuilder builder) {
         super.onBuilderEnded(builder);
         predicate = builder.getPredicate();
-        result.onBuilderEnded(this);
+        listener.onBuilderEnded(this);
     }
 
     @Override
@@ -169,13 +171,13 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
     }
 
     @Override
-    public BinaryPredicateBuilder<T> in() {
-        return startBuilder(new InPredicate.InPredicateBuilder<T>(result, this, leftExpression));
+    public T in(List<?> values) {
+        return chain(new InPredicate(leftExpression, new ParameterExpression(values)));
     }
 
     @Override
-    public T in(List<?> values) {
-        return chain(new InPredicate(leftExpression, new ParameterExpression(values)));
+    public T notIn(List<?> values) {
+        return chain(new NotPredicate(new InPredicate(leftExpression, new ParameterExpression(values))));
     }
     
     @Override

@@ -30,7 +30,7 @@ import javax.persistence.TypedQuery;
  *
  * @author cpbec
  */
-public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements Filterable<RestrictionBuilder<? extends CriteriaBuilder<T>>> {
+public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? extends CriteriaBuilder<T>>> {
     
     private final Class<T> clazz;
     private final AliasInfo rootAliasInfo;
@@ -38,7 +38,8 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
     private final Map<String, AliasInfo> aliasInfos = new HashMap<String, AliasInfo>();
     private final JoinNode rootNode;
     private final Map<String, OrderByInfo> orderByInfos = new HashMap<String, OrderByInfo>();
-    private final AndPredicate rootPredicate;
+    private final RootPredicate rootWherePredicate;
+    private final RootPredicate rootHavingPredicate;
     private final Map<String, Object> parameters = new HashMap<String, Object>();
 
     public CriteriaBuilder(Class<T> clazz, String alias) {
@@ -46,7 +47,8 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
         this.rootAliasInfo = new AliasInfo(alias, "", true);
         this.aliasInfos.put(alias, rootAliasInfo);
         this.rootNode = new JoinNode(rootAliasInfo, null, false);
-        this.rootPredicate = new AndPredicate();
+        this.rootWherePredicate = new RootPredicate();
+        this.rootHavingPredicate = new RootPredicate();
     }
     
     public static <T> CriteriaBuilder<T> from(Class<T> clazz) {
@@ -57,22 +59,24 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
         return new CriteriaBuilder<T>(clazz, alias);
     }
     
-    @Override
-    public void onBuilderEnded(PredicateBuilder builder) {
-        super.onBuilderEnded(builder);
-        rootPredicate.getChildren().add(builder.getPredicate());
-    }
-    
     /* 
      * Where methods
      */
     @Override
     public RestrictionBuilder<CriteriaBuilder<T>> where(String expression) {
-        return startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, ExpressionUtils.parse(expression)));
+        return rootWherePredicate.startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootWherePredicate, ExpressionUtils.parse(expression)));
     }
     
-    public OrBuilder<CriteriaBuilder<T>> whereOr() {
-        return startBuilder(new OrBuilderImpl<CriteriaBuilder<T>>(this));
+    public WhereOrBuilder<CriteriaBuilder<T>> whereOr() {
+        return rootWherePredicate.startBuilder(new WhereOrBuilderImpl<CriteriaBuilder<T>>(this, rootWherePredicate));
+    }
+    
+    public RestrictionBuilder<CriteriaBuilder<T>> having(String expression) {
+        return rootHavingPredicate.startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootHavingPredicate, ExpressionUtils.parse(expression)));
+    }
+    
+    public HavingOrBuilder<CriteriaBuilder<T>> havingOr() {
+        return rootHavingPredicate.startBuilder(new HavingOrBuilderImpl<CriteriaBuilder<T>>(this, rootHavingPredicate));
     }
     
     /* 
@@ -92,6 +96,11 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
     
     public CriteriaBuilder<T> orderByAsc(String path, boolean nullFirst) {
         return orderBy(path, true, nullFirst);
+    }
+    
+    private void verifyBuilderEnded() {
+        rootWherePredicate.verifyBuilderEnded();
+        rootHavingPredicate.verifyBuilderEnded();
     }
     
     public CriteriaBuilder<T> orderBy(String path, boolean ascending, boolean nullFirst) {
@@ -454,6 +463,22 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
             this.field = field;
             this.ascending = ascending;
             this.nullFirst = nullFirst;
+        }
+    }
+    
+    private static class RootPredicate extends AbstractBuilderEndedListener {
+        
+        private final AndPredicate predicate;
+
+        public RootPredicate() {
+            this.predicate = new AndPredicate();
+        }
+        
+    
+        @Override
+        public void onBuilderEnded(PredicateBuilder builder) {
+            super.onBuilderEnded(builder);
+            predicate.getChildren().add(builder.getPredicate());
         }
     }
 }

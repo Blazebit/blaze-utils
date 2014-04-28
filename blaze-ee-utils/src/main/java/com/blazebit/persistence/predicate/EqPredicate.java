@@ -47,7 +47,7 @@ public class EqPredicate  extends BinaryExpressionPredicate {
         visitor.visit(this);
     }
     
-    public static class EqPredicateBuilder<T extends BuilderEndedListener> extends AbstractQuantifiablePredicateBuilder<T> {
+    public static class EqPredicateBuilder<T> extends AbstractQuantifiablePredicateBuilder<T> {
 
         public EqPredicateBuilder(T result, BuilderEndedListener listener, Expression leftExpression, boolean wrapNot) {
             super(result, listener, leftExpression, wrapNot);

@@ -17,7 +17,7 @@ package com.blazebit.persistence;
 
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.PropertyExpression;
-import com.blazebit.persistence.predicate.OrPredicate;
+import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 
@@ -25,20 +25,22 @@ import com.blazebit.persistence.predicate.PredicateBuilder;
  *
  * @author cpbec
  */
-public class OrBuilderImpl<T extends BuilderEndedListener> extends AbstractBuilderEndedListener implements OrBuilder<T> {
-
-    private final T result;
-    private final OrPredicate predicate;
+public class HavingAndBuilderImpl<T> extends AbstractBuilderEndedListener implements HavingAndBuilder<T> {
     
-    public OrBuilderImpl(T result) {
+    private final T result;
+    private final BuilderEndedListener listener;
+    private final AndPredicate predicate;
+    
+    public HavingAndBuilderImpl(T result, BuilderEndedListener listener) {
         this.result = result;
-        this.predicate = new OrPredicate();
+        this.listener = listener;
+        this.predicate = new AndPredicate();
     }
     
     @Override
-    public T endOr() {
+    public T endAnd() {
         verifyBuilderEnded();
-        result.onBuilderEnded(this);
+        listener.onBuilderEnded(this);
         return result;
     }
 
@@ -54,13 +56,12 @@ public class OrBuilderImpl<T extends BuilderEndedListener> extends AbstractBuild
     }
 
     @Override
-    public AndBuilder<OrBuilderImpl<T>> whereAnd() {
-        return startBuilder(new AndBuilderImpl<OrBuilderImpl<T>>(this));
+    public HavingOrBuilder<HavingAndBuilderImpl<T>> havingOr() {
+        return startBuilder(new HavingOrBuilderImpl<HavingAndBuilderImpl<T>>(this, this));
     }
 
     @Override
-    public RestrictionBuilder<? extends OrBuilder<T>> where(String property) {
-        return startBuilder(new RestrictionBuilderImpl<OrBuilderImpl<T>>(this, ExpressionUtils.parse(property)));
+    public RestrictionBuilder<? extends HavingAndBuilder<T>> having(String expression) {
+        return startBuilder(new RestrictionBuilderImpl<HavingAndBuilderImpl<T>>(this, this, ExpressionUtils.parse(expression)));
     }
-    
 }

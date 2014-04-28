@@ -15,13 +15,15 @@
  */
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.predicate.PredicateBuilder;
+
 /**
  *
  * @author cpbec
  */
-public interface Filterable<T> {
+public interface HavingOrBuilder<T> extends Aggregateable<RestrictionBuilder<? extends HavingOrBuilder<T>>>, PredicateBuilder {
     
-    public T where(String expression);
+    public T endOr();
     
-//    public T whereExists(CriteriaBuilder builder);
+    public <N extends HavingOrBuilder<T> & BuilderEndedListener> HavingAndBuilder<N> havingAnd();
 }

@@ -21,9 +21,9 @@ import com.blazebit.persistence.predicate.PredicateBuilder;
  *
  * @author cpbec
  */
-public interface AndBuilder<T extends BuilderEndedListener> extends Filterable<RestrictionBuilder<? extends AndBuilder<T>>>, PredicateBuilder {
+public interface WhereAndBuilder<T> extends Filterable<RestrictionBuilder<? extends WhereAndBuilder<T>>>, PredicateBuilder {
     
     public T endAnd();
     
-    public <N extends AndBuilder<T> & BuilderEndedListener> OrBuilder<N> whereOr();
+    public <N extends WhereAndBuilder<T> & BuilderEndedListener> WhereOrBuilder<N> whereOr();
 }
