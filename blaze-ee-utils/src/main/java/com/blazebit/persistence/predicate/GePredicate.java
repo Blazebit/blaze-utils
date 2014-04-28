@@ -62,15 +62,5 @@ public class GePredicate extends BinaryExpressionPredicate {
         public T expression(String expression) {
             return chain(new GePredicate(leftExpression, ExpressionUtils.parse(expression), quantifier));
         }
-
-        @Override
-        public T elements(String expression) {
-            return chain(new GePredicate(leftExpression, FunctionExpression.elements(expression), quantifier));
-        }
-
-        @Override
-        public T indices(String expression) {
-            return chain(new GePredicate(leftExpression, FunctionExpression.indices(expression), quantifier));
-        }
     }
 }

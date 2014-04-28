@@ -64,9 +64,9 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
     }
     
     @Override
-    public void onBuilderEnded(PredicateBuilder o) {
-        super.onBuilderEnded(o);
-        rootPredicate.getChildren().add(o.getPredicate());
+    public void onBuilderEnded(PredicateBuilder builder) {
+        super.onBuilderEnded(builder);
+        rootPredicate.getChildren().add(builder.getPredicate());
     }
     
     /* 
@@ -74,15 +74,11 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
      */
     @Override
     public RestrictionBuilder<CriteriaBuilder<T>> where(String expression) {
-        RestrictionBuilder<CriteriaBuilder<T>> builder = new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, ExpressionUtils.parse(expression));
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, ExpressionUtils.parse(expression)));
     }
     
     public OrBuilder<CriteriaBuilder<T>> whereOr() {
-        OrBuilder<CriteriaBuilder<T>> builder = new OrBuilderImpl<CriteriaBuilder<T>>(this);
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new OrBuilderImpl<CriteriaBuilder<T>>(this));
     }
     
     /* 

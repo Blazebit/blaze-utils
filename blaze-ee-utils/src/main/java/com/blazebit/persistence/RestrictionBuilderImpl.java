@@ -56,9 +56,9 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
     }
     
     @Override
-    public void onBuilderEnded(PredicateBuilder o) {
-        super.onBuilderEnded(o);
-        predicate = o.getPredicate();
+    public void onBuilderEnded(PredicateBuilder builder) {
+        super.onBuilderEnded(builder);
+        predicate = builder.getPredicate();
         result.onBuilderEnded(this);
     }
 
@@ -79,9 +79,7 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
 
     @Override
     public QuantifiableBinaryPredicateBuilder<T> equalTo() {
-        QuantifiableBinaryPredicateBuilder<T> builder = new EqPredicate.EqPredicateBuilder<T>(result, this, leftExpression, false);
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new EqPredicate.EqPredicateBuilder<T>(result, this, leftExpression, false));
     }
 
     @Override
@@ -96,9 +94,7 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
 
     @Override
     public QuantifiableBinaryPredicateBuilder<T> notEqualTo() {
-        QuantifiableBinaryPredicateBuilder<T> builder =  new EqPredicate.EqPredicateBuilder<T>(result, this, leftExpression, true);
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new EqPredicate.EqPredicateBuilder<T>(result, this, leftExpression, true));
     }
 
     @Override
@@ -113,9 +109,7 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
 
     @Override
     public QuantifiableBinaryPredicateBuilder<T> greaterThan() {
-        QuantifiableBinaryPredicateBuilder<T> builder =  new GtPredicate.GtPredicateBuilder<T>(result, this, leftExpression);
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new GtPredicate.GtPredicateBuilder<T>(result, this, leftExpression));
     }
 
     @Override
@@ -130,9 +124,7 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
 
     @Override
     public QuantifiableBinaryPredicateBuilder<T> greaterOrEqualThan() {
-        QuantifiableBinaryPredicateBuilder<T> builder =  new GePredicate.GePredicateBuilder<T>(result, this, leftExpression);
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new GePredicate.GePredicateBuilder<T>(result, this, leftExpression));
     }
 
     @Override
@@ -147,9 +139,7 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
 
     @Override
     public QuantifiableBinaryPredicateBuilder<T> lessThan() {
-        QuantifiableBinaryPredicateBuilder<T> builder =  new LtPredicate.LtPredicateBuilder<T>(result, this, leftExpression);
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new LtPredicate.LtPredicateBuilder<T>(result, this, leftExpression));
     }
 
     @Override
@@ -164,9 +154,7 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
 
     @Override
     public QuantifiableBinaryPredicateBuilder<T> lessOrEqualThan() {
-        QuantifiableBinaryPredicateBuilder<T> builder =  new LePredicate.LePredicateBuilder<T>(result, this, leftExpression);
-        startedBuilders.add(builder);
-        return builder;
+        return startBuilder(new LePredicate.LePredicateBuilder<T>(result, this, leftExpression));
     }
 
     @Override
@@ -180,10 +168,8 @@ public class RestrictionBuilderImpl<T extends BuilderEndedListener> extends Abst
     }
 
     @Override
-    public QuantizedBinaryPredicateBuilder<T> in() {
-        QuantizedBinaryPredicateBuilder<T> builder =  new InPredicate.InPredicateBuilder<T>(result, this, leftExpression);
-        startedBuilders.add(builder);
-        return builder;
+    public BinaryPredicateBuilder<T> in() {
+        return startBuilder(new InPredicate.InPredicateBuilder<T>(result, this, leftExpression));
     }
 
     @Override

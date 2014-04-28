@@ -62,15 +62,5 @@ public class LtPredicate extends BinaryExpressionPredicate {
         public T expression(String expression) {
             return chain(new LtPredicate(leftExpression, ExpressionUtils.parse(expression), quantifier));
         }
-
-        @Override
-        public T elements(String expression) {
-            return chain(new LtPredicate(leftExpression, FunctionExpression.elements(expression), quantifier));
-        }
-
-        @Override
-        public T indices(String expression) {
-            return chain(new LtPredicate(leftExpression, FunctionExpression.indices(expression), quantifier));
-        }
     }
 }

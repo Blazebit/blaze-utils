@@ -15,9 +15,9 @@
  */
 package com.blazebit.persistence.predicate;
 
+import com.blazebit.persistence.BinaryPredicateBuilder;
 import com.blazebit.persistence.BuilderEndedListener;
 import com.blazebit.persistence.QuantifiableBinaryPredicateBuilder;
-import com.blazebit.persistence.QuantizedBinaryPredicateBuilder;
 import com.blazebit.persistence.expression.Expression;
 
 /**
@@ -25,7 +25,7 @@ import com.blazebit.persistence.expression.Expression;
  * @author cpbec
  */
 public abstract class AbstractQuantifiablePredicateBuilder<T> implements
-    QuantifiableBinaryPredicateBuilder<T>, QuantizedBinaryPredicateBuilder<T>, PredicateBuilder {
+    QuantifiableBinaryPredicateBuilder<T>, PredicateBuilder {
 
     private final T result;
     private final BuilderEndedListener listener;
@@ -48,19 +48,19 @@ public abstract class AbstractQuantifiablePredicateBuilder<T> implements
     }
 
     @Override
-    public QuantizedBinaryPredicateBuilder<T> all() {
+    public BinaryPredicateBuilder<T> all() {
         this.quantifier = PredicateQuantifier.ALL;
         return this;
     }
 
     @Override
-    public QuantizedBinaryPredicateBuilder<T> any() {
+    public BinaryPredicateBuilder<T> any() {
         this.quantifier = PredicateQuantifier.ANY;
         return this;
     }
 
     @Override
-    public QuantizedBinaryPredicateBuilder<T> some() {
+    public BinaryPredicateBuilder<T> some() {
         this.quantifier = PredicateQuantifier.SOME;
         return this;
     }

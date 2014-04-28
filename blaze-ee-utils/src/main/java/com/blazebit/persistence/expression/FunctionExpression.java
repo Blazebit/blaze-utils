@@ -32,21 +32,9 @@ public class FunctionExpression implements Expression {
     public String getName() {
         return name;
     }
-    
-    public static FunctionExpression indices(String expression) {
-        return indices(ExpressionUtils.parse(expression));
-    }
-    
-    public static FunctionExpression indices(Expression expression) {
-        return new FunctionExpression("INDICES", expression);
-    }
-    
-    public static FunctionExpression elements(String expression) {
-        return elements(ExpressionUtils.parse(expression));
-    }
-    
-    public static FunctionExpression elements(Expression expression) {
-        return new FunctionExpression("ELEMENTS", expression);
+
+    public Expression[] getExpressions() {
+        return expressions;
     }
 
     @Override
