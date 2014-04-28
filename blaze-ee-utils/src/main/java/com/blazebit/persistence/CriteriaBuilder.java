@@ -17,18 +17,12 @@ package com.blazebit.persistence;
 
 import com.blazebit.lang.StringUtils;
 import com.blazebit.persistence.expression.ExpressionUtils;
-import com.blazebit.persistence.expression.PropertyExpression;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeMap;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
@@ -386,6 +380,8 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
         
         if (!orderBy.ascending) {
             sb.append(" DESC");
+        } else {
+            sb.append(" ASC");
         }
         
         if (orderBy.nullFirst) {
@@ -424,7 +420,7 @@ public class CriteriaBuilder<T> extends AbstractBuilderEndedListener implements 
         private AliasInfo aliasInfo;
         private JoinType type = JoinType.LEFT;
         private boolean fetch = false;
-        private final Map<String, JoinNode> nodes = new HashMap<String, JoinNode>();
+        private final Map<String, JoinNode> nodes = new TreeMap<String, JoinNode>();
         
         public JoinNode(AliasInfo aliasInfo, JoinType type, boolean fetch) {
             this.aliasInfo = aliasInfo;
