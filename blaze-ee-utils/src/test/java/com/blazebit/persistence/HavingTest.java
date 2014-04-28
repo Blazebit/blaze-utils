@@ -16,6 +16,7 @@
 
 package com.blazebit.persistence;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
@@ -26,7 +27,36 @@ public class HavingTest {
     @Test
     public void testHaving(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.having("test");
+        criteria.groupBy("d.owner").having("d.age").gt(0);
         
+        assertEquals("FROM Document d GROUP BY d.owner HAVING d.age > :param_0", criteria.getQueryString());
+    }
+    
+    @Test
+    public void testHavingPath(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.groupBy("d.owner").having("d.partners.age").gt(0);
+        
+        assertEquals("FROM Document d LEFT JOIN d.partners partners GROUP BY d.owner HAVING partners.age > :param_0", criteria.getQueryString());
+    }
+    
+    @Test(expected = javax.jms.IllegalStateException.class)
+    public void testHavingWithoutGroupBy(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.having("d.partners.age");        
+    }
+    
+    @Test(expected = NullPointerException.class)
+    public void testHavingNull(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.groupBy("d.owner").having(null);      
+    }
+    
+    @Test(expected = NullPointerException.class)
+    public void testHavingAnd(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.groupBy("d.owner").having("d.partners.age").gt(0).having("d.locations.url").like("http://%");     
+        
+        assertEquals("FROM Document d GROUP BY d.owner HAVING d.partners.age > :param_0 and d.locations.url LIKE :param_1", criteria.getQueryString());
     }
 }
