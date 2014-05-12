@@ -17,6 +17,8 @@ package com.blazebit.persistence;
 
 import com.blazebit.lang.StringUtils;
 import com.blazebit.persistence.expression.ExpressionUtils;
+import com.blazebit.persistence.impl.ParameterNameGeneratorImpl;
+import com.blazebit.persistence.impl.QueryGeneratorVisitor;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 import java.util.HashMap;
@@ -44,6 +46,7 @@ public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? exten
     private final Map<String, SelectInfo> selectInfos = new LinkedHashMap<String, SelectInfo>();
     private final Map<String, GroupByInfo> groupByInfos = new LinkedHashMap<String, GroupByInfo>();
     private final Map<String, Object> parameters = new HashMap<String, Object>();
+    private final ParameterNameGenerator paramNameGenerator = new ParameterNameGeneratorImpl();
 
     public CriteriaBuilder(Class<T> clazz, String alias) {
         this.clazz = clazz;
@@ -575,6 +578,14 @@ public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? exten
         }
     }
     
+    private void applyWhere(StringBuilder sb) {
+        QueryGeneratorVisitor whereClauseGenerator = new QueryGeneratorVisitor(paramNameGenerator, parameters);
+        rootWherePredicate.predicate.accept(whereClauseGenerator);
+        
+        sb.append(" WHERE ");
+        sb.append(whereClauseGenerator.getString());
+    }
+    
     private static void applyOrderBys(StringBuilder sb, Map<String, OrderByInfo> orderBys) {
         if (orderBys.isEmpty()) {
             return;
@@ -615,7 +626,8 @@ public class CriteriaBuilder<T> implements Filterable<RestrictionBuilder<? exten
         applySelects(sb, selectInfos);
         sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(rootAliasInfo.alias);
         applyJoins(sb, rootAliasInfo, rootNode.nodes);
-//        applyWheres(sb, conditions);
+        applyWhere(sb);
+        
         applyGroupBys(sb, groupByInfos);
 //        applyHavings();
         applyOrderBys(sb, orderByInfos);

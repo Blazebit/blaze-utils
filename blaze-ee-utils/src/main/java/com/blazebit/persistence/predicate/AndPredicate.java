@@ -24,9 +24,5 @@ public final class AndPredicate extends MultinaryPredicate {
     @Override
     public void accept(Visitor visitor) {
         visitor.visit(this);
-        
-        for (Predicate child : children) {
-            child.accept(visitor);
-        }
     }
 }

@@ -39,7 +39,7 @@ public class FunctionExpression implements Expression {
 
     @Override
     public void accept(Visitor visitor) {
-        visitor.visit(this);
+//        visitor.visit(this);
     }
     
 }

@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence.predicate;
+grammar TestGrammar;
 
-/**
- *
- * @author cpbec
- */
-public final class OrPredicate extends MultinaryPredicate {
-    
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
-    }
-}
+import JPQL, JPQL_lexer;
+
+parse_test_grammar
+    : single_valued_path_expression
+    | aggregate_expression
+    ;
+
+

@@ -48,7 +48,7 @@ public class AbstractBuilderEndedListener implements BuilderEndedListener{
         if (currentBuilder == null) {
             throw new IllegalStateException("There was an attempt to end a builder that was not started or already closed.");
         }
-        currentBuilder = builder;
+        currentBuilder = null;
     }
     
 }

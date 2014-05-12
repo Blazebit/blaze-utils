@@ -44,6 +44,13 @@
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-maven-plugin</artifactId>
+            <version>4.2.2</version>
+            <type>maven-plugin</type>
+        </dependency>
 
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -53,6 +60,7 @@
             <version>4.2.5.Final</version>
             <scope>test</scope>
         </dependency>
+        
         <dependency>
             <groupId>org.apache.openejb</groupId>
             <artifactId>openejb-core</artifactId>
@@ -63,6 +71,8 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        
+        
     </dependencies>
     <build>
         <plugins>
@@ -86,22 +96,34 @@
                 </executions>
             </plugin>
             
-<!--            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.7.0.201403182114</version>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.2.2</version>
                 <executions>
                     <execution>
+                        <!--<phase>generate-sources</phase>-->
                         <goals>
-                            <goal>prepare-agent</goal>
+                            <goal>antlr4</goal>
                         </goals>
                     </execution>
+                </executions>
+            </plugin>
+            
+<!--            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
                     <execution>
-                        <id>report</id>
-                        <phase>prepare-package</phase>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>report</goal>
+                            <goal>add-source</goal>
                         </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources</source>
+                            </sources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>-->
@@ -109,14 +131,4 @@
         </plugins>
     
     </build>
-        
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.4</version>
-            </plugin>
-        </plugins>
-    </reporting>
 </project>
