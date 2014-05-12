@@ -13,25 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.blazebit.persistence.predicate;
 
-import com.blazebit.persistence.BuilderEndedListener;
 import com.blazebit.persistence.expression.Expression;
-import com.blazebit.persistence.expression.ExpressionUtils;
-import com.blazebit.persistence.expression.ParameterExpression;
 
 /**
  *
- * @author cpbec
+ * @author ccbem
  */
-public class InPredicate extends BinaryExpressionPredicate {
+public abstract class QuantifiableBinaryExpressionPredicate extends BinaryExpressionPredicate {
+    private final PredicateQuantifier quantifier;
 
-    public InPredicate(Expression left, Expression right) {
+    public QuantifiableBinaryExpressionPredicate(Expression left, Expression right) {
+        this(left, right, PredicateQuantifier.ONE);
+    }
+    
+    public QuantifiableBinaryExpressionPredicate(Expression left, Expression right, PredicateQuantifier quantifier) {
         super(left, right);
+        this.quantifier = quantifier;
     }
 
-    @Override
-    public void accept(Visitor visitor) {
-        visitor.visit(this);
+    public PredicateQuantifier getQuantifier() {
+        return quantifier;
     }
 }

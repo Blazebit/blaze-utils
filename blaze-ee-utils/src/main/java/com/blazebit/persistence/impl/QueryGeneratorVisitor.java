@@ -24,6 +24,7 @@ import com.blazebit.persistence.expression.ParameterExpression;
 import com.blazebit.persistence.expression.PropertyExpression;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.BetweenPredicate;
+import com.blazebit.persistence.predicate.BinaryExpressionPredicate;
 import com.blazebit.persistence.predicate.EqPredicate;
 import com.blazebit.persistence.predicate.GePredicate;
 import com.blazebit.persistence.predicate.GtPredicate;
@@ -38,6 +39,7 @@ import com.blazebit.persistence.predicate.NotPredicate;
 import com.blazebit.persistence.predicate.OrPredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateQuantifier;
+import com.blazebit.persistence.predicate.QuantifiableBinaryExpressionPredicate;
 import java.util.Map;
 
 /**
@@ -46,15 +48,15 @@ import java.util.Map;
  */
 public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visitor {
 
-    private StringBuilder sb = new StringBuilder();
-    private Map<String, Object> parameters;
-    private ParameterNameGenerator paramNameGenerator;
+    private final StringBuilder sb = new StringBuilder();
+    private final Map<String, Object> parameters;
+    private final ParameterNameGenerator paramNameGenerator;
 
     public QueryGeneratorVisitor(ParameterNameGenerator paramNameGenerator, Map<String, Object> parameters) {
         this.parameters = parameters;
         this.paramNameGenerator = paramNameGenerator;
     }
-    
+
     public String getString() {
         return sb.toString();
     }
@@ -70,13 +72,16 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
             } else {
                 child.accept(this);
             }
-            sb.append(" and");
+            sb.append(and);
         }
-        sb.deleteCharAt(and.length() - 4);
+        if (predicate.getChildren().size() > 0) {
+            sb.delete(sb.length() - and.length(), sb.length());
+        }
     }
 
     @Override
     public void visit(OrPredicate predicate) {
+        final String or = " or";
         for (Predicate child : predicate.getChildren()) {
             if (child instanceof AndPredicate) {
                 sb.append("(");
@@ -85,7 +90,10 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
             } else {
                 child.accept(this);
             }
-            sb.append(" or");
+            sb.append(or);
+        }
+        if (predicate.getChildren().size() > 0) {
+            sb.delete(sb.length() - or.length(), sb.length());
         }
     }
 
@@ -97,88 +105,125 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     @Override
     public void visit(EqPredicate predicate) {
-        predicate.getLeft().accept(this);
-        sb.append(" =");
-        if(predicate.getQuantifier() != PredicateQuantifier.ONE)
-        {
-            sb.append(predicate.getQuantifier().toString());
-            sb.append("(");
-        }
-        predicate.getRight().accept(this);
-        if(predicate.getQuantifier() != PredicateQuantifier.ONE)
-        {
-            sb.append(")");
-        }
+        visitQuantifiableBinaryPredicate(predicate, "=");
     }
 
     @Override
     public void visit(IsNullPredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        predicate.getExpression().accept(this);
+        sb.append(" IS NULL");
     }
 
     @Override
     public void visit(IsEmptyPredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        predicate.getExpression().accept(this);
+        sb.append(" IS EMPTY");
     }
 
     @Override
     public void visit(IsMemberOfPredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        predicate.getLeft().accept(this);
+        sb.append(" MEMBER OF ");
+        predicate.getRight().accept(this);
     }
 
     @Override
     public void visit(LikePredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (!predicate.isCaseSensitive()) {
+            sb.append("UPPER(");
+        }
+        predicate.getLeft().accept(this);
+        if (!predicate.isCaseSensitive()) {
+            sb.append(")");
+        }
+        sb.append(" LIKE ");
+        if (!predicate.isCaseSensitive()) {
+            sb.append("UPPER(");
+        }
+        predicate.getRight().accept(this);
+        if (!predicate.isCaseSensitive()) {
+            sb.append(")");
+        }
+        if (predicate.getEscapeCharacter() != null) {
+            if (!predicate.isCaseSensitive()) {
+                sb.append("UPPER(");
+            }
+            sb.append(" ESCAPE ").append("'").append(predicate.getEscapeCharacter()).append("'");
+            if (!predicate.isCaseSensitive()) {
+                sb.append(")");
+            }
+        }
     }
 
     @Override
     public void visit(BetweenPredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        predicate.getLeft().accept(this);
+        sb.append(" BETWEEN ");
+        predicate.getStart().accept(this);
+        sb.append(" AND ");
+        predicate.getEnd().accept(this);
     }
 
     @Override
     public void visit(InPredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        predicate.getLeft().accept(this);
+        sb.append(" IN(");
+        predicate.getRight().accept(this);
+        sb.append(")");
     }
 
+    private void visitQuantifiableBinaryPredicate(QuantifiableBinaryExpressionPredicate predicate, String operator){
+        predicate.getLeft().accept(this);
+        sb.append(" ").append(operator);
+        if (predicate.getQuantifier() != PredicateQuantifier.ONE) {
+            sb.append(predicate.getQuantifier().toString());
+            sb.append("(");
+        }
+        predicate.getRight().accept(this);
+        if (predicate.getQuantifier() != PredicateQuantifier.ONE) {
+            sb.append(")");
+        }
+    }
     @Override
     public void visit(GtPredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        visitQuantifiableBinaryPredicate(predicate, ">");
     }
 
     @Override
     public void visit(GePredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        visitQuantifiableBinaryPredicate(predicate, ">=");
     }
 
     @Override
     public void visit(LtPredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        visitQuantifiableBinaryPredicate(predicate, "<");
     }
 
     @Override
     public void visit(LePredicate predicate) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        visitQuantifiableBinaryPredicate(predicate, "<=");
     }
 
-    
+    /* Expression.Visitor */
     @Override
     public void visit(PropertyExpression expression) {
-        sb.append(expression.getProperty());
+        sb.append(" ").append(expression.getProperty());
     }
 
     @Override
     public void visit(ParameterExpression expression) {
         String paramName = paramNameGenerator.getParamNameForObject(expression.getValue());
-        sb.append(":");
+        sb.append(" :");
         sb.append(paramName);
-        
+
         parameters.put(paramName, expression.getValue());
     }
 
     @Override
     public void visit(CompositeExpression expression) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        for (Expression e : expression.getExpressions()) {
+            e.accept(this);
+        }
     }
 
     @Override
@@ -188,6 +233,6 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     @Override
     public void visit(FooExpression expression) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        sb.append(expression.getString());
     }
 }

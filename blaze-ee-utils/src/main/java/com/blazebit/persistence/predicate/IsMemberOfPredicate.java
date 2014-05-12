@@ -21,10 +21,10 @@ import com.blazebit.persistence.expression.Expression;
  *
  * @author cpbec
  */
-public class IsMemberOfPredicate extends UnaryExpressionPredicate {
+public class IsMemberOfPredicate extends BinaryExpressionPredicate {
 
-    public IsMemberOfPredicate(Expression expression) {
-        super(expression);
+    public IsMemberOfPredicate(Expression left, Expression right) {
+        super(left, right);
     }
 
     @Override

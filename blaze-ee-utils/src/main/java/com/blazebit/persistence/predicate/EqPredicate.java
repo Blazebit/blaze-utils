@@ -24,21 +24,14 @@ import com.blazebit.persistence.expression.ParameterExpression;
  *
  * @author cpbec
  */
-public class EqPredicate  extends BinaryExpressionPredicate {
+public class EqPredicate  extends QuantifiableBinaryExpressionPredicate {
 
-    private final PredicateQuantifier quantifier;
-    
     public EqPredicate(Expression left, Expression right) {
-        this(left, right, PredicateQuantifier.ONE);
+        super(left, right, PredicateQuantifier.ONE);
     }
     
     public EqPredicate(Expression left, Expression right, PredicateQuantifier quantifier) {
-        super(left, right);
-        this.quantifier = quantifier;
-    }
-
-    public PredicateQuantifier getQuantifier() {
-        return quantifier;
+        super(left, right, quantifier);
     }
     
     @Override

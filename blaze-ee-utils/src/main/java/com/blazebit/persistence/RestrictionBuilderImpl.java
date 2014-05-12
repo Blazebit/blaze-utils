@@ -202,12 +202,12 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T isMemberOf(String expression) {
-        return chain(new IsMemberOfPredicate(leftExpression));
+        return chain(new IsMemberOfPredicate(leftExpression, ExpressionUtils.parse(expression)));
     }
 
     @Override
     public T isNotMemberOf(String expression) {
-        return chain(new NotPredicate(new IsMemberOfPredicate(leftExpression)));
+        return chain(new NotPredicate(new IsMemberOfPredicate(leftExpression, ExpressionUtils.parse(expression))));
     }
     
     @Override
