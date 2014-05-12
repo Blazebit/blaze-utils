@@ -36,7 +36,7 @@ public class LessTest {
     
     @Test
     public void testLt(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").lt(20);
         
         assertEquals("FROM Document d WHERE d.age < :param_0", criteria.getQueryString());
@@ -44,13 +44,13 @@ public class LessTest {
     
     @Test(expected = NullPointerException.class)
     public void testLtNull(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").lt(null);        
     }
     
     @Test
     public void testLtExpression(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").ltExpression("d.owner.age");
         
         assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE d.age < owner.age", criteria.getQueryString());
@@ -58,13 +58,13 @@ public class LessTest {
     
     @Test(expected = NullPointerException.class)
     public void testLtExpressionNull(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").ltExpression(null);        
     }
     
     @Test
     public void testLe(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").le(20);
         
         assertEquals("FROM Document d WHERE d.age <= :param_0", criteria.getQueryString());
@@ -72,13 +72,13 @@ public class LessTest {
     
     @Test(expected = NullPointerException.class)
     public void testLeNull(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").le(null);        
     }
     
     @Test
     public void testLeExpression(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").leExpression("d.owner.age");
         
         assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE d.age <= owner.age", criteria.getQueryString());
@@ -86,7 +86,7 @@ public class LessTest {
     
     @Test(expected = NullPointerException.class)
     public void testLeExpressionNull(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").leExpression(null);        
     }
 }

@@ -29,7 +29,7 @@ import org.junit.Test;
 public class InTest {
     @Test
     public void testIn(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         List<Integer> ages = new ArrayList<Integer>(Arrays.asList(new Integer[]{1,2,3,4,5}));
         criteria.where("d.age").in(ages);
         
@@ -38,13 +38,13 @@ public class InTest {
     
     @Test(expected = NullPointerException.class)
     public void testInNull(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").in(null);   
     }
     
     @Test
     public void testNotIn(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         List<Integer> ages = new ArrayList<Integer>(Arrays.asList(new Integer[]{1,2,3,4,5}));
         criteria.where("d.age").notIn(ages);
         
@@ -53,7 +53,7 @@ public class InTest {
     
     @Test(expected = NullPointerException.class)
     public void testNotInNull(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").notIn(null);
     }
     

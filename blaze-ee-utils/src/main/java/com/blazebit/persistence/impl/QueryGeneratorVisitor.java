@@ -16,6 +16,12 @@
 package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.ParameterNameGenerator;
+import com.blazebit.persistence.expression.ArrayExpression;
+import com.blazebit.persistence.expression.CompositeExpression;
+import com.blazebit.persistence.expression.Expression;
+import com.blazebit.persistence.expression.FooExpression;
+import com.blazebit.persistence.expression.ParameterExpression;
+import com.blazebit.persistence.expression.PropertyExpression;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.BetweenPredicate;
 import com.blazebit.persistence.predicate.EqPredicate;
@@ -38,7 +44,7 @@ import java.util.Map;
  *
  * @author ccbem
  */
-public class QueryGeneratorVisitor implements Predicate.Visitor {
+public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visitor {
 
     private StringBuilder sb = new StringBuilder();
     private Map<String, Object> parameters;
@@ -91,18 +97,14 @@ public class QueryGeneratorVisitor implements Predicate.Visitor {
 
     @Override
     public void visit(EqPredicate predicate) {
-        ExpressionVisitorImpl leftEvaluation = new ExpressionVisitorImpl(paramNameGenerator, parameters);
-        predicate.getLeft().accept(leftEvaluation);
-        sb.append(leftEvaluation.getString());
+        predicate.getLeft().accept(this);
         sb.append(" =");
         if(predicate.getQuantifier() != PredicateQuantifier.ONE)
         {
             sb.append(predicate.getQuantifier().toString());
             sb.append("(");
         }
-        ExpressionVisitorImpl rightEvaluation = new ExpressionVisitorImpl(paramNameGenerator, parameters);
-        predicate.getRight().accept(rightEvaluation);
-        sb.append(rightEvaluation.getString());
+        predicate.getRight().accept(this);
         if(predicate.getQuantifier() != PredicateQuantifier.ONE)
         {
             sb.append(")");
@@ -159,4 +161,33 @@ public class QueryGeneratorVisitor implements Predicate.Visitor {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    
+    @Override
+    public void visit(PropertyExpression expression) {
+        sb.append(expression.getProperty());
+    }
+
+    @Override
+    public void visit(ParameterExpression expression) {
+        String paramName = paramNameGenerator.getParamNameForObject(expression.getValue());
+        sb.append(":");
+        sb.append(paramName);
+        
+        parameters.put(paramName, expression.getValue());
+    }
+
+    @Override
+    public void visit(CompositeExpression expression) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void visit(ArrayExpression expression) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void visit(FooExpression expression) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

@@ -26,42 +26,42 @@ import org.junit.Test;
 public class OrderByTest {
     @Test
     public void testOrderByAscNullsFirst(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.orderBy("d.age", true, true);
         assertEquals("FROM Document d ORDER BY d.age ASC NULLS FIRST", criteria.getQueryString());
     }
     
     @Test
     public void testOrderByAscNullsLast(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.orderBy("d.age", true, false);
         assertEquals("FROM Document d ORDER BY d.age ASC NULLS LAST", criteria.getQueryString());
     }
     
     @Test
     public void testOrderByDescNullsFirst(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.orderBy("d.age", false, true);
         assertEquals("FROM Document d ORDER BY d.age DESC NULLS FIRST", criteria.getQueryString());
     }
     
     @Test
     public void testOrderByDescNullsLast(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.orderBy("d.age", false, false);
         assertEquals("FROM Document d ORDER BY d.age DESC NULLS LAST", criteria.getQueryString());
     }
     
     @Test
     public void testOrderByNested(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.orderBy("d.employees.contacts.age", false, false);
         assertEquals("FROM Document d LEFT JOIN d.employees employees LEFT JOIN employees.contacts contacts ORDER BY contacts.age DESC NULLS LAST", criteria.getQueryString());
     }
     
     @Test
     public void testOrderByMultiple(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.orderBy("d.employees.contacts.age", false, false).orderBy("d.employees.supervisors.joinDate", true, true);
 
         assertEquals("FROM Document d LEFT JOIN d.employees employees LEFT JOIN employees.contacts contacts LEFT JOIN employees.supervisors supervisors ORDER BY contacts.age DESC NULLS LAST, supervisors.joinDate ASC NULLS FIRST", criteria.getQueryString());
@@ -69,13 +69,13 @@ public class OrderByTest {
     
     @Test(expected = NullPointerException.class)
     public void testOrderByNullAlias(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.orderBy(null, false, false);
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testOrderByEmptyAlias(){
-        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.orderBy("", false, false);
     }
 }

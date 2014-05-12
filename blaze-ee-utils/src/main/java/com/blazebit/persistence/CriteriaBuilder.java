@@ -27,11 +27,11 @@ import javax.persistence.TypedQuery;
 public abstract class CriteriaBuilder<T> implements Aggregateable<RestrictionBuilder<CriteriaBuilder<T>>>, Filterable<RestrictionBuilder<CriteriaBuilder<T>>> {
 
     
-    public static <T> CriteriaBuilderImpl<T> from(Class<T> clazz) {
+    public static <T> CriteriaBuilder<T> from(Class<T> clazz) {
         return new CriteriaBuilderImpl<T>(clazz, StringUtils.firstToLower(clazz.getSimpleName()));
     }
     
-    public static <T> CriteriaBuilderImpl<T> from(Class<T> clazz, String alias) {
+    public static <T> CriteriaBuilder<T> from(Class<T> clazz, String alias) {
         return new CriteriaBuilderImpl<T>(clazz, alias);
     }
     

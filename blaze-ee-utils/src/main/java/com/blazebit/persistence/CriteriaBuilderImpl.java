@@ -15,8 +15,9 @@
  */
 package com.blazebit.persistence;
 
-import com.blazebit.lang.StringUtils;
 import com.blazebit.persistence.expression.ExpressionUtils;
+import com.blazebit.persistence.impl.ParameterNameGeneratorImpl;
+import com.blazebit.persistence.impl.QueryGeneratorVisitor;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 import java.lang.reflect.Constructor;
@@ -49,6 +50,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     // Maps normalized path to group by info
     private final Map<String, GroupByInfo> groupByInfos = new LinkedHashMap<String, GroupByInfo>();
     private final Map<String, Object> parameters = new HashMap<String, Object>();
+    private final ParameterNameGenerator paramNameGenerator = new ParameterNameGeneratorImpl();
     
     private boolean distinct = false;
 
@@ -608,6 +610,14 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         }
     }
 
+    private void applyWhere(StringBuilder sb) {
+        QueryGeneratorVisitor whereClauseGenerator = new QueryGeneratorVisitor(paramNameGenerator, parameters);
+        rootWherePredicate.predicate.accept(whereClauseGenerator);
+        
+        sb.append(" WHERE ");
+        sb.append(whereClauseGenerator.getString());
+    }
+    
     private void applyGroupBys(StringBuilder sb, Map<String, GroupByInfo> groupBys) {
         if (groupBys.isEmpty()) {
             return;
@@ -672,7 +682,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         applySelects(sb, selectInfos);
         sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(rootAliasInfo.alias);
         applyJoins(sb, rootAliasInfo, rootNode.nodes);
-//        applyWheres(sb, conditions);
+        applyWhere(sb);
         applyGroupBys(sb, groupByInfos);
 //        applyHavings();
         applyOrderBys(sb, orderByInfos);

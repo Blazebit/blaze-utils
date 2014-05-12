@@ -21,5 +21,5 @@ package com.blazebit.persistence;
  * @author ccbem
  */
 public interface ParameterNameGenerator {
-    String getNextName();
+    String getParamNameForObject(Object o);
 }

@@ -17,6 +17,7 @@
 package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.ParameterNameGenerator;
+import com.blazebit.persistence.expression.Expression;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -30,9 +31,15 @@ public class ParameterNameGeneratorImpl implements ParameterNameGenerator {
     private Map<Object, String> nameCache = new IdentityHashMap<Object, String>();
     
     @Override
-    public String getNextName() {
-        
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String getParamNameForObject(Object o) {
+        String existingName = nameCache.get(o);
+        if(existingName == null){
+            existingName = prefix + counter++;
+            nameCache.put(o, existingName);
+        }
+        return existingName;
     }
+    
+    
     
 }
