@@ -26,7 +26,7 @@ import org.junit.Test;
 public class EqTest {
     @Test
     public void testEqualTo(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.age").eq(20);
         
         assertEquals("FROM Document d WHERE d.age = :param_0", criteria.getQueryString());
@@ -34,13 +34,13 @@ public class EqTest {
     
     @Test(expected = NullPointerException.class)
     public void testEqualToNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.age").eq(null);
     }
     
     @Test
     public void testEqualToExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.age").eqExpression("d.age2 + 1");
         
         assertEquals("FROM Document d WHERE d.age = d.age2 + 1", criteria.getQueryString());
@@ -48,13 +48,13 @@ public class EqTest {
     
     @Test(expected = IllegalArgumentException.class)
     public void testEqualToEmptyExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.age").eqExpression("");        
     }
     
     @Test(expected = NullPointerException.class)
     public void testEqualToNullExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.age").eqExpression(null);        
     }
     
@@ -77,7 +77,7 @@ public class EqTest {
     
     @Test
     public void testNotEqualTo(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.age").notEq(20);
         
         assertEquals("FROM Document d WHERE d.age != 20", criteria.getQueryString());
@@ -85,13 +85,13 @@ public class EqTest {
     
      @Test(expected = NullPointerException.class)
     public void testNotEqualToNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.age").notEq(null);
     }
     
     @Test
     public void testNotEqualToExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.age").notEqExpression("d.age2 + 1");
         
         assertEquals("FROM Document d WHERE d.age != d.age2 + 1", criteria.getQueryString());
@@ -99,13 +99,13 @@ public class EqTest {
     
     @Test(expected = IllegalArgumentException.class)
     public void testNotEqualToEmptyExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.age").notEqExpression("");        
     }
     
     @Test(expected = NullPointerException.class)
     public void testNotEqualToNullExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.age").notEqExpression(null);        
     }
     

@@ -15,15 +15,90 @@
  */
 package com.blazebit.persistence.expression;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  *
  * @author cpbec
  */
 public final class ExpressionUtils {
     
+    private static final String SIMPLE_PATH = "([a-zA-Z_][\\w]*(\\.[\\w]+)*)";
+    private static final String PARAMETER_OR_PATH = "(\\:[a-zA-Z_][\\w]*) | (" + SIMPLE_PATH + ")";
+    private static final String PATH = SIMPLE_PATH + "(\\[(" + PARAMETER_OR_PATH + ")\\])?";
+    private static final ThreadLocal<Pattern> expressionExtractor = new ThreadLocal<Pattern>() {
+
+        @Override
+        protected Pattern initialValue() {
+            return Pattern.compile(PATH);
+        }
+        
+    };
+    private static final TreeSet<String> KEYWORDS = new TreeSet<String>(Arrays.asList(
+        "AVG", "MAX", "MIN", "SUM", "COUNT", "DISTINCT", "LENGTH", "LOCATE", "ABS", "SQRT", "MOD", "SIZE", "CURRENT_DATE", 
+        "CURRENT_TIME", "CURRENT_TIMESTAMP", "CONCAT", "SUBSTRING", "TRIM", "LEADING", "TRAILING", "BOTH", "FROM", "LOWER", "UPPER"
+        ));
+    
     public static Expression parse(String expression) {
-        if(expression.matches("[\\w.]+"))
+        final List<Expression> expressions = new ArrayList<Expression>();
+        final Matcher matcher = expressionExtractor.get().matcher(expression);
+        StringBuilder sb = new StringBuilder();
+        
+        if(matcher.matches()){
             return new PropertyExpression(expression);
-        throw new UnsupportedOperationException();
+        }
+        
+        int start = 0;
+        
+        while (start < expression.length() && matcher.find(start)) {
+            if (matcher.start() != start) {
+                sb.append(expression.substring(start, matcher.start()));
+            }
+            
+            String candidate = expression.substring(matcher.start(), matcher.end());
+            
+            if (KEYWORDS.contains(candidate.toUpperCase())) {
+                sb.append(candidate);
+            } else {
+                expressions.add(new FooExpression(sb.toString()));
+                sb.setLength(0);
+                
+                String base = matcher.group(1);
+                String index = matcher.group(4);
+                
+                if (index == null) {
+                    expressions.add(new PropertyExpression(base));
+                } else {
+                    index = index.trim();
+                    Expression indexExpression;
+                    
+                    if (index.charAt(0) == ':') {
+                        indexExpression = new ParameterExpression(index.substring(1));
+                    } else {
+                        indexExpression = new PropertyExpression(index);
+                    }
+                    
+                    expressions.add(new ArrayExpression(new PropertyExpression(base), indexExpression));
+                }
+            }
+            start = matcher.end();
+        }
+        
+        if (start == 0) {
+            throw new IllegalArgumentException("Just literals are not allowed!");
+        } else if (start != expression.length()) {
+            sb.append(expression.substring(start, expression.length()));
+        }
+        
+        if (sb.length() > 0) {
+            expressions.add(new FooExpression(sb.toString()));
+        }
+        
+        return new CompositeExpression(expressions);
     }
 }
