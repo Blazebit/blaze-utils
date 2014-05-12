@@ -39,7 +39,7 @@ public abstract class CriteriaBuilder<T> implements Aggregateable<RestrictionBui
 
     public abstract String getQueryString();
     
-//    public CriteriaBuilder<T> page(int page, int objectsPerPage);
+    public abstract CriteriaBuilder<T> page(int page, int objectsPerPage);
 
     /*
      * Join methods
