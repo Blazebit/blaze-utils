@@ -15,6 +15,8 @@
  */
 package com.blazebit.persistence.expression;
 
+import com.blazebit.persistence.impl.JoinNode;
+
 /**
  *
  * @author cpbec
@@ -22,6 +24,8 @@ package com.blazebit.persistence.expression;
 public class PropertyExpression implements Expression {
 
     private final String property;
+    private JoinNode baseNode;
+    private String field;
 
     public PropertyExpression(String property) {
         this.property = property;
@@ -34,6 +38,22 @@ public class PropertyExpression implements Expression {
 
     public String getProperty() {
         return property;
+    }
+
+    public JoinNode getBaseNode() {
+        return baseNode;
+    }
+
+    public void setBaseNode(JoinNode baseNode) {
+        this.baseNode = baseNode;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
     }
     
 }
