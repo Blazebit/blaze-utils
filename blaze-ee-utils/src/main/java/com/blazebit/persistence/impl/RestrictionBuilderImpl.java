@@ -75,11 +75,13 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T between(Object start, Object end) {
+        if(start == null || end == null) throw new NullPointerException();
         return chain(new BetweenPredicate(leftExpression, new ParameterExpression(start), new ParameterExpression(end)));
     }
 
     @Override
     public T notBetween(Object start, Object end) {
+        if(start == null || end == null) throw new NullPointerException();
         return chain(new NotPredicate(new BetweenPredicate(leftExpression, new ParameterExpression(start), new ParameterExpression(end))));
     }
 
@@ -90,6 +92,7 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T eq(Object value) {
+        if(value == null) throw new NullPointerException();
         return chain(new EqPredicate(leftExpression, new ParameterExpression(value)));
     }
 
@@ -105,6 +108,7 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T notEq(Object value) {
+        if(value == null) throw new NullPointerException();
         return chain(new NotPredicate(new EqPredicate(leftExpression, new ParameterExpression(value))));
     }
 
@@ -120,6 +124,7 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T gt(Object value) {
+        if(value == null) throw new NullPointerException();
         return chain(new GtPredicate(leftExpression, new ParameterExpression(value)));
     }
 
@@ -135,6 +140,7 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T ge(Object value) {
+        if(value == null) throw new NullPointerException();
         return chain(new GePredicate(leftExpression, new ParameterExpression(value)));
     }
 
@@ -150,6 +156,7 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T lt(Object value) {
+        if(value == null) throw new NullPointerException();
         return chain(new LtPredicate(leftExpression, new ParameterExpression(value)));
     }
 
@@ -165,6 +172,7 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T le(Object value) {
+        if(value == null) throw new NullPointerException();
         return chain(new LePredicate(leftExpression, new ParameterExpression(value)));
     }
 
@@ -175,11 +183,13 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T in(List<?> values) {
+        if(values == null) throw new NullPointerException();
         return chain(new InPredicate(leftExpression, new ParameterExpression(values)));
     }
 
     @Override
     public T notIn(List<?> values) {
+        if(values == null) throw new NullPointerException();
         return chain(new NotPredicate(new InPredicate(leftExpression, new ParameterExpression(values))));
     }
     
@@ -205,12 +215,12 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T isMemberOf(String expression) {
-        return chain(new IsMemberOfPredicate(leftExpression));
+        return chain(new IsMemberOfPredicate(leftExpression, ExpressionUtils.parse(expression)));
     }
 
     @Override
     public T isNotMemberOf(String expression) {
-        return chain(new NotPredicate(new IsMemberOfPredicate(leftExpression)));
+        return chain(new NotPredicate(new IsMemberOfPredicate(leftExpression, ExpressionUtils.parse(expression))));
     }
     
     @Override

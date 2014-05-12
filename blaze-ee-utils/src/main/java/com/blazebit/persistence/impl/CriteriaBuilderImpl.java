@@ -635,7 +635,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         QueryGeneratorVisitor whereClauseGenerator = new QueryGeneratorVisitor(paramNameGenerator, parameters);
         rootWherePredicate.predicate.accept(whereClauseGenerator);
         
-        sb.append(" WHERE ");
+        sb.append(" WHERE");
         sb.append(whereClauseGenerator.getString());
     }
     

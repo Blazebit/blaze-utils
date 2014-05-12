@@ -47,8 +47,7 @@ public class InTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         List<Integer> ages = new ArrayList<Integer>(Arrays.asList(new Integer[]{1,2,3,4,5}));
         criteria.where("d.age").notIn(ages);
-        
-        assertEquals("FROM Document d WHERE d.age NOT IN (:param_0)", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE NOT d.age IN (:param_0)", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)

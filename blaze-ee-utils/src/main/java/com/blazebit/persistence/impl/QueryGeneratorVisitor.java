@@ -63,7 +63,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     @Override
     public void visit(AndPredicate predicate) {
-        final String and = " and";
+        final String and = " AND";
         for (Predicate child : predicate.getChildren()) {
             if (child instanceof OrPredicate) {
                 sb.append("(");
@@ -81,7 +81,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     @Override
     public void visit(OrPredicate predicate) {
-        final String or = " or";
+        final String or = " OR";
         for (Predicate child : predicate.getChildren()) {
             if (child instanceof AndPredicate) {
                 sb.append("(");
@@ -99,7 +99,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     @Override
     public void visit(NotPredicate predicate) {
-        sb.append(" not");
+        sb.append(" NOT");
         predicate.getPredicate().accept(this);
     }
 
@@ -167,7 +167,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     @Override
     public void visit(InPredicate predicate) {
         predicate.getLeft().accept(this);
-        sb.append(" IN(");
+        sb.append(" IN (");
         predicate.getRight().accept(this);
         sb.append(")");
     }
@@ -213,7 +213,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     @Override
     public void visit(ParameterExpression expression) {
         String paramName = paramNameGenerator.getParamNameForObject(expression.getValue());
-        sb.append(" :");
+        sb.append(":");
         sb.append(paramName);
 
         parameters.put(paramName, expression.getValue());
