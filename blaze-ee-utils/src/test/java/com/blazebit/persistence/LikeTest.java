@@ -31,7 +31,7 @@ public class LikeTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.name").like(pattern, false, null);
         
-        assertEquals("FROM Document d WHERE " + getCaseInsensitiveLike("d.name", ":param_0"), criteria.getQueryString());
+        assertEquals("FROM Document d WHERE " + getCaseInsensitiveLike("d.name", ":param_0", null), criteria.getQueryString());
     }
     
     @Test
@@ -63,7 +63,7 @@ public class LikeTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.name").likeExpression("d.owner.namePattern", false, null);
         
-        assertEquals("FROM Document d WHERE " + getCaseInsensitiveLike("d.name", "d.owner.namePattern"), criteria.getQueryString());
+        assertEquals("FROM Document d WHERE " + getCaseInsensitiveLike("d.name", "d.owner.namePattern", null), criteria.getQueryString());
     }
     
     @Test
@@ -96,7 +96,7 @@ public class LikeTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.name").notLike(pattern, false, null);
         
-        assertEquals("FROM Document d WHERE " + getCaseInsensitiveNotLike("d.name", ":param_0"), criteria.getQueryString());
+        assertEquals("FROM Document d WHERE " + getCaseInsensitiveNotLike("d.name", ":param_0", null), criteria.getQueryString());
     }
     
     @Test
@@ -128,7 +128,23 @@ public class LikeTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.name").notLikeExpression("d.owner.namePattern", false, null);
         
-        assertEquals("FROM Document d WHERE " + getCaseInsensitiveNotLike("d.name", "d.owner.namePattern"), criteria.getQueryString());
+        assertEquals("FROM Document d WHERE " + getCaseInsensitiveNotLike("d.name", "d.owner.namePattern", null), criteria.getQueryString());
+    }
+    
+    @Test
+    public void testLikeExpressionCaseInsensitiveEscaped(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.name").notLikeExpression("d.owner.namePattern", false, '\\');
+        
+        assertEquals("FROM Document d WHERE " + getCaseInsensitiveLike("d.name", "d.owner.namePattern", '\\'), criteria.getQueryString());
+    }
+    
+    @Test
+    public void testNotLikeExpressionCaseInsensitiveEscaped(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.where("d.name").notLikeExpression("d.owner.namePattern", false, '\\');
+        
+        assertEquals("FROM Document d WHERE " + getCaseInsensitiveNotLike("d.name", "d.owner.namePattern", '\\'), criteria.getQueryString());
     }
     
     @Test
@@ -153,11 +169,14 @@ public class LikeTest {
         criteria.where("d.name").notLikeExpression(null, true, null);
     }
     
-    private String getCaseInsensitiveLike(String property, String likeParam){
-        return property + " LIKE UPPER(" + likeParam + ")";
+    private String getCaseInsensitiveLike(String property, String likeParam, Character escape){
+        String res = "UPPER(" + property + ") LIKE UPPER(" + likeParam + ")";
+        if(escape != null)
+            res += "ESCAPE UPPER('" + escape + "')";
+        return res;
     }
     
-    private String getCaseInsensitiveNotLike(String property, String likeParam){
-        return property + " NOT LIKE UPPER(" + likeParam + ")";
+    private String getCaseInsensitiveNotLike(String property, String likeParam, Character escape){
+        return "NOT " + getCaseInsensitiveLike(property, likeParam, escape);
     }
 }

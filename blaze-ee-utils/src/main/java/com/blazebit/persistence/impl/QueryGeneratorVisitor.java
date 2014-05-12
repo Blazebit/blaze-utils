@@ -48,22 +48,17 @@ import java.util.Map;
  */
 public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visitor {
 
-    private final StringBuilder sb = new StringBuilder();
-    private final Map<String, Object> parameters;
+    private final StringBuilder sb;
     private final ParameterNameGenerator paramNameGenerator;
 
-    public QueryGeneratorVisitor(ParameterNameGenerator paramNameGenerator, Map<String, Object> parameters) {
-        this.parameters = parameters;
+    public QueryGeneratorVisitor(StringBuilder sb, ParameterNameGenerator paramNameGenerator) {
+        this.sb = sb;
         this.paramNameGenerator = paramNameGenerator;
-    }
-
-    public String getString() {
-        return sb.toString();
     }
 
     @Override
     public void visit(AndPredicate predicate) {
-        final String and = " AND";
+        final String and = " AND ";
         for (Predicate child : predicate.getChildren()) {
             if (child instanceof OrPredicate) {
                 sb.append("(");
@@ -81,7 +76,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     @Override
     public void visit(OrPredicate predicate) {
-        final String or = " OR";
+        final String or = " OR ";
         for (Predicate child : predicate.getChildren()) {
             if (child instanceof AndPredicate) {
                 sb.append("(");
@@ -99,13 +94,13 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     @Override
     public void visit(NotPredicate predicate) {
-        sb.append(" NOT");
+        sb.append("NOT ");
         predicate.getPredicate().accept(this);
     }
 
     @Override
     public void visit(EqPredicate predicate) {
-        visitQuantifiableBinaryPredicate(predicate, "=");
+        visitQuantifiableBinaryPredicate(predicate, " = ");
     }
 
     @Override
@@ -174,7 +169,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     private void visitQuantifiableBinaryPredicate(QuantifiableBinaryExpressionPredicate predicate, String operator){
         predicate.getLeft().accept(this);
-        sb.append(" ").append(operator);
+        sb.append(operator);
         if (predicate.getQuantifier() != PredicateQuantifier.ONE) {
             sb.append(predicate.getQuantifier().toString());
             sb.append("(");
@@ -186,28 +181,28 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     }
     @Override
     public void visit(GtPredicate predicate) {
-        visitQuantifiableBinaryPredicate(predicate, ">");
+        visitQuantifiableBinaryPredicate(predicate, " > ");
     }
 
     @Override
     public void visit(GePredicate predicate) {
-        visitQuantifiableBinaryPredicate(predicate, ">=");
+        visitQuantifiableBinaryPredicate(predicate, " >= ");
     }
 
     @Override
     public void visit(LtPredicate predicate) {
-        visitQuantifiableBinaryPredicate(predicate, "<");
+        visitQuantifiableBinaryPredicate(predicate, " < ");
     }
 
     @Override
     public void visit(LePredicate predicate) {
-        visitQuantifiableBinaryPredicate(predicate, "<=");
+        visitQuantifiableBinaryPredicate(predicate, " <= ");
     }
 
     /* Expression.Visitor */
     @Override
     public void visit(PropertyExpression expression) {
-        sb.append(" ").append(expression.getProperty());
+        sb.append(expression.getProperty());
     }
 
     @Override
@@ -215,8 +210,6 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
         String paramName = paramNameGenerator.getParamNameForObject(expression.getValue());
         sb.append(":");
         sb.append(paramName);
-
-        parameters.put(paramName, expression.getValue());
     }
 
     @Override

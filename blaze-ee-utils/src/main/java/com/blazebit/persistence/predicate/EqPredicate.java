@@ -15,10 +15,10 @@
  */
 package com.blazebit.persistence.predicate;
 
-import com.blazebit.persistence.BuilderEndedListener;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.ParameterExpression;
+import com.blazebit.persistence.impl.BuilderEndedListener;
 
 /**
  *

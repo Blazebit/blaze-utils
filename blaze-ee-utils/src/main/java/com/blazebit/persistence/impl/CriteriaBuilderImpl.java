@@ -71,7 +71,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     // Maps normalized path to group by info
     private final Map<String, GroupByInfo> groupByInfos = new LinkedHashMap<String, GroupByInfo>();
     private final Map<String, Object> parameters = new HashMap<String, Object>();
-    private final ParameterNameGenerator paramNameGenerator = new ParameterNameGeneratorImpl();
+    private final ParameterNameGenerator paramNameGenerator = new ParameterNameGeneratorImpl(parameters);
     private boolean distinct = false;
 
     public CriteriaBuilderImpl(Class<T> clazz, String alias) {
@@ -207,7 +207,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     @Override
     public RestrictionBuilder<CriteriaBuilder<T>> where(String expression) {
         return rootWherePredicate.startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootWherePredicate,
-                                                                                              ExpressionUtils.parse(expression)));
+                ExpressionUtils.parse(expression)));
     }
 
     @Override
@@ -296,7 +296,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     @Override
     public RestrictionBuilder<CriteriaBuilder<T>> having(String expression) {
         return rootHavingPredicate.startBuilder(
-            new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootHavingPredicate, ExpressionUtils.parse(expression)));
+                new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootHavingPredicate, ExpressionUtils.parse(expression)));
     }
 
     @Override
@@ -348,16 +348,16 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         return paths;
     }
-    
+
     private Expression implicitJoin(Expression exp) {
         return null;
     }
-    
+
     private void implicitJoin(String path) {
         String normalizedPath;
         JoinNode baseNode;
         String field;
-        
+
         if (startsAtRootAlias(path)) {
             // The given path is relative to the root
             normalizedPath = path.substring(rootAliasInfo.alias.length() + 1);
@@ -404,13 +404,13 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
             baseNode = rootNode;
             field = normalizedPath;
         }
-        
+
     }
 
     @Override
     public CriteriaBuilderImpl<T> orderBy(String expression, boolean ascending, boolean nullFirst) {
         verifyBuilderEnded();
-        Expression exp = implicitJoin(ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this));        
+        Expression exp = implicitJoin(ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this));
 //        orderByInfos.add(new OrderByInfo(exp, ascending, nullFirst));
         return this;
     }
@@ -460,6 +460,11 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
     @Override
     public CriteriaBuilderImpl<T> join(String path, String alias, JoinType type, boolean fetch) {
+        if(path == null || alias == null ||type == null){
+            throw new NullPointerException();
+        }
+        if(alias.isEmpty()) throw new IllegalArgumentException();
+        
         verifyBuilderEnded();
 
         String normalizedPath;
@@ -500,7 +505,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
     private boolean startsAtRootAlias(String path) {
         return path.startsWith(rootAliasInfo.alias) && path.length() > rootAliasInfo.alias.length() && path
-            .charAt(rootAliasInfo.alias.length()) == '.';
+                .charAt(rootAliasInfo.alias.length()) == '.';
     }
 
     private JoinNode findNode(JoinNode baseNode, String path) {
@@ -523,7 +528,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         for (int i = 0; i < pathElements.length - 1; i++) {
             // TODO: Implement model aware joining or use fetch profiles or so to decide the join types automatically
             currentNode = getOrCreate(currentPath, currentNode, pathElements[i], pathElements[i], JoinType.LEFT, false,
-                                      "Ambiguous implicit join", true);
+                    "Ambiguous implicit join", true);
         }
 
         if (joinAlias == null) {
@@ -536,7 +541,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         }
 
         currentNode = getOrCreate(currentPath, currentNode, pathElements[pathElements.length - 1], joinAlias, type, fetch,
-                                  "Ambiguous alias", implicit);
+                "Ambiguous alias", implicit);
 
         // We can only change the join type if the existing node is implicit and the update on the node is not implicit
         if (currentNode.aliasInfo.implicit && !implicit) {
@@ -566,7 +571,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                     throw new IllegalArgumentException(errorMessage);
                 } else {
                     throw new RuntimeException("Probably a programming error if this happens. An alias[" + alias
-                        + "] for the same join path[" + currentJoinPath + "] is available but the join node is not!");
+                            + "] for the same join path[" + currentJoinPath + "] is available but the join node is not!");
                 }
             } else {
                 node = new JoinNode(new AliasInfo(alias, currentJoinPath, implicit), type, fetch);
@@ -588,7 +593,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                     aliasInfos.put(alias, nodeAliasInfo);
                 } else if (!nodeAliasInfo.implicit && !implicit) {
                     throw new IllegalArgumentException("Alias conflict[" + nodeAliasInfo.alias + "="
-                        + nodeAliasInfo.absolutePath + ", " + alias + "=" + currentPath.toString() + "]");
+                            + nodeAliasInfo.absolutePath + ", " + alias + "=" + currentPath.toString() + "]");
                 }
             }
         }
@@ -606,7 +611,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         sb.append("SELECT ");
         Iterator<SelectInfo> iter = selects.values()
-            .iterator();
+                .iterator();
         applySelect(sb, iter.next());
 
         while (iter.hasNext()) {
@@ -622,7 +627,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         if (select.field != null) {
             sb.append('.')
-                .append(select.field);
+                    .append(select.field);
         }
     }
 
@@ -653,10 +658,10 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
             }
 
             sb.append(joinBase.alias)
-                .append('.')
-                .append(relation)
-                .append(' ')
-                .append(node.aliasInfo.alias);
+                    .append('.')
+                    .append(relation)
+                    .append(' ')
+                    .append(node.aliasInfo.alias);
 
             if (!node.nodes.isEmpty()) {
                 applyJoins(sb, node.aliasInfo, node.nodes);
@@ -665,11 +670,11 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     }
 
     private void applyWhere(StringBuilder sb) {
-        QueryGeneratorVisitor whereClauseGenerator = new QueryGeneratorVisitor(paramNameGenerator, parameters);
+        if(rootWherePredicate.predicate.getChildren().isEmpty())
+            return;
+        sb.append(" WHERE ");
+        QueryGeneratorVisitor whereClauseGenerator = new QueryGeneratorVisitor(sb, paramNameGenerator);
         rootWherePredicate.predicate.accept(whereClauseGenerator);
-        
-        sb.append(" WHERE");
-        sb.append(whereClauseGenerator.getString());
     }
 
     private void applyGroupBys(StringBuilder sb, Map<String, GroupByInfo> groupBys) {
@@ -679,7 +684,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         sb.append(" GROUP BY ");
         Iterator<GroupByInfo> iter = groupBys.values()
-            .iterator();
+                .iterator();
         applyGroupBy(sb, iter.next());
 
         while (iter.hasNext()) {
@@ -693,7 +698,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         if (groupBy.field != null) {
             sb.append('.')
-                .append(groupBy.field);
+                    .append(groupBy.field);
         }
     }
 
@@ -714,8 +719,8 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
     private static void applyOrderBy(StringBuilder sb, OrderByInfo orderBy) {
         sb.append(orderBy.baseAliasInfo.alias)
-            .append('.')
-            .append(orderBy.field);
+                .append('.')
+                .append(orderBy.field);
 
         if (!orderBy.ascending) {
             sb.append(" DESC");
@@ -737,9 +742,9 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         applySelects(sb, selectInfos);
         sb.append("FROM ")
-            .append(clazz.getSimpleName())
-            .append(' ')
-            .append(rootAliasInfo.alias);
+                .append(clazz.getSimpleName())
+                .append(' ')
+                .append(rootAliasInfo.alias);
         applyJoins(sb, rootAliasInfo, rootNode.nodes);
         applyWhere(sb);
         applyGroupBys(sb, groupByInfos);
@@ -837,7 +842,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         public void onBuilderEnded(PredicateBuilder builder) {
             super.onBuilderEnded(builder);
             predicate.getChildren()
-                .add(builder.getPredicate());
+                    .add(builder.getPredicate());
         }
     }
 }

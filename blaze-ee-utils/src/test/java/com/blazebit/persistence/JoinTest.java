@@ -151,6 +151,11 @@ public class JoinTest {
     }
     
     @Test(expected = NullPointerException.class)
+    public void testConstructorClassNull(){
+        CriteriaBuilder.from(null, "d");
+    }
+    
+    @Test(expected = NullPointerException.class)
     public void testJoinNullPath(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
         criteria.join(null, "o", JoinType.LEFT, true);
