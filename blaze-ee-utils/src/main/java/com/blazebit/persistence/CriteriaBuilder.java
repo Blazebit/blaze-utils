@@ -15,6 +15,7 @@
  */
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.impl.CriteriaBuilderImpl;
 import com.blazebit.lang.StringUtils;
 import java.lang.reflect.Constructor;
 import javax.persistence.EntityManager;

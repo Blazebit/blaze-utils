@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.BuilderEndedListener;
+import com.blazebit.persistence.HavingAndBuilder;
+import com.blazebit.persistence.HavingOrBuilder;
+import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.PropertyExpression;
-import com.blazebit.persistence.predicate.AndPredicate;
+import com.blazebit.persistence.predicate.OrPredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 
@@ -25,20 +29,20 @@ import com.blazebit.persistence.predicate.PredicateBuilder;
  *
  * @author cpbec
  */
-public class HavingAndBuilderImpl<T> extends AbstractBuilderEndedListener implements HavingAndBuilder<T> {
-    
+public class HavingOrBuilderImpl<T> extends AbstractBuilderEndedListener implements HavingOrBuilder<T> {
+
     private final T result;
     private final BuilderEndedListener listener;
-    private final AndPredicate predicate;
+    private final OrPredicate predicate;
     
-    public HavingAndBuilderImpl(T result, BuilderEndedListener listener) {
+    public HavingOrBuilderImpl(T result, BuilderEndedListener listener) {
         this.result = result;
         this.listener = listener;
-        this.predicate = new AndPredicate();
+        this.predicate = new OrPredicate();
     }
     
     @Override
-    public T endAnd() {
+    public T endOr() {
         verifyBuilderEnded();
         listener.onBuilderEnded(this);
         return result;
@@ -56,12 +60,13 @@ public class HavingAndBuilderImpl<T> extends AbstractBuilderEndedListener implem
     }
 
     @Override
-    public HavingOrBuilder<HavingAndBuilderImpl<T>> havingOr() {
-        return startBuilder(new HavingOrBuilderImpl<HavingAndBuilderImpl<T>>(this, this));
+    public HavingAndBuilder<HavingOrBuilderImpl<T>> havingAnd() {
+        return startBuilder(new HavingAndBuilderImpl<HavingOrBuilderImpl<T>>(this, this));
     }
 
     @Override
-    public RestrictionBuilder<? extends HavingAndBuilder<T>> having(String expression) {
-        return startBuilder(new RestrictionBuilderImpl<HavingAndBuilderImpl<T>>(this, this, ExpressionUtils.parse(expression)));
+    public RestrictionBuilder<? extends HavingOrBuilder<T>> having(String expression) {
+        return startBuilder(new RestrictionBuilderImpl<HavingOrBuilderImpl<T>>(this, this, ExpressionUtils.parse(expression)));
     }
+    
 }
