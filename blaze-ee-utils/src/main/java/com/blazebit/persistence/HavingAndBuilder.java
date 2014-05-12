@@ -15,15 +15,13 @@
  */
 package com.blazebit.persistence;
 
-import com.blazebit.persistence.predicate.PredicateBuilder;
-
 /**
  *
  * @author cpbec
  */
-public interface HavingAndBuilder<T> extends Aggregateable<RestrictionBuilder<? extends HavingAndBuilder<T>>>, PredicateBuilder {
+public interface HavingAndBuilder<T> extends Aggregateable<RestrictionBuilder<? extends HavingAndBuilder<T>>> {
     
     public T endAnd();
     
-    public <N extends HavingAndBuilder<T> & BuilderEndedListener> HavingOrBuilder<N> havingOr();
+    public <N extends HavingAndBuilder<T>> HavingOrBuilder<N> havingOr();
 }

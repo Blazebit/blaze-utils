@@ -16,7 +16,7 @@
 package com.blazebit.persistence.predicate;
 
 import com.blazebit.persistence.BinaryPredicateBuilder;
-import com.blazebit.persistence.BuilderEndedListener;
+import com.blazebit.persistence.impl.BuilderEndedListener;
 import com.blazebit.persistence.QuantifiableBinaryPredicateBuilder;
 import com.blazebit.persistence.expression.Expression;
 

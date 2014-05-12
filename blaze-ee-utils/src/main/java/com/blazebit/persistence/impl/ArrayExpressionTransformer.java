@@ -24,6 +24,7 @@ import com.blazebit.persistence.expression.Expression;
 public class ArrayExpressionTransformer {
     
     public static <T> Expression transform(Expression original, CriteriaBuilderImpl<T> builder) {
+        // TODO: transform the original expression and apply changes in the criteria builder
         throw new UnsupportedOperationException();
     }
 }

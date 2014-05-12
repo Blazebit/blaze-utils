@@ -15,8 +15,6 @@
  */
 package com.blazebit.persistence;
 
-import com.blazebit.persistence.predicate.PredicateBuilder;
-
 /**
  *
  * @author cpbec

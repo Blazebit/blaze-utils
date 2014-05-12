@@ -15,14 +15,13 @@
  */
 package com.blazebit.persistence;
 
-import com.blazebit.persistence.predicate.PredicateBuilder;
 import java.util.List;
 
 /**
  *
  * @author cpbec
  */
-public interface RestrictionBuilder<T> extends PredicateBuilder {
+public interface RestrictionBuilder<T> {
     
     // TODO: [expression] [operator] [ALL | ANY | SOME] [subquery]
     

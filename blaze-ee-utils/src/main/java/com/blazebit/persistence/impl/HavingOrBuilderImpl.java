@@ -15,7 +15,6 @@
  */
 package com.blazebit.persistence.impl;
 
-import com.blazebit.persistence.BuilderEndedListener;
 import com.blazebit.persistence.HavingAndBuilder;
 import com.blazebit.persistence.HavingOrBuilder;
 import com.blazebit.persistence.RestrictionBuilder;
@@ -29,7 +28,7 @@ import com.blazebit.persistence.predicate.PredicateBuilder;
  *
  * @author cpbec
  */
-public class HavingOrBuilderImpl<T> extends AbstractBuilderEndedListener implements HavingOrBuilder<T> {
+public class HavingOrBuilderImpl<T> extends AbstractBuilderEndedListener implements HavingOrBuilder<T>, PredicateBuilder {
 
     private final T result;
     private final BuilderEndedListener listener;
