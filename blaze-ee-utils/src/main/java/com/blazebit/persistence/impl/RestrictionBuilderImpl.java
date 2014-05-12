@@ -224,12 +224,14 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
     
     @Override
     public T like(String value) {
-        return chain(new LikePredicate(leftExpression, new ParameterExpression(value), true, null));
+        if(value == null) throw new NullPointerException();
+        return chain(new LikePredicate(leftExpression, new ParameterExpression((Object)value), true, null));
     }
 
     @Override
     public T like(String value, boolean caseSensitive, Character escapeCharacter) {
-        return chain(new LikePredicate(leftExpression, new ParameterExpression(value), caseSensitive, escapeCharacter));
+        if(value == null) throw new NullPointerException();
+        return chain(new LikePredicate(leftExpression, new ParameterExpression((Object)value), caseSensitive, escapeCharacter));
     }
     
     @Override
@@ -244,12 +246,14 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T notLike(String value) {
-        return chain(new NotPredicate(new LikePredicate(leftExpression, new ParameterExpression(value), true, null)));
+        if(value == null) throw new NullPointerException();
+        return chain(new NotPredicate(new LikePredicate(leftExpression, new ParameterExpression((Object)value), true, null)));
     }
 
     @Override
     public T notLike(String value, boolean caseSensitive, Character escapeCharacter) {
-        return chain(new NotPredicate(new LikePredicate(leftExpression, new ParameterExpression(value), caseSensitive, escapeCharacter)));
+        if(value == null) throw new NullPointerException();
+        return chain(new NotPredicate(new LikePredicate(leftExpression, new ParameterExpression((Object)value), caseSensitive, escapeCharacter)));
     }
 
     @Override

@@ -64,7 +64,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.partners.age").gt(0).where("d.locations.url").like("http://%");     
         
-        assertEquals("FROM Document d WHERE d.partners.age > :param_0 and d.locations.url LIKE :param_1", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE d.partners.age > :param_0 AND d.locations.url LIKE :param_1", criteria.getQueryString());
     }
     
     @Test
@@ -72,7 +72,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.whereOr().where("d.partners.age").gt(0).where("d.locations.url").like("http://%").endOr();   
         
-        assertEquals("FROM Document d WHERE d.partners.age > :param_0 or d.locations.url LIKE :param_1", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE d.partners.age > :param_0 OR d.locations.url LIKE :param_1", criteria.getQueryString());
     }
     
     @Test
@@ -80,7 +80,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.whereOr().whereAnd().where("d.partners.age").gt(0).where("d.locations.url").like("http://%").endAnd().whereAnd().where("d.locations.age").lt(10).where("d.locations.url").like("ftp://%").endAnd().endOr();   
         
-        assertEquals("FROM Document d WHERE (d.partners.age > :param_0 and d.locations.url LIKE :param_1) or (d.partners.age > :param_2 and d.locations.url LIKE :param_3)", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE (d.partners.age > :param_0 AND d.locations.url LIKE :param_1) OR (d.partners.age > :param_2 AND d.locations.url LIKE :param_3)", criteria.getQueryString());
     }
     
     @Test
@@ -88,7 +88,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.whereOr().where("d.partners.age").gt(0).where("d.locations.url").like("http://%").endOr().whereOr().where("d.locations.age").lt(10).where("d.locations.url").like("ftp://%").endOr();   
         
-        assertEquals("FROM Document d WHERE (d.partners.age > :param_0 or d.locations.url LIKE :param_1) and (d.partners.age > :param_2 or d.locations.url LIKE :param_3)", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE (d.partners.age > :param_0 OR d.locations.url LIKE :param_1) AND (d.partners.age > :param_2 OR d.locations.url LIKE :param_3)", criteria.getQueryString());
     }
     
     @Test
@@ -119,21 +119,21 @@ public class WhereTest {
         criteria.where("").gt(0);
     }
     
-    @Test(expected = javax.jms.IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void testWhereNotClosed(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age");
         criteria.where("d.owner");
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void testWhereOrNotClosed(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.whereOr().where("d.partners.age").gt(0);        
         criteria.where("d.partners.age");
     }
     
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = IllegalStateException.class)
     public void testWhereAndNotClosed(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.whereOr().whereAnd().where("d.partners.age").gt(0);

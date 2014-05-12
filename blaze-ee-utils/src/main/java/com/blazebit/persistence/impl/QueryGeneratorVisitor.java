@@ -58,6 +58,10 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     @Override
     public void visit(AndPredicate predicate) {
+        if(predicate.getChildren().size() == 1){
+            predicate.getChildren().get(0).accept(this);
+            return;
+        }
         final String and = " AND ";
         for (Predicate child : predicate.getChildren()) {
             if (child instanceof OrPredicate) {
@@ -69,13 +73,17 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
             }
             sb.append(and);
         }
-        if (predicate.getChildren().size() > 0) {
+        if (predicate.getChildren().size() > 1) {
             sb.delete(sb.length() - and.length(), sb.length());
         }
     }
 
     @Override
     public void visit(OrPredicate predicate) {
+        if(predicate.getChildren().size() == 1){
+            predicate.getChildren().get(0).accept(this);
+            return;
+        }
         final String or = " OR ";
         for (Predicate child : predicate.getChildren()) {
             if (child instanceof AndPredicate) {
@@ -87,7 +95,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
             }
             sb.append(or);
         }
-        if (predicate.getChildren().size() > 0) {
+        if (predicate.getChildren().size() > 1) {
             sb.delete(sb.length() - or.length(), sb.length());
         }
     }
@@ -140,10 +148,11 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
             sb.append(")");
         }
         if (predicate.getEscapeCharacter() != null) {
+            sb.append(" ESCAPE ");
             if (!predicate.isCaseSensitive()) {
                 sb.append("UPPER(");
             }
-            sb.append(" ESCAPE ").append("'").append(predicate.getEscapeCharacter()).append("'");
+            sb.append("'").append(predicate.getEscapeCharacter()).append("'");
             if (!predicate.isCaseSensitive()) {
                 sb.append(")");
             }

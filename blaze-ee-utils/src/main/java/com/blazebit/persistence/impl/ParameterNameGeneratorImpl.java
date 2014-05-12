@@ -37,6 +37,8 @@ public class ParameterNameGeneratorImpl implements ParameterNameGenerator {
     
     @Override
     public String getParamNameForObject(Object o) {
+        if(o == null)
+            throw new NullPointerException();
         String existingName = nameCache.get(o);
         if(existingName == null){
             existingName = prefix + counter++;

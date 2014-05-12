@@ -105,7 +105,7 @@ public class LikeTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.name").notLike(pattern, true, null);
         
-        assertEquals("FROM Document d WHERE d.name NOT LIKE :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE NOT d.name LIKE :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -114,7 +114,7 @@ public class LikeTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.name").notLike(pattern, true, '\\');
         
-        assertEquals("FROM Document d WHERE d.name NOT LIKE :param_0 ESCAPE '\\'", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE NOT d.name LIKE :param_0 ESCAPE '\\'", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
@@ -134,7 +134,7 @@ public class LikeTest {
     @Test
     public void testLikeExpressionCaseInsensitiveEscaped(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.name").notLikeExpression("d.owner.namePattern", false, '\\');
+        criteria.where("d.name").likeExpression("d.owner.namePattern", false, '\\');
         
         assertEquals("FROM Document d WHERE " + getCaseInsensitiveLike("d.name", "d.owner.namePattern", '\\'), criteria.getQueryString());
     }
@@ -152,7 +152,7 @@ public class LikeTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.name").notLikeExpression("d.owner.namePattern", true, null);
         
-        assertEquals("FROM Document d WHERE d.name NOT LIKE d.owner.namePattern", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE NOT d.name LIKE d.owner.namePattern", criteria.getQueryString());
     }
     
     @Test
@@ -160,7 +160,7 @@ public class LikeTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.name").notLikeExpression("d.owner.namePattern", true, '\\');
         
-        assertEquals("FROM Document d WHERE d.name NOT LIKE d.owner.namePattern ESCAPE '\\'", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE NOT d.name LIKE d.owner.namePattern ESCAPE '\\'", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
@@ -172,7 +172,7 @@ public class LikeTest {
     private String getCaseInsensitiveLike(String property, String likeParam, Character escape){
         String res = "UPPER(" + property + ") LIKE UPPER(" + likeParam + ")";
         if(escape != null)
-            res += "ESCAPE UPPER('" + escape + "')";
+            res += " ESCAPE UPPER('" + escape + "')";
         return res;
     }
     
