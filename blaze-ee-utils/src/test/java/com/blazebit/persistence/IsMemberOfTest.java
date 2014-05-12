@@ -26,7 +26,7 @@ import org.junit.Test;
 public class IsMemberOfTest {
     @Test
     public void testIsMemberOf(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.name").isMemberOf("d.parentDocuments.childDocuments.name");
         
         assertEquals("FROM Document d LEFT JOIN d.parentDocuments parentDocuments LEFT JOIN parentDocuments.childDocuments childDocuments WHERE d.name MEMBER OF childDocuments", criteria.getQueryString());
@@ -34,19 +34,19 @@ public class IsMemberOfTest {
     
     @Test(expected = NullPointerException.class)
     public void testIsMemberOfNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.name").isMemberOf(null);
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testIsMemberOfEmpty(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.name").isMemberOf("");
     }
     
     @Test
     public void testIsNotMemberOf(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.name").isNotMemberOf("d.parentDocuments.childDocuments.name");
         
         assertEquals("FROM Document d LEFT JOIN d.parentDocuments parentDocuments LEFT JOIN parentDocuments.childDocuments childDocuments WHERE d.name NOT MEMBER OF childDocuments", criteria.getQueryString());
@@ -54,13 +54,13 @@ public class IsMemberOfTest {
     
     @Test(expected = NullPointerException.class)
     public void testIsNotMemberOfNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.name").isNotMemberOf(null);
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testIsNotMemberOfEmpty(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.where("d.name").isNotMemberOf("");
     }
 }

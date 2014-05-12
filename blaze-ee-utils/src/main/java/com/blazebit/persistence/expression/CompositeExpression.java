@@ -15,25 +15,18 @@
  */
 package com.blazebit.persistence.expression;
 
+import java.util.List;
+
 /**
  *
  * @author cpbec
  */
-public class ParameterExpression implements Expression {
+public class CompositeExpression implements Expression {
 
-    private String name;
-    private final Object value;
-    private final boolean valueSet;
+    private final List<Expression> expressions;
 
-    public ParameterExpression(String name) {
-        this.name = name;
-        this.value = null;
-        this.valueSet = false;
-    }
-
-    public ParameterExpression(Object value) {
-        this.value = value;
-        this.valueSet = true;
+    public CompositeExpression(List<Expression> expressions) {
+        this.expressions = expressions;
     }
     
     @Override
@@ -41,20 +34,8 @@ public class ParameterExpression implements Expression {
         visitor.visit(this);
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Object getValue() {
-        return value;
-    }
-
-    public boolean isValueSet() {
-        return valueSet;
+    public List<Expression> getExpressions() {
+        return expressions;
     }
     
 }

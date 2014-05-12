@@ -18,7 +18,6 @@ package com.blazebit.persistence.predicate;
 import com.blazebit.persistence.BuilderEndedListener;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
-import com.blazebit.persistence.expression.FunctionExpression;
 import com.blazebit.persistence.expression.ParameterExpression;
 
 /**

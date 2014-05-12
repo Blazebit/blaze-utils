@@ -19,21 +19,14 @@ package com.blazebit.persistence.expression;
  *
  * @author cpbec
  */
-public class ParameterExpression implements Expression {
+public class ArrayExpression implements Expression {
 
-    private String name;
-    private final Object value;
-    private final boolean valueSet;
+    private final PropertyExpression base;
+    private final Expression index;
 
-    public ParameterExpression(String name) {
-        this.name = name;
-        this.value = null;
-        this.valueSet = false;
-    }
-
-    public ParameterExpression(Object value) {
-        this.value = value;
-        this.valueSet = true;
+    public ArrayExpression(PropertyExpression base, Expression index) {
+        this.base = base;
+        this.index = index;
     }
     
     @Override
@@ -41,20 +34,12 @@ public class ParameterExpression implements Expression {
         visitor.visit(this);
     }
 
-    public String getName() {
-        return name;
+    public PropertyExpression getBase() {
+        return base;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Object getValue() {
-        return value;
-    }
-
-    public boolean isValueSet() {
-        return valueSet;
+    public Expression getIndex() {
+        return index;
     }
     
 }

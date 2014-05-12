@@ -25,8 +25,8 @@ import org.junit.Test;
  */
 public class HavingTest {
     @Test
-    public void testHavingProperty(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+    public void testHaving(){
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.groupBy("d.owner").having("d.age").gt(0);
         
         assertEquals("FROM Document d GROUP BY d.owner HAVING d.age > :param_0", criteria.getQueryString());
@@ -42,7 +42,7 @@ public class HavingTest {
     
     @Test
     public void testHavingPath(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.groupBy("d.owner").having("d.partners.age").gt(0);
         
         assertEquals("FROM Document d LEFT JOIN d.partners partners GROUP BY d.owner HAVING partners.age > :param_0", criteria.getQueryString());
@@ -106,40 +106,21 @@ public class HavingTest {
     
     @Test(expected = javax.jms.IllegalStateException.class)
     public void testHavingWithoutGroupBy(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.having("d.partners.age");        
     }
     
     @Test(expected = NullPointerException.class)
     public void testHavingNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
         criteria.groupBy("d.owner").having(null);      
     }
     
-    @Test(expected = IllegalArgumentException.class)
-    public void testHavingEmpty(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.groupBy("d.owner").having("").gt(0);  
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testHavingNotClosed(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.groupBy("d.owner").having("d.partners.age");  
-        criteria.having("d.partners.age");
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testHavingOrNotClosed(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.groupBy("d.owner").havingOr().having("d.partners.age").gt(0);    
-        criteria.having("d.partners.age");
-    }
-    
-    @Test(expected = IllegalArgumentException.class)
-    public void testHavingAndNotClosed(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.groupBy("d.owner").havingOr().havingAnd().having("d.partners.age").gt(0);   
-        criteria.having("d.partners.age");
+    @Test(expected = NullPointerException.class)
+    public void testHavingAnd(){
+        CriteriaBuilderImpl<Document> criteria = CriteriaBuilderImpl.from(Document.class, "d");
+        criteria.groupBy("d.owner").having("d.partners.age").gt(0).having("d.locations.url").like("http://%");     
+        
+        assertEquals("FROM Document d GROUP BY d.owner HAVING d.partners.age > :param_0 and d.locations.url LIKE :param_1", criteria.getQueryString());
     }
 }
