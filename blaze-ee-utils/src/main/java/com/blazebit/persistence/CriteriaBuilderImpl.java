@@ -71,6 +71,11 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     }
     
     @Override
+    public CriteriaBuilder<T> page(int page, int objectsPerPage) {
+        throw new UnsupportedOperationException();
+    }
+    
+    @Override
     public CriteriaBuilderImpl<T> select(String... paths) {
         for (String path : paths) {
             select(path);
