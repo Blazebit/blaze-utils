@@ -34,7 +34,7 @@ import javax.persistence.TypedQuery;
  *
  * @author cpbec
  */
-public class CriteriaBuilderImpl<T> implements CriteriaBuilder<T> {
+public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     
     private final Class<T> clazz;
     private final AliasInfo rootAliasInfo;
@@ -59,14 +59,6 @@ public class CriteriaBuilderImpl<T> implements CriteriaBuilder<T> {
         this.rootNode = new JoinNode(rootAliasInfo, null, false);
         this.rootWherePredicate = new RootPredicate();
         this.rootHavingPredicate = new RootPredicate();
-    }
-    
-    public static <T> CriteriaBuilderImpl<T> from(Class<T> clazz) {
-        return new CriteriaBuilderImpl<T>(clazz, StringUtils.firstToLower(clazz.getSimpleName()));
-    }
-    
-    public static <T> CriteriaBuilderImpl<T> from(Class<T> clazz, String alias) {
-        return new CriteriaBuilderImpl<T>(clazz, alias);
     }
     
     /* 
