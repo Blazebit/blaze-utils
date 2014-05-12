@@ -29,7 +29,7 @@ public class BetweenTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").between(1, 10);
         
-        assertEquals("FROM Document d WHERE d.age BETWEEN :param_0 and :param_1", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE d.age BETWEEN :param_0 AND :param_1", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
@@ -49,7 +49,7 @@ public class BetweenTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").notBetween(1, 10);
         
-        assertEquals("FROM Document d WHERE d.age NOT BETWEEN :param_0 and :param_1", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE d.age NOT BETWEEN :param_0 AND :param_1", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)

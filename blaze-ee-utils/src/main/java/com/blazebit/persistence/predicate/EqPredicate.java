@@ -15,30 +15,23 @@
  */
 package com.blazebit.persistence.predicate;
 
-import com.blazebit.persistence.impl.BuilderEndedListener;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.ParameterExpression;
+import com.blazebit.persistence.impl.BuilderEndedListener;
 
 /**
  *
  * @author cpbec
  */
-public class EqPredicate  extends BinaryExpressionPredicate {
+public class EqPredicate  extends QuantifiableBinaryExpressionPredicate {
 
-    private final PredicateQuantifier quantifier;
-    
     public EqPredicate(Expression left, Expression right) {
-        this(left, right, PredicateQuantifier.ONE);
+        super(left, right, PredicateQuantifier.ONE);
     }
     
     public EqPredicate(Expression left, Expression right, PredicateQuantifier quantifier) {
-        super(left, right);
-        this.quantifier = quantifier;
-    }
-
-    public PredicateQuantifier getQuantifier() {
-        return quantifier;
+        super(left, right, quantifier);
     }
     
     @Override

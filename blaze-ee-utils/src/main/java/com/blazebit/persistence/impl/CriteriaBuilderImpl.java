@@ -57,7 +57,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     private final List<SelectInfo> selectInfos = new ArrayList<SelectInfo>();
     private final List<GroupByInfo> groupByInfos = new ArrayList<GroupByInfo>();
     private final Map<String, Object> parameters = new HashMap<String, Object>();
-    private final ParameterNameGenerator paramNameGenerator = new ParameterNameGeneratorImpl();
+    private final ParameterNameGenerator paramNameGenerator = new ParameterNameGeneratorImpl(parameters);
     private boolean distinct = false;
 
     public CriteriaBuilderImpl(Class<T> clazz, String alias) {
@@ -177,7 +177,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     @Override
     public RestrictionBuilder<CriteriaBuilder<T>> having(String expression) {
         return rootHavingPredicate.startBuilder(
-            new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootHavingPredicate, ExpressionUtils.parse(expression)));
+                new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootHavingPredicate, ExpressionUtils.parse(expression)));
     }
 
     @Override
@@ -369,6 +369,11 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
     @Override
     public CriteriaBuilderImpl<T> join(String path, String alias, JoinType type, boolean fetch) {
+        if(path == null || alias == null ||type == null){
+            throw new NullPointerException();
+        }
+        if(alias.isEmpty()) throw new IllegalArgumentException();
+        
         verifyBuilderEnded();
 
         String normalizedPath;
@@ -436,7 +441,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         for (int i = 0; i < pathElements.length - 1; i++) {
             // TODO: Implement model aware joining or use fetch profiles or so to decide the join types automatically
             currentNode = getOrCreate(currentPath, currentNode, pathElements[i], pathElements[i], JoinType.LEFT, false,
-                                      "Ambiguous implicit join", true);
+                    "Ambiguous implicit join", true);
         }
 
         if (joinAlias == null) {
@@ -449,7 +454,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         }
 
         currentNode = getOrCreate(currentPath, currentNode, pathElements[pathElements.length - 1], joinAlias, type, fetch,
-                                  "Ambiguous alias", implicit);
+                "Ambiguous alias", implicit);
 
         // We can only change the join type if the existing node is implicit and the update on the node is not implicit
         if (currentNode.getAliasInfo()
@@ -482,7 +487,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                     throw new IllegalArgumentException(errorMessage);
                 } else {
                     throw new RuntimeException("Probably a programming error if this happens. An alias[" + alias
-                        + "] for the same join path[" + currentJoinPath + "] is available but the join node is not!");
+                            + "] for the same join path[" + currentJoinPath + "] is available but the join node is not!");
                 }
             } else {
                 node = new JoinNode(new AliasInfo(alias, currentJoinPath, implicit), type, fetch);
@@ -543,7 +548,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         if (select.field != null) {
             sb.append('.')
-                .append(select.field);
+                    .append(select.field);
         }
     }
 
@@ -588,11 +593,11 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     }
 
     private void applyWhere(StringBuilder sb) {
-        QueryGeneratorVisitor whereClauseGenerator = new QueryGeneratorVisitor(paramNameGenerator, parameters);
-        rootWherePredicate.predicate.accept(whereClauseGenerator);
-
+        if(rootWherePredicate.predicate.getChildren().isEmpty())
+            return;
         sb.append(" WHERE ");
-        sb.append(whereClauseGenerator.getString());
+        QueryGeneratorVisitor whereClauseGenerator = new QueryGeneratorVisitor(sb, paramNameGenerator);
+        rootWherePredicate.predicate.accept(whereClauseGenerator);
     }
 
     private void applyGroupBys(StringBuilder sb, List<GroupByInfo> groupBys) {
@@ -615,7 +620,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         if (groupBy.field != null) {
             sb.append('.')
-                .append(groupBy.field);
+                    .append(groupBy.field);
         }
     }
 
@@ -725,7 +730,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         public void onBuilderEnded(PredicateBuilder builder) {
             super.onBuilderEnded(builder);
             predicate.getChildren()
-                .add(builder.getPredicate());
+                    .add(builder.getPredicate());
         }
     }
 }

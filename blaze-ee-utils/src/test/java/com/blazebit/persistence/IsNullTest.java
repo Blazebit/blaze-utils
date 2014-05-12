@@ -37,6 +37,6 @@ public class IsNullTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.name").isNotNull();
         
-        assertEquals("FROM Document d WHERE d.name IS NOT NULL", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE NOT d.name IS NULL", criteria.getQueryString());
     }
 }

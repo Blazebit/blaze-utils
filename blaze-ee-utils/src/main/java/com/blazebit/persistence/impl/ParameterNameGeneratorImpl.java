@@ -28,7 +28,12 @@ import java.util.Map;
 public class ParameterNameGeneratorImpl implements ParameterNameGenerator {
     private static final String prefix = "param_";
     private int counter;
-    private Map<Object, String> nameCache = new IdentityHashMap<Object, String>();
+    private final Map<Object, String> nameCache = new IdentityHashMap<Object, String>();
+    private final Map<String, Object> parameters;
+    
+    public ParameterNameGeneratorImpl(Map<String, Object> parameters){
+        this.parameters = parameters;
+    }
     
     @Override
     public String getParamNameForObject(Object o) {
@@ -36,6 +41,7 @@ public class ParameterNameGeneratorImpl implements ParameterNameGenerator {
         if(existingName == null){
             existingName = prefix + counter++;
             nameCache.put(o, existingName);
+            parameters.put(existingName, o);
         }
         return existingName;
     }

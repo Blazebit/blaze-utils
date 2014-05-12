@@ -80,7 +80,7 @@ public class EqTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").notEq(20);
         
-        assertEquals("FROM Document d WHERE d.age != 20", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE NOT d.age = :param_0", criteria.getQueryString());
     }
     
      @Test(expected = NullPointerException.class)
@@ -94,7 +94,7 @@ public class EqTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").notEqExpression("d.age2 + 1");
         
-        assertEquals("FROM Document d WHERE d.age != d.age2 + 1", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE NOT d.age = d.age2 + 1", criteria.getQueryString());
     }
     
     @Test(expected = IllegalArgumentException.class)

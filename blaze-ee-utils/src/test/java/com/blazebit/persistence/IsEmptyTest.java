@@ -40,6 +40,6 @@ public class IsEmptyTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.name").isNotEmpty();
         
-        assertEquals("FROM Document d WHERE d.name IS NOT EMPTY", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE NOT d.name IS EMPTY", criteria.getQueryString());
     }
 }

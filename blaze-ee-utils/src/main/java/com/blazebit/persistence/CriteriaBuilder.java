@@ -27,26 +27,28 @@ import javax.persistence.TypedQuery;
  */
 public abstract class CriteriaBuilder<T> implements Aggregateable<RestrictionBuilder<CriteriaBuilder<T>>>, Filterable<RestrictionBuilder<CriteriaBuilder<T>>> {
 
-    
     public static <T> CriteriaBuilder<T> from(Class<T> clazz) {
         return new CriteriaBuilderImpl<T>(clazz, StringUtils.firstToLower(clazz.getSimpleName()));
     }
-    
+
     public static <T> CriteriaBuilder<T> from(Class<T> clazz, String alias) {
+        if (clazz == null || alias == null) {
+            throw new NullPointerException();
+        }
         return new CriteriaBuilderImpl<T>(clazz, alias);
     }
-    
+
     public abstract TypedQuery<T> getQuery(EntityManager em);
 
     public abstract String getQueryString();
-    
+
     public abstract CriteriaBuilder<T> page(int page, int objectsPerPage);
 
     /*
      * Join methods
      */
     public abstract CriteriaBuilder<T> join(String path, String alias, JoinType type, boolean fetch);
-    
+
     public abstract CriteriaBuilder<T> innerJoin(String path, String alias);
 
     public abstract CriteriaBuilder<T> innerJoinFetch(String path, String alias);
@@ -66,13 +68,12 @@ public abstract class CriteriaBuilder<T> implements Aggregateable<RestrictionBui
     /*
      * Order by methods
      */
-
     public abstract CriteriaBuilder<T> orderBy(String expression, boolean ascending, boolean nullFirst);
 
     public abstract CriteriaBuilder<T> orderByAsc(String expression);
 
     public abstract CriteriaBuilder<T> orderByAsc(String expression, boolean nullFirst);
-    
+
     public abstract CriteriaBuilder<T> orderByDesc(String expression);
 
     public abstract CriteriaBuilder<T> orderByDesc(String expression, boolean nullFirst);
@@ -81,23 +82,23 @@ public abstract class CriteriaBuilder<T> implements Aggregateable<RestrictionBui
      * Select methods
      */
     public abstract CriteriaBuilder<T> distinct();
-    
+
     public abstract CriteriaBuilder<T> select(String... expressions);
 
     public abstract CriteriaBuilder<T> select(String expression);
 
     public abstract CriteriaBuilder<T> select(String expression, String alias);
-    
+
     public abstract CriteriaBuilder<T> select(Class<? extends T> clazz);
-    
+
     public abstract CriteriaBuilder<T> select(Constructor<? extends T> constructor);
-    
+
     public abstract CriteriaBuilder<T> select(ObjectBuilder<? extends T> builder);
-    
+
     public abstract SelectObjectBuilder<CriteriaBuilder<T>> selectNew(Class<? extends T> clazz);
-    
+
     public abstract SelectObjectBuilder<CriteriaBuilder<T>> selectNew(Constructor<? extends T> constructor);
-    
+
     public abstract SelectObjectBuilder<CriteriaBuilder<T>> selectNew(ObjectBuilder<? extends T> builder);
 
     /*
@@ -122,5 +123,5 @@ public abstract class CriteriaBuilder<T> implements Aggregateable<RestrictionBui
     public abstract RestrictionBuilder<CriteriaBuilder<T>> having(String expression);
 
     public abstract HavingOrBuilder<CriteriaBuilder<T>> havingOr();
-    
+
 }
