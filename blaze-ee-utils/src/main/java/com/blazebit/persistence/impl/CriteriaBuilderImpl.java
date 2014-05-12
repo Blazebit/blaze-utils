@@ -521,7 +521,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     /*
      * Apply methods
      */
-    private void applySelects(StringBuilder sb, List<SelectInfo> selects) {
+    private void applySelects(QueryGeneratorVisitor queryGenerator, StringBuilder sb, List<SelectInfo> selects) {
         if (selects.isEmpty()) {
             return;
         }
@@ -533,23 +533,14 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         }
         
         Iterator<SelectInfo> iter = selects.iterator();
-        applySelect(sb, iter.next());
+        iter.next().expression.accept(queryGenerator);
 
         while (iter.hasNext()) {
             sb.append(", ");
-            applySelect(sb, iter.next());
+            iter.next().expression.accept(queryGenerator);
         }
 
         sb.append(" ");
-    }
-
-    private void applySelect(StringBuilder sb, SelectInfo select) {
-        sb.append(select.baseAliasInfo.getAlias());
-
-        if (select.field != null) {
-            sb.append('.')
-                    .append(select.field);
-        }
     }
 
     private static void applyJoins(StringBuilder sb, AliasInfo joinBase, Map<String, JoinNode> nodes) {
@@ -592,57 +583,45 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         }
     }
 
-    private void applyWhere(StringBuilder sb) {
+    private void applyWhere(QueryGeneratorVisitor queryGenerator, StringBuilder sb) {
         if(rootWherePredicate.predicate.getChildren().isEmpty())
             return;
         sb.append(" WHERE ");
-        QueryGeneratorVisitor whereClauseGenerator = new QueryGeneratorVisitor(sb, paramNameGenerator);
-        rootWherePredicate.predicate.accept(whereClauseGenerator);
+        rootWherePredicate.predicate.accept(queryGenerator);
     }
 
-    private void applyGroupBys(StringBuilder sb, List<GroupByInfo> groupBys) {
+    private void applyGroupBys(QueryGeneratorVisitor queryGenerator, StringBuilder sb, List<GroupByInfo> groupBys) {
         if (groupBys.isEmpty()) {
             return;
         }
 
         sb.append(" GROUP BY ");
         Iterator<GroupByInfo> iter = groupBys.iterator();
-        applyGroupBy(sb, iter.next());
+        iter.next().expression.accept(queryGenerator);
 
         while (iter.hasNext()) {
             sb.append(", ");
-            applyGroupBy(sb, iter.next());
+            iter.next().expression.accept(queryGenerator);
         }
     }
 
-    private void applyGroupBy(StringBuilder sb, GroupByInfo groupBy) {
-        sb.append(groupBy.baseAliasInfo.getAlias());
-
-        if (groupBy.field != null) {
-            sb.append('.')
-                    .append(groupBy.field);
-        }
-    }
-
-    private static void applyOrderBys(StringBuilder sb, List<OrderByInfo> orderBys) {
+    private static void applyOrderBys(QueryGeneratorVisitor queryGenerator, StringBuilder sb, List<OrderByInfo> orderBys) {
         if (orderBys.isEmpty()) {
             return;
         }
 
         sb.append(" ORDER BY ");
         Iterator<OrderByInfo> iter = orderBys.iterator();
-        applyOrderBy(sb, iter.next());
+        applyOrderBy(queryGenerator, sb, iter.next());
 
         while (iter.hasNext()) {
             sb.append(", ");
-            applyOrderBy(sb, iter.next());
+            applyOrderBy(queryGenerator, sb, iter.next());
         }
     }
 
-    private static void applyOrderBy(StringBuilder sb, OrderByInfo orderBy) {
-        sb.append(orderBy.baseAliasInfo.getAlias())
-            .append('.')
-            .append(orderBy.field);
+    private static void applyOrderBy(QueryGeneratorVisitor queryGenerator, StringBuilder sb, OrderByInfo orderBy) {
+        orderBy.expression.accept(queryGenerator);
 
         if (!orderBy.ascending) {
             sb.append(" DESC");
@@ -662,16 +641,17 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         verifyBuilderEnded();
         StringBuilder sb = new StringBuilder();
 
-        applySelects(sb, selectInfos);
+        QueryGeneratorVisitor queryGenerator = new QueryGeneratorVisitor(sb, paramNameGenerator);
+        applySelects(queryGenerator, sb, selectInfos);
         sb.append("FROM ")
             .append(clazz.getSimpleName())
             .append(' ')
             .append(rootAliasInfo.getAlias());
         applyJoins(sb, rootAliasInfo, rootNode.getNodes());
-        applyWhere(sb);
-        applyGroupBys(sb, groupByInfos);
+        applyWhere(queryGenerator, sb);
+        applyGroupBys(queryGenerator, sb, groupByInfos);
 //        applyHavings();
-        applyOrderBys(sb, orderByInfos);
+        applyOrderBys(queryGenerator, sb, orderByInfos);
 
         return sb.toString();
     }

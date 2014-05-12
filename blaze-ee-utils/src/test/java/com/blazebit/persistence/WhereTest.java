@@ -30,7 +30,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").ge(25);
 
-        assertEquals("FROM Document d d.age >= :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE d.age >= :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -38,7 +38,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age + 1").ge(25);
 
-        assertEquals("FROM Document d d.age + 1 >= :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE d.age + 1 >= :param_0", criteria.getQueryString());
     }
     
     
@@ -80,7 +80,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.whereOr().whereAnd().where("d.partners.age").gt(0).where("d.locations.url").like("http://%").endAnd().whereAnd().where("d.locations.age").lt(10).where("d.locations.url").like("ftp://%").endAnd().endOr();   
         
-        assertEquals("FROM Document d WHERE (d.partners.age > :param_0 AND d.locations.url LIKE :param_1) OR (d.partners.age > :param_2 AND d.locations.url LIKE :param_3)", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE (d.partners.age > :param_0 AND d.locations.url LIKE :param_1) OR (d.locations.age < :param_2 AND d.locations.url LIKE :param_3)", criteria.getQueryString());
     }
     
     @Test
@@ -88,7 +88,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.whereOr().where("d.partners.age").gt(0).where("d.locations.url").like("http://%").endOr().whereOr().where("d.locations.age").lt(10).where("d.locations.url").like("ftp://%").endOr();   
         
-        assertEquals("FROM Document d WHERE (d.partners.age > :param_0 OR d.locations.url LIKE :param_1) AND (d.partners.age > :param_2 OR d.locations.url LIKE :param_3)", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE (d.partners.age > :param_0 OR d.locations.url LIKE :param_1) AND (d.locations.age < :param_2 OR d.locations.url LIKE :param_3)", criteria.getQueryString());
     }
     
     @Test
