@@ -281,6 +281,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                 // We found an alias for the first part of the path
                 String potentialBasePath = potentialBaseInfo.getAbsolutePath();
                 JoinNode aliasNode = findNode(rootNode, potentialBasePath);
+                // TODO: if aliasNode is null, then probably a subpath is not yet joined
                 String relativePath = normalizedPath.substring(aliasNode.getAliasInfo()
                     .getAlias()
                     .length() + 1);
@@ -398,6 +399,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                     // We found an alias for the first part of the path
                     String potentialBasePath = potentialBaseInfo.getAbsolutePath();
                     JoinNode aliasNode = findNode(rootNode, potentialBasePath);
+                // TODO: if aliasNode is null, then probably a subpath is not yet joined
                     String relativePath = normalizedPath.substring(dotIndex + 1);
 //                    normalizedPath = potentialBasePath + '.' + relativePath;
                     createOrUpdateNode(aliasNode, potentialBasePath, relativePath, alias, type, fetch, false);

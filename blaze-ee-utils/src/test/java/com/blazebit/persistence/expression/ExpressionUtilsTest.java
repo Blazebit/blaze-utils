@@ -32,6 +32,7 @@ public class ExpressionUtilsTest {
     public void testParse() {
         System.out.println(ExpressionUtils.parse("d"));
         System.out.println(ExpressionUtils.parse("d.a"));
+        System.out.println(ExpressionUtils.parse("d.a.c"));
         System.out.println(ExpressionUtils.parse("d[a]"));
         System.out.println(ExpressionUtils.parse("d.b[a]"));
         System.out.println(ExpressionUtils.parse("d.b[a].c"));
