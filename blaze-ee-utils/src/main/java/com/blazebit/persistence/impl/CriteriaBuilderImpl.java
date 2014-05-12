@@ -16,37 +16,25 @@
 package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.CriteriaBuilder;
-import com.blazebit.persistence.CriteriaBuilder;
-import com.blazebit.persistence.HavingOrBuilder;
 import com.blazebit.persistence.HavingOrBuilder;
 import com.blazebit.persistence.JoinType;
-import com.blazebit.persistence.JoinType;
-import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.ParameterNameGenerator;
-import com.blazebit.persistence.ParameterNameGenerator;
-import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
-import com.blazebit.persistence.SelectObjectBuilder;
-import com.blazebit.persistence.WhereOrBuilder;
 import com.blazebit.persistence.WhereOrBuilder;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.PropertyExpression;
-import com.blazebit.persistence.impl.ParameterNameGeneratorImpl;
-import com.blazebit.persistence.impl.QueryGeneratorVisitor;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 
@@ -63,13 +51,11 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     // Maps alias to join path with the root as base
     private final Map<String, AliasInfo> aliasInfos = new HashMap<String, AliasInfo>();
     private final JoinNode rootNode;
-    // Maps normalized path to order by info
     private final List<OrderByInfo> orderByInfos = new ArrayList<OrderByInfo>();
     private final RootPredicate rootWherePredicate;
     private final RootPredicate rootHavingPredicate;
-    private final Map<String, SelectInfo> selectInfos = new LinkedHashMap<String, SelectInfo>();
-    // Maps normalized path to group by info
-    private final Map<String, GroupByInfo> groupByInfos = new LinkedHashMap<String, GroupByInfo>();
+    private final List<SelectInfo> selectInfos = new ArrayList<SelectInfo>();
+    private final List<GroupByInfo> groupByInfos = new ArrayList<GroupByInfo>();
     private final Map<String, Object> parameters = new HashMap<String, Object>();
     private final ParameterNameGenerator paramNameGenerator = new ParameterNameGeneratorImpl(parameters);
     private boolean distinct = false;
@@ -98,105 +84,57 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     }
 
     @Override
-    public CriteriaBuilderImpl<T> select(String... paths) {
-        for (String path : paths) {
-            select(path);
+    public CriteriaBuilderImpl<T> select(String... expressions) {
+        for (String expression : expressions) {
+            select(expression);
         }
 
         return this;
     }
 
     @Override
-    public CriteriaBuilderImpl<T> select(String path) {
-        return select(path, null);
+    public CriteriaBuilderImpl<T> select(String expression) {
+        return select(expression, null);
     }
 
     @Override
-    public CriteriaBuilderImpl<T> select(String path, String selectAlias) {
+    public CriteriaBuilderImpl<T> select(String expression, String selectAlias) {
+        if (selectAlias != null) {
+            throw new UnsupportedOperationException("Not yet implemented");
+        }
+        
         verifyBuilderEnded();
-        //TODO: use alias
-        JoinNode node;
-        String normalizedPath;
-        String selectField;
-
-        if (startsAtRootAlias(path)) {
-            // The given path is relative to the root
-            normalizedPath = path.substring(rootAliasInfo.alias.length() + 1);
-        } else {
-            // The path is either already normalized or uses a specific alias as base
-            normalizedPath = path;
-        }
-
-        int dotIndex;
-        int fieldStartDotIndex;
-        if ((fieldStartDotIndex = normalizedPath.lastIndexOf('.')) != -1) {
-            // First we extract the field by which should be ordered
-            selectField = normalizedPath.substring(fieldStartDotIndex + 1);
-            String joinPath = normalizedPath.substring(0, fieldStartDotIndex);
-            AliasInfo potentialBaseInfo;
-
-            if ((dotIndex = joinPath.indexOf('.')) != -1) {
-                // We found a dot in the path, so it either uses an alias or does chained joining
-                String potentialBase = normalizedPath.substring(0, dotIndex);
-                potentialBaseInfo = aliasInfos.get(potentialBase);
-            } else {
-                potentialBaseInfo = aliasInfos.get(joinPath);
-            }
-
-            if (potentialBaseInfo != null) {
-                // We found an alias for the first part of the path
-                String potentialBasePath = potentialBaseInfo.absolutePath;
-                JoinNode aliasNode = findNode(rootNode, potentialBasePath);
-                String relativePath = normalizedPath.substring(aliasNode.aliasInfo.alias.length() + 1);
-                normalizedPath = potentialBasePath + '.' + relativePath;
-                String relativeJoinPath = relativePath.substring(0, relativePath.length() - selectField.length());
-
-                if (relativeJoinPath.isEmpty()) {
-                    node = aliasNode;
-                } else {
-                    node = createOrUpdateNode(aliasNode, potentialBasePath, relativeJoinPath, null, null, false, true);
-                }
-            } else {
-                // The given path is relative to the root
-                node = createOrUpdateNode(rootNode, "", joinPath, null, null, false, true);
-            }
-        } else {
-            // The given path is relative to the root, an alias or the root itself
-            AliasInfo alias = aliasInfos.get(normalizedPath);
-
-            if (alias != null) {
-                node = findNode(rootNode, alias.absolutePath);
-                selectField = null;
-            } else {
-                node = rootNode;
-                selectField = normalizedPath;
-            }
-        }
-
-        selectInfos.put(normalizedPath, new SelectInfo(node.aliasInfo, selectField));
+        Expression exp = implicitJoin(ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this), true);
+        selectInfos.add(new SelectInfo(exp));
         return this;
     }
 
+    @Override
     public CriteriaBuilder<T> select(Class<? extends T> clazz) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public CriteriaBuilder<T> select(Constructor<? extends T> constructor) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public CriteriaBuilder<T> select(ObjectBuilder<? extends T> builder) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public SelectObjectBuilder<CriteriaBuilder<T>> selectNew(Class<? extends T> clazz) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public SelectObjectBuilder<CriteriaBuilder<T>> selectNew(Constructor<? extends T> constructor) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public SelectObjectBuilder<CriteriaBuilder<T>> selectNew(ObjectBuilder<? extends T> builder) {
         throw new UnsupportedOperationException();
     }
@@ -206,8 +144,9 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
      */
     @Override
     public RestrictionBuilder<CriteriaBuilder<T>> where(String expression) {
-        return rootWherePredicate.startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootWherePredicate,
-                ExpressionUtils.parse(expression)));
+        return rootWherePredicate
+            .startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootWherePredicate,
+                                                                         ExpressionUtils.parse(expression)));
     }
 
     @Override
@@ -225,68 +164,10 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     }
 
     @Override
-    public CriteriaBuilderImpl<T> groupBy(String path) {
+    public CriteriaBuilderImpl<T> groupBy(String expression) {
         verifyBuilderEnded();
-
-        JoinNode node;
-        String normalizedPath;
-        String groupByField;
-
-        if (startsAtRootAlias(path)) {
-            // The given path is relative to the root
-            normalizedPath = path.substring(rootAliasInfo.alias.length() + 1);
-        } else {
-            // The path is either already normalized or uses a specific alias as base
-            normalizedPath = path;
-        }
-
-        int dotIndex;
-        int fieldStartDotIndex;
-        if ((fieldStartDotIndex = normalizedPath.lastIndexOf('.')) != -1) {
-            // First we extract the field by which should be ordered
-            groupByField = normalizedPath.substring(fieldStartDotIndex + 1);
-            String joinPath = normalizedPath.substring(0, fieldStartDotIndex);
-            AliasInfo potentialBaseInfo;
-
-            if ((dotIndex = joinPath.indexOf('.')) != -1) {
-                // We found a dot in the path, so it either uses an alias or does chained joining
-                String potentialBase = normalizedPath.substring(0, dotIndex);
-                potentialBaseInfo = aliasInfos.get(potentialBase);
-            } else {
-                potentialBaseInfo = aliasInfos.get(joinPath);
-            }
-
-            if (potentialBaseInfo != null) {
-                // We found an alias for the first part of the path
-                String potentialBasePath = potentialBaseInfo.absolutePath;
-                JoinNode aliasNode = findNode(rootNode, potentialBasePath);
-                String relativePath = normalizedPath.substring(aliasNode.aliasInfo.alias.length() + 1);
-                normalizedPath = potentialBasePath + '.' + relativePath;
-                String relativeJoinPath = relativePath.substring(0, relativePath.length() - groupByField.length());
-
-                if (relativeJoinPath.isEmpty()) {
-                    node = aliasNode;
-                } else {
-                    node = createOrUpdateNode(aliasNode, potentialBasePath, relativeJoinPath, null, null, false, true);
-                }
-            } else {
-                // The given path is relative to the root
-                node = createOrUpdateNode(rootNode, "", joinPath, null, null, false, true);
-            }
-        } else {
-            // The given path is relative to the root, an alias or the root itself
-            AliasInfo alias = aliasInfos.get(normalizedPath);
-
-            if (alias != null) {
-                node = findNode(rootNode, alias.absolutePath);
-                groupByField = null;
-            } else {
-                node = rootNode;
-                groupByField = normalizedPath;
-            }
-        }
-
-        groupByInfos.put(normalizedPath, new GroupByInfo(node.aliasInfo, groupByField));
+        Expression exp = implicitJoin(ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this), true);
+        groupByInfos.add(new GroupByInfo(exp));
         return this;
     }
 
@@ -332,35 +213,48 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         rootHavingPredicate.verifyBuilderEnded();
     }
 
-    private List<String> getPropertyPaths(Expression expression) {
-        List<String> paths = new ArrayList<String>();
-
+    private Expression implicitJoin(Expression expression, boolean objectLeafAllowed) {
+        PropertyExpression propertyExpression;
+        
         if (expression instanceof PropertyExpression) {
-            paths.add(((PropertyExpression) expression).getProperty());
+            propertyExpression = (PropertyExpression) expression;
+            JoinResult result = implicitJoin(propertyExpression.getProperty(), objectLeafAllowed);
+            propertyExpression.setBaseNode(result.baseNode);
+            propertyExpression.setField(result.field);
         } else {
             // We know it can only be a composite expression
             for (Expression exp : ((CompositeExpression) expression).getExpressions()) {
                 if (exp instanceof PropertyExpression) {
-                    paths.add(((PropertyExpression) exp).getProperty());
+                    propertyExpression = (PropertyExpression) exp;
+                    JoinResult result = implicitJoin(propertyExpression.getProperty(), objectLeafAllowed);
+                    propertyExpression.setBaseNode(result.baseNode);
+                    propertyExpression.setField(result.field);
                 }
             }
         }
 
-        return paths;
+        return expression;
+    }
+    
+    private static class JoinResult {
+        private final JoinNode baseNode;
+        private final String field;
+
+        public JoinResult(JoinNode baseNode, String field) {
+            this.baseNode = baseNode;
+            this.field = field;
+        }
     }
 
-    private Expression implicitJoin(Expression exp) {
-        return null;
-    }
-
-    private void implicitJoin(String path) {
+    private JoinResult implicitJoin(String path, boolean objectLeafAllowed) {
         String normalizedPath;
         JoinNode baseNode;
         String field;
 
         if (startsAtRootAlias(path)) {
             // The given path is relative to the root
-            normalizedPath = path.substring(rootAliasInfo.alias.length() + 1);
+            normalizedPath = path.substring(rootAliasInfo.getAlias()
+                .length() + 1);
         } else {
             // The path is either already normalized or uses a specific alias as base
             normalizedPath = path;
@@ -384,9 +278,11 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
             if (potentialBaseInfo != null) {
                 // We found an alias for the first part of the path
-                String potentialBasePath = potentialBaseInfo.absolutePath;
+                String potentialBasePath = potentialBaseInfo.getAbsolutePath();
                 JoinNode aliasNode = findNode(rootNode, potentialBasePath);
-                String relativePath = normalizedPath.substring(aliasNode.aliasInfo.alias.length() + 1);
+                String relativePath = normalizedPath.substring(aliasNode.getAliasInfo()
+                    .getAlias()
+                    .length() + 1);
                 normalizedPath = potentialBasePath + '.' + relativePath;
                 String relativeJoinPath = relativePath.substring(0, relativePath.length() - field.length());
 
@@ -400,18 +296,31 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                 baseNode = createOrUpdateNode(rootNode, "", joinPath, null, null, false, true);
             }
         } else {
-            // The given path is relative to the root
-            baseNode = rootNode;
-            field = normalizedPath;
+            if (objectLeafAllowed) {
+                // The given path is relative to the root, an alias or the root itself
+                AliasInfo alias = aliasInfos.get(normalizedPath);
+
+                if (alias != null) {
+                    baseNode = findNode(rootNode, alias.getAbsolutePath());
+                    field = null;
+                } else {
+                    baseNode = rootNode;
+                    field = normalizedPath;
+                }
+            } else {
+                baseNode = rootNode;
+                field = normalizedPath;
+            }
         }
 
+        return new JoinResult(baseNode, field);
     }
 
     @Override
     public CriteriaBuilderImpl<T> orderBy(String expression, boolean ascending, boolean nullFirst) {
         verifyBuilderEnded();
-        Expression exp = implicitJoin(ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this));
-//        orderByInfos.add(new OrderByInfo(exp, ascending, nullFirst));
+        Expression exp = implicitJoin(ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this), false);
+        orderByInfos.add(new OrderByInfo(exp, ascending, nullFirst));
         return this;
     }
 
@@ -471,7 +380,8 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         if (startsAtRootAlias(path)) {
             // The given path is relative to the root
-            normalizedPath = path.substring(rootAliasInfo.alias.length() + 1);
+            normalizedPath = path.substring(rootAliasInfo.getAlias()
+                .length() + 1);
             createOrUpdateNode(rootNode, "", normalizedPath, alias, type, fetch, false);
         } else {
             // The path is either already normalized or uses a specific alias as base
@@ -485,7 +395,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
                 if (potentialBaseInfo != null) {
                     // We found an alias for the first part of the path
-                    String potentialBasePath = potentialBaseInfo.absolutePath;
+                    String potentialBasePath = potentialBaseInfo.getAbsolutePath();
                     JoinNode aliasNode = findNode(rootNode, potentialBasePath);
                     String relativePath = normalizedPath.substring(dotIndex + 1);
 //                    normalizedPath = potentialBasePath + '.' + relativePath;
@@ -504,8 +414,10 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     }
 
     private boolean startsAtRootAlias(String path) {
-        return path.startsWith(rootAliasInfo.alias) && path.length() > rootAliasInfo.alias.length() && path
-                .charAt(rootAliasInfo.alias.length()) == '.';
+        return path.startsWith(rootAliasInfo.getAlias()) && path.length() > rootAliasInfo.getAlias()
+            .length() && path
+            .charAt(rootAliasInfo.getAlias()
+            .length()) == '.';
     }
 
     private JoinNode findNode(JoinNode baseNode, String path) {
@@ -513,7 +425,8 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         String[] pathElements = path.split("\\.");
 
         for (int i = 0; i < pathElements.length; i++) {
-            currentNode = currentNode.nodes.get(pathElements[i]);
+            currentNode = currentNode.getNodes()
+                .get(pathElements[i]);
         }
 
         return currentNode;
@@ -544,17 +457,19 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                 "Ambiguous alias", implicit);
 
         // We can only change the join type if the existing node is implicit and the update on the node is not implicit
-        if (currentNode.aliasInfo.implicit && !implicit) {
-            currentNode.type = type;
+        if (currentNode.getAliasInfo()
+            .isImplicit() && !implicit) {
+            currentNode.setType(type);
         }
         if (fetch) {
-            currentNode.fetch = true;
+            currentNode.setFetch(true);
         }
         return currentNode;
     }
 
     private JoinNode getOrCreate(StringBuilder currentPath, JoinNode currentNode, String joinRelation, String alias, JoinType type, boolean fetch, String errorMessage, boolean implicit) {
-        JoinNode node = currentNode.nodes.get(joinRelation);
+        JoinNode node = currentNode.getNodes()
+            .get(joinRelation);
 
         if (currentPath.length() > 0) {
             currentPath.append('.');
@@ -567,7 +482,8 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
             AliasInfo oldAliasInfo = aliasInfos.get(alias);
 
             if (oldAliasInfo != null) {
-                if (!oldAliasInfo.absolutePath.equals(currentJoinPath)) {
+                if (!oldAliasInfo.getAbsolutePath()
+                    .equals(currentJoinPath)) {
                     throw new IllegalArgumentException(errorMessage);
                 } else {
                     throw new RuntimeException("Probably a programming error if this happens. An alias[" + alias
@@ -575,25 +491,26 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                 }
             } else {
                 node = new JoinNode(new AliasInfo(alias, currentJoinPath, implicit), type, fetch);
-                aliasInfos.put(alias, node.aliasInfo);
+                aliasInfos.put(alias, node.getAliasInfo());
             }
 
-            currentNode.nodes.put(joinRelation, node);
+            currentNode.getNodes()
+                .put(joinRelation, node);
         } else {
-            AliasInfo nodeAliasInfo = node.aliasInfo;
+            AliasInfo nodeAliasInfo = node.getAliasInfo();
 
-            if (!alias.equals(nodeAliasInfo.alias)) {
+            if (!alias.equals(nodeAliasInfo.getAlias())) {
                 // Aliases for the same join paths don't match
-                if (nodeAliasInfo.implicit && !implicit) {
+                if (nodeAliasInfo.isImplicit() && !implicit) {
                     // Overwrite implicit aliases
-                    String oldAlias = nodeAliasInfo.alias;
-                    nodeAliasInfo.alias = alias;
-                    nodeAliasInfo.implicit = false;
+                    String oldAlias = nodeAliasInfo.getAlias();
+                    nodeAliasInfo.setAlias(alias);
+                    nodeAliasInfo.setImplicit(false);
                     aliasInfos.remove(oldAlias);
                     aliasInfos.put(alias, nodeAliasInfo);
-                } else if (!nodeAliasInfo.implicit && !implicit) {
-                    throw new IllegalArgumentException("Alias conflict[" + nodeAliasInfo.alias + "="
-                            + nodeAliasInfo.absolutePath + ", " + alias + "=" + currentPath.toString() + "]");
+                } else if (!nodeAliasInfo.isImplicit() && !implicit) {
+                    throw new IllegalArgumentException("Alias conflict[" + nodeAliasInfo.getAlias() + "="
+                        + nodeAliasInfo.getAbsolutePath() + ", " + alias + "=" + currentPath.toString() + "]");
                 }
             }
         }
@@ -604,14 +521,18 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     /*
      * Apply methods
      */
-    private void applySelects(StringBuilder sb, Map<String, SelectInfo> selects) {
+    private void applySelects(StringBuilder sb, List<SelectInfo> selects) {
         if (selects.isEmpty()) {
             return;
         }
 
         sb.append("SELECT ");
-        Iterator<SelectInfo> iter = selects.values()
-                .iterator();
+        
+        if (distinct) {
+            sb.append("DISTINCT ");
+        }
+        
+        Iterator<SelectInfo> iter = selects.iterator();
         applySelect(sb, iter.next());
 
         while (iter.hasNext()) {
@@ -623,7 +544,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     }
 
     private void applySelect(StringBuilder sb, SelectInfo select) {
-        sb.append(select.baseAliasInfo.alias);
+        sb.append(select.baseAliasInfo.getAlias());
 
         if (select.field != null) {
             sb.append('.')
@@ -638,7 +559,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
             sb.append(' ');
 
-            switch (node.type) {
+            switch (node.getType()) {
                 case INNER:
                     sb.append("JOIN ");
                     break;
@@ -653,18 +574,20 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                     break;
             }
 
-            if (node.fetch) {
+            if (node.isFetch()) {
                 sb.append("FETCH ");
             }
 
-            sb.append(joinBase.alias)
-                    .append('.')
-                    .append(relation)
-                    .append(' ')
-                    .append(node.aliasInfo.alias);
+            sb.append(joinBase.getAlias())
+                .append('.')
+                .append(relation)
+                .append(' ')
+                .append(node.getAliasInfo()
+                .getAlias());
 
-            if (!node.nodes.isEmpty()) {
-                applyJoins(sb, node.aliasInfo, node.nodes);
+            if (!node.getNodes()
+                .isEmpty()) {
+                applyJoins(sb, node.getAliasInfo(), node.getNodes());
             }
         }
     }
@@ -677,14 +600,13 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         rootWherePredicate.predicate.accept(whereClauseGenerator);
     }
 
-    private void applyGroupBys(StringBuilder sb, Map<String, GroupByInfo> groupBys) {
+    private void applyGroupBys(StringBuilder sb, List<GroupByInfo> groupBys) {
         if (groupBys.isEmpty()) {
             return;
         }
 
         sb.append(" GROUP BY ");
-        Iterator<GroupByInfo> iter = groupBys.values()
-                .iterator();
+        Iterator<GroupByInfo> iter = groupBys.iterator();
         applyGroupBy(sb, iter.next());
 
         while (iter.hasNext()) {
@@ -694,7 +616,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     }
 
     private void applyGroupBy(StringBuilder sb, GroupByInfo groupBy) {
-        sb.append(groupBy.baseAliasInfo.alias);
+        sb.append(groupBy.baseAliasInfo.getAlias());
 
         if (groupBy.field != null) {
             sb.append('.')
@@ -718,9 +640,9 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     }
 
     private static void applyOrderBy(StringBuilder sb, OrderByInfo orderBy) {
-        sb.append(orderBy.baseAliasInfo.alias)
-                .append('.')
-                .append(orderBy.field);
+        sb.append(orderBy.baseAliasInfo.getAlias())
+            .append('.')
+            .append(orderBy.field);
 
         if (!orderBy.ascending) {
             sb.append(" DESC");
@@ -742,10 +664,10 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         applySelects(sb, selectInfos);
         sb.append("FROM ")
-                .append(clazz.getSimpleName())
-                .append(' ')
-                .append(rootAliasInfo.alias);
-        applyJoins(sb, rootAliasInfo, rootNode.nodes);
+            .append(clazz.getSimpleName())
+            .append(' ')
+            .append(rootAliasInfo.getAlias());
+        applyJoins(sb, rootAliasInfo, rootNode.getNodes());
         applyWhere(sb);
         applyGroupBys(sb, groupByInfos);
 //        applyHavings();
@@ -765,44 +687,14 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         return query;
     }
 
-    private static class JoinNode {
-
-        private AliasInfo aliasInfo;
-        private JoinType type = JoinType.LEFT;
-        private boolean fetch = false;
-        private final Map<String, JoinNode> nodes = new TreeMap<String, JoinNode>();
-
-        public JoinNode(AliasInfo aliasInfo, JoinType type, boolean fetch) {
-            this.aliasInfo = aliasInfo;
-            this.type = type;
-            this.fetch = fetch;
-        }
-    }
-
-    private static class AliasInfo {
-
-        private String alias;
-        // The absolute normalized path with the root as implicit base
-        private String absolutePath;
-        private boolean implicit;
-
-        public AliasInfo(String alias, String absolutePath, boolean implicit) {
-            this.alias = alias;
-            this.absolutePath = absolutePath;
-            this.implicit = implicit;
-        }
-    }
-
     private static class OrderByInfo {
 
-        private AliasInfo baseAliasInfo;
-        private String field;
+        private Expression expression;
         private boolean ascending;
         private boolean nullFirst;
 
-        public OrderByInfo(AliasInfo baseAliasInfo, String field, boolean ascending, boolean nullFirst) {
-            this.baseAliasInfo = baseAliasInfo;
-            this.field = field;
+        public OrderByInfo(Expression expression, boolean ascending, boolean nullFirst) {
+            this.expression = expression;
             this.ascending = ascending;
             this.nullFirst = nullFirst;
         }
@@ -810,23 +702,19 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
     private static class GroupByInfo {
 
-        private AliasInfo baseAliasInfo;
-        private String field;
+        private Expression expression;
 
-        public GroupByInfo(AliasInfo baseAliasInfo, String field) {
-            this.baseAliasInfo = baseAliasInfo;
-            this.field = field;
+        public GroupByInfo(Expression expression) {
+            this.expression = expression;
         }
     }
 
     private static class SelectInfo {
 
-        private AliasInfo baseAliasInfo;
-        private String field;
+        private Expression expression;
 
-        public SelectInfo(AliasInfo baseAliasInfo, String field) {
-            this.baseAliasInfo = baseAliasInfo;
-            this.field = field;
+        public SelectInfo(Expression expression) {
+            this.expression = expression;
         }
     }
 
