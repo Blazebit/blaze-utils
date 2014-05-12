@@ -13,8 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.BuilderEndedListener;
+import com.blazebit.persistence.QuantifiableBinaryPredicateBuilder;
+import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.ParameterExpression;
@@ -202,12 +205,12 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
 
     @Override
     public T isMemberOf(String expression) {
-        return chain(new IsMemberOfPredicate(leftExpression, ExpressionUtils.parse(expression)));
+        return chain(new IsMemberOfPredicate(leftExpression));
     }
 
     @Override
     public T isNotMemberOf(String expression) {
-        return chain(new NotPredicate(new IsMemberOfPredicate(leftExpression, ExpressionUtils.parse(expression))));
+        return chain(new NotPredicate(new IsMemberOfPredicate(leftExpression)));
     }
     
     @Override

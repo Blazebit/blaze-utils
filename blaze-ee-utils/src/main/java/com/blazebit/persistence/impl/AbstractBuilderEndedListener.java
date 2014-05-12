@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.BuilderEndedListener;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 import java.util.Collections;
 import java.util.IdentityHashMap;

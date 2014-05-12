@@ -13,11 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.BuilderEndedListener;
+import com.blazebit.persistence.RestrictionBuilder;
+import com.blazebit.persistence.WhereAndBuilder;
+import com.blazebit.persistence.WhereOrBuilder;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.PropertyExpression;
-import com.blazebit.persistence.predicate.AndPredicate;
+import com.blazebit.persistence.predicate.OrPredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 
@@ -25,20 +29,20 @@ import com.blazebit.persistence.predicate.PredicateBuilder;
  *
  * @author cpbec
  */
-public class WhereAndBuilderImpl<T> extends AbstractBuilderEndedListener implements WhereAndBuilder<T> {
-    
+public class WhereOrBuilderImpl<T> extends AbstractBuilderEndedListener implements WhereOrBuilder<T> {
+
     private final T result;
     private final BuilderEndedListener listener;
-    private final AndPredicate predicate;
+    private final OrPredicate predicate;
     
-    public WhereAndBuilderImpl(T result, BuilderEndedListener listener) {
+    public WhereOrBuilderImpl(T result, BuilderEndedListener listener) {
         this.result = result;
         this.listener = listener;
-        this.predicate = new AndPredicate();
+        this.predicate = new OrPredicate();
     }
     
     @Override
-    public T endAnd() {
+    public T endOr() {
         verifyBuilderEnded();
         listener.onBuilderEnded(this);
         return result;
@@ -56,12 +60,13 @@ public class WhereAndBuilderImpl<T> extends AbstractBuilderEndedListener impleme
     }
 
     @Override
-    public WhereOrBuilder<WhereAndBuilderImpl<T>> whereOr() {
-        return startBuilder(new WhereOrBuilderImpl<WhereAndBuilderImpl<T>>(this, this));
+    public WhereAndBuilder<WhereOrBuilderImpl<T>> whereAnd() {
+        return startBuilder(new WhereAndBuilderImpl<WhereOrBuilderImpl<T>>(this, this));
     }
 
     @Override
-    public RestrictionBuilder<? extends WhereAndBuilder<T>> where(String expression) {
-        return startBuilder(new RestrictionBuilderImpl<WhereAndBuilderImpl<T>>(this, this, ExpressionUtils.parse(expression)));
+    public RestrictionBuilder<? extends WhereOrBuilder<T>> where(String expression) {
+        return startBuilder(new RestrictionBuilderImpl<WhereOrBuilderImpl<T>>(this, this, ExpressionUtils.parse(expression)));
     }
+    
 }
