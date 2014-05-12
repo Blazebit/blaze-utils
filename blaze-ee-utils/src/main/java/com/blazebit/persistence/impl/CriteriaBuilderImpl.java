@@ -28,6 +28,7 @@ import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.PropertyExpression;
 import com.blazebit.persistence.predicate.AndPredicate;
+import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -65,8 +66,8 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         this.rootAliasInfo = new AliasInfo(alias, "", true);
         this.aliasInfos.put(alias, rootAliasInfo);
         this.rootNode = new JoinNode(rootAliasInfo, null, false);
-        this.rootWherePredicate = new RootPredicate();
-        this.rootHavingPredicate = new RootPredicate();
+        this.rootWherePredicate = new RootPredicate(this);
+        this.rootHavingPredicate = new RootPredicate(this);
     }
 
     /*
@@ -213,7 +214,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         rootHavingPredicate.verifyBuilderEnded();
     }
 
-    private Expression implicitJoin(Expression expression, boolean objectLeafAllowed) {
+    Expression implicitJoin(Expression expression, boolean objectLeafAllowed) {
         PropertyExpression propertyExpression;
         
         if (expression instanceof PropertyExpression) {
@@ -666,6 +667,10 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         return query;
     }
+    
+    void addWherePredicate(Predicate predicate) {
+        rootWherePredicate.predicate.getChildren().add(predicate);
+    }
 
     private static class OrderByInfo {
 
@@ -701,16 +706,22 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     private static class RootPredicate extends AbstractBuilderEndedListener {
 
         private final AndPredicate predicate;
+        private final ArrayTransformationVisitor transformer;
 
-        public RootPredicate() {
+        public RootPredicate(CriteriaBuilderImpl<?> builder) {
             this.predicate = new AndPredicate();
+            this.transformer = new ArrayTransformationVisitor(builder);
         }
 
         @Override
         public void onBuilderEnded(PredicateBuilder builder) {
             super.onBuilderEnded(builder);
+            Predicate pred = builder.getPredicate();
+            
+            pred.accept(transformer);
+            
             predicate.getChildren()
-                    .add(builder.getPredicate());
+                    .add(pred);
         }
     }
 }

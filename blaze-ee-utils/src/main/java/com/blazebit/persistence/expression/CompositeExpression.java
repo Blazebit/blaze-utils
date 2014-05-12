@@ -37,5 +37,9 @@ public class CompositeExpression implements Expression {
     public List<Expression> getExpressions() {
         return expressions;
     }
-    
+
+    @Override
+    public String toString() {
+        return expressions.toString();
+    }
 }

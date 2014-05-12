@@ -30,7 +30,8 @@ public final class ExpressionUtils {
     
     private static final String SIMPLE_PATH = "([a-zA-Z_][\\w]*(\\.[\\w]+)*)";
     private static final String PARAMETER_OR_PATH = "(\\:[a-zA-Z_][\\w]*) | (" + SIMPLE_PATH + ")";
-    private static final String PATH = SIMPLE_PATH + "(\\[(" + PARAMETER_OR_PATH + ")\\])?";
+    private static final String INDEX = "(\\[(" + PARAMETER_OR_PATH + ")\\])?";
+    private static final String PATH = "([a-zA-Z_][\\w]*" + INDEX + "((\\.[\\w]+)" + INDEX + ")*)";
     private static final ThreadLocal<Pattern> expressionExtractor = new ThreadLocal<Pattern>() {
 
         @Override

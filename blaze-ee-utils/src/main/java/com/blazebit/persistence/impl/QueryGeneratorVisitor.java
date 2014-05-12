@@ -211,7 +211,8 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     /* Expression.Visitor */
     @Override
     public void visit(PropertyExpression expression) {
-        sb.append(expression.getProperty()); //TODO: resolve joins
+//        if(expression.getBaseNode())
+        sb.append(expression.getBaseNode().getAliasInfo().getAlias()).append(".").append(expression.getField());
     }
 
     @Override
@@ -226,11 +227,6 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
         for (Expression e : expression.getExpressions()) {
             e.accept(this);
         }
-    }
-
-    @Override
-    public void visit(ArrayExpression expression) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

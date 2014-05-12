@@ -31,7 +31,6 @@ public class ArrayExpression implements Expression {
     
     @Override
     public void accept(Visitor visitor) {
-        visitor.visit(this);
     }
 
     public PropertyExpression getBase() {
@@ -42,4 +41,8 @@ public class ArrayExpression implements Expression {
         return index;
     }
     
+    @Override
+    public String toString() {
+        return base.toString() + "[" + index.toString() + "]";
+    }
 }
