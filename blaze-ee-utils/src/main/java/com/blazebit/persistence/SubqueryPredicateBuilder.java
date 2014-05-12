@@ -15,13 +15,11 @@
  */
 package com.blazebit.persistence;
 
-import com.blazebit.persistence.predicate.PredicateBuilder;
-
 /**
  *
  * @author cpbec
  */
-public interface SubqueryPredicateBuilder<T> extends PredicateBuilder {
+public interface SubqueryPredicateBuilder<T> {
     
     
     // TODO: subquery

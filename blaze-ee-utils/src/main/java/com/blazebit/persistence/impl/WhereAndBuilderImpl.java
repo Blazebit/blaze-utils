@@ -15,7 +15,6 @@
  */
 package com.blazebit.persistence.impl;
 
-import com.blazebit.persistence.BuilderEndedListener;
 import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.WhereAndBuilder;
 import com.blazebit.persistence.WhereOrBuilder;
@@ -29,7 +28,7 @@ import com.blazebit.persistence.predicate.PredicateBuilder;
  *
  * @author cpbec
  */
-public class WhereAndBuilderImpl<T> extends AbstractBuilderEndedListener implements WhereAndBuilder<T> {
+public class WhereAndBuilderImpl<T> extends AbstractBuilderEndedListener implements WhereAndBuilder<T>, PredicateBuilder {
     
     private final T result;
     private final BuilderEndedListener listener;

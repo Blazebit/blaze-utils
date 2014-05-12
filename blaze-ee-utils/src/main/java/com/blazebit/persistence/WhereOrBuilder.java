@@ -15,15 +15,13 @@
  */
 package com.blazebit.persistence;
 
-import com.blazebit.persistence.predicate.PredicateBuilder;
-
 /**
  *
  * @author cpbec
  */
-public interface WhereOrBuilder<T> extends Filterable<RestrictionBuilder<? extends WhereOrBuilder<T>>>, PredicateBuilder {
+public interface WhereOrBuilder<T> extends Filterable<RestrictionBuilder<? extends WhereOrBuilder<T>>> {
     
     public T endOr();
     
-    public <N extends WhereOrBuilder<T> & BuilderEndedListener> WhereAndBuilder<N> whereAnd();
+    public <N extends WhereOrBuilder<T>> WhereAndBuilder<N> whereAnd();
 }

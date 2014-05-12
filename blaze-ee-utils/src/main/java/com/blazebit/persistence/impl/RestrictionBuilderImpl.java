@@ -15,7 +15,6 @@
  */
 package com.blazebit.persistence.impl;
 
-import com.blazebit.persistence.BuilderEndedListener;
 import com.blazebit.persistence.QuantifiableBinaryPredicateBuilder;
 import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.expression.Expression;
@@ -41,7 +40,7 @@ import java.util.List;
  *
  * @author cpbec
  */
-public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener implements RestrictionBuilder<T> {
+public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener implements RestrictionBuilder<T>, PredicateBuilder {
 
     private final T result;
     private final BuilderEndedListener listener;
