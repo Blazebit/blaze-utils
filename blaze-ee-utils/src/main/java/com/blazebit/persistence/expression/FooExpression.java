@@ -36,4 +36,9 @@ public class FooExpression implements Expression {
         return string;
     }
     
+    @Override
+    public String toString() {
+        return string;
+    }
+    
 }

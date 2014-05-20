@@ -231,11 +231,6 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     }
 
     @Override
-    public void visit(ArrayExpression expression) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public void visit(FooExpression expression) {
         sb.append(expression.getString());
     }

@@ -56,4 +56,9 @@ public class PropertyExpression implements Expression {
         this.field = field;
     }
     
+    @Override
+    public String toString() {
+        return property;
+    }
+    
 }

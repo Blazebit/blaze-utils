@@ -57,4 +57,8 @@ public class ParameterExpression implements Expression {
         return valueSet;
     }
     
+    @Override
+    public String toString() {
+        return name;
+    }
 }

@@ -83,6 +83,11 @@ public abstract class CriteriaBuilder<T> implements Aggregateable<RestrictionBui
      */
     public abstract CriteriaBuilder<T> distinct();
 
+    public abstract CaseWhenBuilder<CriteriaBuilder<T>> selectCase();
+
+    /* CASE caseOperand (WHEN scalarExpression THEN scalarExpression)+ ELSE scalarExpression END */
+    public abstract SimpleCaseWhenBuilder<CriteriaBuilder<T>> selectCase(String expression);
+
     public abstract CriteriaBuilder<T> select(String... expressions);
 
     public abstract CriteriaBuilder<T> select(String expression);

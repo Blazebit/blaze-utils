@@ -29,7 +29,7 @@ public interface RestrictionBuilder<T> {
     //                 COUNT, AVG, MIN, MAX, SUM
     
     // Operators TODO: IN [subquery], 
-    //                 EXISTS [subquery]
+    //                 EXISTS [subquery] => Filterable
     
     public T between(Object start, Object end);
     

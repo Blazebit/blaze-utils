@@ -13,29 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence.expression;
+grammar JPQLSelectExpression;
 
-/**
- *
- * @author cpbec
- */
-public interface Expression {
-    
-    public static interface Visitor {
-        
-        public void visit(PropertyExpression expression);
-        
-        public void visit(ParameterExpression expression);
-        
-        public void visit(CompositeExpression expression);
-                
-        public void visit(FooExpression expression);
-    }
-    
-    /**
-     * The expression tree is traversed in pre-order.
-     * 
-     * @param visitor 
-     */
-    public void accept(Visitor visitor);
-}
+import JPQL, JPQL_lexer;
+
+parseSimpleExpression
+    : simple_expression;
+parseScalarExpression
+    : scalar_expression;
+parseCaseOperandExpression
+    : case_operand;

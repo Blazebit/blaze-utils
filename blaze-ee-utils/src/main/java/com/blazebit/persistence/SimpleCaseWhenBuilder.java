@@ -13,29 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence.expression;
+
+package com.blazebit.persistence;
 
 /**
  *
  * @author cpbec
  */
-public interface Expression {
+public interface SimpleCaseWhenBuilder<T> {
     
-    public static interface Visitor {
-        
-        public void visit(PropertyExpression expression);
-        
-        public void visit(ParameterExpression expression);
-        
-        public void visit(CompositeExpression expression);
-                
-        public void visit(FooExpression expression);
-    }
+    /* expression and thenExpression are both scalarExpression  */
+    public SimpleCaseWhenBuilder<T> when(String expression, String thenExpression);
     
-    /**
-     * The expression tree is traversed in pre-order.
-     * 
-     * @param visitor 
-     */
-    public void accept(Visitor visitor);
+    /* scalarExpression  */
+    public T thenElse(String elseExpression);
 }

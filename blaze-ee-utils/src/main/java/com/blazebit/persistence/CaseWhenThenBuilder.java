@@ -13,29 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence.expression;
+
+package com.blazebit.persistence;
 
 /**
  *
  * @author cpbec
  */
-public interface Expression {
+public interface CaseWhenThenBuilder<T> {
     
-    public static interface Visitor {
-        
-        public void visit(PropertyExpression expression);
-        
-        public void visit(ParameterExpression expression);
-        
-        public void visit(CompositeExpression expression);
-                
-        public void visit(FooExpression expression);
-    }
-    
-    /**
-     * The expression tree is traversed in pre-order.
-     * 
-     * @param visitor 
-     */
-    public void accept(Visitor visitor);
+    public T then(String expression);
 }

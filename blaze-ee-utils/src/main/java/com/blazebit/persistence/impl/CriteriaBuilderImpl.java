@@ -15,6 +15,9 @@
  */
 package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.CaseWhenAndBuilder;
+import com.blazebit.persistence.CaseWhenBuilder;
+import com.blazebit.persistence.CaseWhenOrBuilder;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.HavingOrBuilder;
 import com.blazebit.persistence.JoinType;
@@ -22,12 +25,14 @@ import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.ParameterNameGenerator;
 import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
+import com.blazebit.persistence.SimpleCaseWhenBuilder;
 import com.blazebit.persistence.WhereOrBuilder;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.PropertyExpression;
 import com.blazebit.persistence.predicate.AndPredicate;
+import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -88,6 +93,18 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         }
         this.distinct = true;
         return this;
+    }
+    
+    /* CASE (WHEN condition THEN scalarExpression)+ ELSE scalarExpression END */
+    @Override
+    public CaseWhenBuilder<CriteriaBuilder<T>> selectCase() {
+        return new CaseWhenBuilderImpl<CriteriaBuilder<T>>(this);
+    }
+
+    /* CASE caseOperand (WHEN scalarExpression THEN scalarExpression)+ ELSE scalarExpression END */
+    @Override
+    public SimpleCaseWhenBuilder<CriteriaBuilder<T>> selectCase(String expression) {
+        return new SimpleCaseWhenBuilderImpl<CriteriaBuilder<T>>(this, expression);
     }
 
     @Override
@@ -259,7 +276,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         selectObjectBuilderEndedListener.verifyBuilderEnded();
     }
 
-    private Expression implicitJoin(Expression expression, boolean objectLeafAllowed) {
+    Expression implicitJoin(Expression expression, boolean objectLeafAllowed) {
         PropertyExpression propertyExpression;
 
         if (expression instanceof PropertyExpression) {
@@ -327,6 +344,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                 // We found an alias for the first part of the path
                 String potentialBasePath = potentialBaseInfo.getAbsolutePath();
                 JoinNode aliasNode = findNode(rootNode, potentialBasePath);
+                // TODO: if aliasNode is null, then probably a subpath is not yet joined
                 String relativePath = normalizedPath.substring(aliasNode.getAliasInfo()
                         .getAlias()
                         .length() + 1);
@@ -446,6 +464,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                     // We found an alias for the first part of the path
                     String potentialBasePath = potentialBaseInfo.getAbsolutePath();
                     JoinNode aliasNode = findNode(rootNode, potentialBasePath);
+                // TODO: if aliasNode is null, then probably a subpath is not yet joined
                     String relativePath = normalizedPath.substring(dotIndex + 1);
 //                    normalizedPath = potentialBasePath + '.' + relativePath;
                     createOrUpdateNode(aliasNode, potentialBasePath, relativePath, alias, type, fetch, false);
@@ -737,6 +756,10 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         }
         return query;
     }
+    
+    void addWherePredicate(Predicate predicate) {
+        rootWherePredicate.predicate.getChildren().add(predicate);
+    }
 
     private static class OrderByInfo {
 
@@ -778,16 +801,22 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     private static class RootPredicate extends AbstractBuilderEndedListener {
 
         private final AndPredicate predicate;
+        private final ArrayTransformationVisitor transformer;
 
-        public RootPredicate() {
+        public RootPredicate(CriteriaBuilderImpl<?> builder) {
             this.predicate = new AndPredicate();
+            this.transformer = new ArrayTransformationVisitor(builder);
         }
 
         @Override
         public void onBuilderEnded(PredicateBuilder builder) {
             super.onBuilderEnded(builder);
+            Predicate pred = builder.getPredicate();
+            
+            pred.accept(transformer);
+            
             predicate.getChildren()
-                    .add(builder.getPredicate());
+                    .add(pred);
         }
     }
 
