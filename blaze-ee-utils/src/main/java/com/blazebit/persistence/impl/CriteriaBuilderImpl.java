@@ -15,6 +15,9 @@
  */
 package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.CaseWhenAndBuilder;
+import com.blazebit.persistence.CaseWhenBuilder;
+import com.blazebit.persistence.CaseWhenOrBuilder;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.HavingOrBuilder;
 import com.blazebit.persistence.JoinType;
@@ -22,6 +25,7 @@ import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.ParameterNameGenerator;
 import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
+import com.blazebit.persistence.SimpleCaseWhenBuilder;
 import com.blazebit.persistence.WhereOrBuilder;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
@@ -77,6 +81,18 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     public CriteriaBuilder<T> distinct() {
         this.distinct = true;
         return this;
+    }
+    
+    /* CASE (WHEN condition THEN scalarExpression)+ ELSE scalarExpression END */
+    @Override
+    public CaseWhenBuilder<CriteriaBuilder<T>> selectCase() {
+        return new CaseWhenBuilderImpl<CriteriaBuilder<T>>(this);
+    }
+
+    /* CASE caseOperand (WHEN scalarExpression THEN scalarExpression)+ ELSE scalarExpression END */
+    @Override
+    public SimpleCaseWhenBuilder<CriteriaBuilder<T>> selectCase(String expression) {
+        return new SimpleCaseWhenBuilderImpl<CriteriaBuilder<T>>(this, expression);
     }
 
     @Override

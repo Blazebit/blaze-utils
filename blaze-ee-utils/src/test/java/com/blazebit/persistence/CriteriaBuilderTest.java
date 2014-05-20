@@ -31,6 +31,42 @@ import static org.junit.Assert.*;
 public class CriteriaBuilderTest {
     
     @Test
+    public void testCaseWhen() {
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        criteria.selectCase("document.type")
+            .when("'vertrag'", "2")
+            .when("'info'", "1")
+            .thenElse("0");
+        
+        criteria.selectCase()
+                .when("document.type").eq("vertrag").then("2")
+                
+                .whenAnd()
+                    .and("document.type").eq("vertrag")
+                    .and("document.type").eq("info")
+                .then("1")
+                .whenAnd()
+                    .and("document.type").eq("vertrag")
+                    .and("document.type").eq("info")
+                .then("1")
+                .whenOr()
+                    .or("document.type").eq("vertrag")
+                    .or("document.type").eq("info")
+                .then("1")
+                .whenOr()
+                    .and()
+                        .and("document.type").eq("vertrag")
+                        .and("document.type").eq("info")
+                    .endAnd()
+                    .and()
+                        .and("document.type").eq("vertrag")
+                        .and("document.type").eq("info")
+                    .endAnd()
+                .then("2")
+                .thenElse("0");
+    }
+    
+    @Test
     public void testJoin1() {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
         criteria.join("owner", "owner", JoinType.INNER, false);

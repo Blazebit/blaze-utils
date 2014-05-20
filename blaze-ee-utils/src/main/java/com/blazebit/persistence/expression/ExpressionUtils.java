@@ -109,4 +109,12 @@ public final class ExpressionUtils {
 
         return new CompositeExpression(expressions);
     }
+
+    public static Expression parseCaseOperand(String caseOperandExpression) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public static Expression parseScalarExpression(String expression) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

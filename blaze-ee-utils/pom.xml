@@ -44,6 +44,12 @@
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-maven-plugin</artifactId>
+            <version>4.2.2</version>
+            <type>maven-plugin</type>
+        </dependency>
 
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -85,6 +91,19 @@
                                 <processor>com.blazebit.apt.validation.ConstraintBasedAnnotationProcessor</processor>
                             </processors>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-maven-plugin</artifactId>
+                <version>4.2.2</version>
+                <executions>
+                    <execution>
+                        <!--<phase>generate-sources</phase>-->
+                        <goals>
+                            <goal>antlr4</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
