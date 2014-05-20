@@ -78,8 +78,8 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         this.rootAliasInfo = new AliasInfo(alias, "", true);
         this.aliasInfos.put(alias, rootAliasInfo);
         this.rootNode = new JoinNode(rootAliasInfo, null, false);
-        this.rootWherePredicate = new RootPredicate();
-        this.rootHavingPredicate = new RootPredicate();
+        this.rootWherePredicate = new RootPredicate(this);
+        this.rootHavingPredicate = new RootPredicate(this);
         this.selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
     }
 
