@@ -31,12 +31,16 @@ import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
+import org.hibernate.Query;
+import org.hibernate.transform.ResultTransformer;
+import org.hibernate.transform.Transformers;
 
 /**
  *
@@ -59,6 +63,10 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     private final Map<String, Object> parameters = new HashMap<String, Object>();
     private final ParameterNameGenerator paramNameGenerator = new ParameterNameGeneratorImpl(parameters);
     private boolean distinct = false;
+    
+    private SelectObjectBuilder<T> selectObjectBuilder;
+    private ResultTransformer selectObjectTransformer;
+    private final SelectObjectBuilderEndedListenerImpl selectObjectBuilderEndedListener;
 
     public CriteriaBuilderImpl(Class<T> clazz, String alias) {
         this.clazz = clazz;
@@ -67,6 +75,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         this.rootNode = new JoinNode(rootAliasInfo, null, false);
         this.rootWherePredicate = new RootPredicate();
         this.rootHavingPredicate = new RootPredicate();
+        this.selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
     }
 
     /*
@@ -74,6 +83,9 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
      */
     @Override
     public CriteriaBuilder<T> distinct() {
+        if (selectInfos.isEmpty()) {
+            throw new IllegalStateException("Distinct requires select");
+        }
         this.distinct = true;
         return this;
     }
@@ -99,13 +111,21 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
     @Override
     public CriteriaBuilderImpl<T> select(String expression, String selectAlias) {
-        if (selectAlias != null) {
-            throw new UnsupportedOperationException("Not yet implemented");
+        if (expression.isEmpty() || (selectAlias != null && selectAlias.isEmpty())) {
+            throw new IllegalArgumentException();
         }
-        
+//        if (selectAlias != null) {
+//            throw new UnsupportedOperationException("Not yet implemented");
+//        }
+        AliasInfo aliasInfo = null;
+        if (selectAlias != null) {
+            aliasInfo = new AliasInfo(selectAlias, expression, false);
+            aliasInfos.put(selectAlias, aliasInfo);
+        }
+
         verifyBuilderEnded();
         Expression exp = implicitJoin(ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this), true);
-        selectInfos.add(new SelectInfo(exp));
+        selectInfos.add(new SelectInfo(exp, aliasInfo));
         return this;
     }
 
@@ -119,24 +139,45 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         throw new UnsupportedOperationException();
     }
 
+    // TODO: needed?
     @Override
     public CriteriaBuilder<T> select(ObjectBuilder<? extends T> builder) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public SelectObjectBuilder<CriteriaBuilder<T>> selectNew(Class<? extends T> clazz) {
-        throw new UnsupportedOperationException();
+    public <X> SelectObjectBuilder<X> selectNew(Class<X> clazz) {
+        checkSelectNewAllowed();
+
+        //TODO: maybe unify with selectNew(ObjectBuilder)
+        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl<T>(this, selectObjectBuilderEndedListener));
+        selectObjectTransformer = new ClassResultTransformer(clazz);
+        return (SelectObjectBuilder) selectObjectBuilder;
     }
 
     @Override
-    public SelectObjectBuilder<CriteriaBuilder<T>> selectNew(Constructor<? extends T> constructor) {
-        throw new UnsupportedOperationException();
+    public SelectObjectBuilder<T> selectNew(Constructor<?> constructor) {
+        checkSelectNewAllowed();
+        
+        //TODO: maybe unify with selectNew(ObjectBuilder)
+        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl<T>(this, selectObjectBuilderEndedListener));
+        selectObjectTransformer = new ConstructorResultTransformer(constructor);
+        return (SelectObjectBuilder) selectObjectBuilder;
     }
 
     @Override
-    public SelectObjectBuilder<CriteriaBuilder<T>> selectNew(ObjectBuilder<? extends T> builder) {
+    public SelectObjectBuilder<T> selectNew(ObjectBuilder<? extends T> builder) {
         throw new UnsupportedOperationException();
+    }
+    
+    private void checkSelectNewAllowed(){
+        verifyBuilderEnded();
+        if(selectObjectBuilder != null){
+            throw new IllegalStateException("Only one selectNew is allowed");
+        }
+        if(!selectInfos.isEmpty()){
+            throw new IllegalStateException("No mixture of select and selectNew is allowed");
+        }
     }
 
     /*
@@ -145,8 +186,8 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     @Override
     public RestrictionBuilder<CriteriaBuilder<T>> where(String expression) {
         return rootWherePredicate
-            .startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootWherePredicate,
-                                                                         ExpressionUtils.parse(expression)));
+                .startBuilder(new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootWherePredicate,
+                                ExpressionUtils.parse(expression)));
     }
 
     @Override
@@ -176,6 +217,10 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
      */
     @Override
     public RestrictionBuilder<CriteriaBuilder<T>> having(String expression) {
+        if (groupByInfos.isEmpty()) {
+            throw new IllegalStateException();
+        }
+
         return rootHavingPredicate.startBuilder(
                 new RestrictionBuilderImpl<CriteriaBuilder<T>>(this, rootHavingPredicate, ExpressionUtils.parse(expression)));
     }
@@ -211,11 +256,12 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     private void verifyBuilderEnded() {
         rootWherePredicate.verifyBuilderEnded();
         rootHavingPredicate.verifyBuilderEnded();
+        selectObjectBuilderEndedListener.verifyBuilderEnded();
     }
 
     private Expression implicitJoin(Expression expression, boolean objectLeafAllowed) {
         PropertyExpression propertyExpression;
-        
+
         if (expression instanceof PropertyExpression) {
             propertyExpression = (PropertyExpression) expression;
             JoinResult result = implicitJoin(propertyExpression.getProperty(), objectLeafAllowed);
@@ -235,8 +281,9 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         return expression;
     }
-    
+
     private static class JoinResult {
+
         private final JoinNode baseNode;
         private final String field;
 
@@ -246,7 +293,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         }
     }
 
-    private JoinResult implicitJoin(String path, boolean objectLeafAllowed) {
+    JoinResult implicitJoin(String path, boolean objectLeafAllowed) {
         String normalizedPath;
         JoinNode baseNode;
         String field;
@@ -254,7 +301,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         if (startsAtRootAlias(path)) {
             // The given path is relative to the root
             normalizedPath = path.substring(rootAliasInfo.getAlias()
-                .length() + 1);
+                    .length() + 1);
         } else {
             // The path is either already normalized or uses a specific alias as base
             normalizedPath = path;
@@ -281,8 +328,8 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                 String potentialBasePath = potentialBaseInfo.getAbsolutePath();
                 JoinNode aliasNode = findNode(rootNode, potentialBasePath);
                 String relativePath = normalizedPath.substring(aliasNode.getAliasInfo()
-                    .getAlias()
-                    .length() + 1);
+                        .getAlias()
+                        .length() + 1);
                 normalizedPath = potentialBasePath + '.' + relativePath;
                 String relativeJoinPath = relativePath.substring(0, relativePath.length() - field.length());
 
@@ -369,11 +416,13 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
     @Override
     public CriteriaBuilderImpl<T> join(String path, String alias, JoinType type, boolean fetch) {
-        if(path == null || alias == null ||type == null){
+        if (path == null || alias == null || type == null) {
             throw new NullPointerException();
         }
-        if(alias.isEmpty()) throw new IllegalArgumentException();
-        
+        if (alias.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
+
         verifyBuilderEnded();
 
         String normalizedPath;
@@ -381,7 +430,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         if (startsAtRootAlias(path)) {
             // The given path is relative to the root
             normalizedPath = path.substring(rootAliasInfo.getAlias()
-                .length() + 1);
+                    .length() + 1);
             createOrUpdateNode(rootNode, "", normalizedPath, alias, type, fetch, false);
         } else {
             // The path is either already normalized or uses a specific alias as base
@@ -415,9 +464,9 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
     private boolean startsAtRootAlias(String path) {
         return path.startsWith(rootAliasInfo.getAlias()) && path.length() > rootAliasInfo.getAlias()
-            .length() && path
-            .charAt(rootAliasInfo.getAlias()
-            .length()) == '.';
+                .length() && path
+                .charAt(rootAliasInfo.getAlias()
+                        .length()) == '.';
     }
 
     private JoinNode findNode(JoinNode baseNode, String path) {
@@ -426,7 +475,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         for (int i = 0; i < pathElements.length; i++) {
             currentNode = currentNode.getNodes()
-                .get(pathElements[i]);
+                    .get(pathElements[i]);
         }
 
         return currentNode;
@@ -458,7 +507,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
         // We can only change the join type if the existing node is implicit and the update on the node is not implicit
         if (currentNode.getAliasInfo()
-            .isImplicit() && !implicit) {
+                .isImplicit() && !implicit) {
             currentNode.setType(type);
         }
         if (fetch) {
@@ -469,7 +518,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
     private JoinNode getOrCreate(StringBuilder currentPath, JoinNode currentNode, String joinRelation, String alias, JoinType type, boolean fetch, String errorMessage, boolean implicit) {
         JoinNode node = currentNode.getNodes()
-            .get(joinRelation);
+                .get(joinRelation);
 
         if (currentPath.length() > 0) {
             currentPath.append('.');
@@ -483,7 +532,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
             if (oldAliasInfo != null) {
                 if (!oldAliasInfo.getAbsolutePath()
-                    .equals(currentJoinPath)) {
+                        .equals(currentJoinPath)) {
                     throw new IllegalArgumentException(errorMessage);
                 } else {
                     throw new RuntimeException("Probably a programming error if this happens. An alias[" + alias
@@ -495,7 +544,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
             }
 
             currentNode.getNodes()
-                .put(joinRelation, node);
+                    .put(joinRelation, node);
         } else {
             AliasInfo nodeAliasInfo = node.getAliasInfo();
 
@@ -510,7 +559,7 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
                     aliasInfos.put(alias, nodeAliasInfo);
                 } else if (!nodeAliasInfo.isImplicit() && !implicit) {
                     throw new IllegalArgumentException("Alias conflict[" + nodeAliasInfo.getAlias() + "="
-                        + nodeAliasInfo.getAbsolutePath() + ", " + alias + "=" + currentPath.toString() + "]");
+                            + nodeAliasInfo.getAbsolutePath() + ", " + alias + "=" + currentPath.toString() + "]");
                 }
             }
         }
@@ -522,25 +571,33 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
      * Apply methods
      */
     private void applySelects(QueryGeneratorVisitor queryGenerator, StringBuilder sb, List<SelectInfo> selects) {
+
         if (selects.isEmpty()) {
             return;
         }
 
         sb.append("SELECT ");
-        
+
         if (distinct) {
             sb.append("DISTINCT ");
         }
-        
+
         Iterator<SelectInfo> iter = selects.iterator();
-        iter.next().expression.accept(queryGenerator);
+        applySelect(queryGenerator, sb, iter.next());
 
         while (iter.hasNext()) {
             sb.append(", ");
-            iter.next().expression.accept(queryGenerator);
+            applySelect(queryGenerator, sb, iter.next());
         }
 
         sb.append(" ");
+    }
+
+    private void applySelect(QueryGeneratorVisitor queryGenerator, StringBuilder sb, SelectInfo select) {
+        select.expression.accept(queryGenerator);
+        if (select.aliasInfo != null) {
+            sb.append(" AS ").append(select.aliasInfo.getAlias());
+        }
     }
 
     private static void applyJoins(StringBuilder sb, AliasInfo joinBase, Map<String, JoinNode> nodes) {
@@ -570,24 +627,33 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
             }
 
             sb.append(joinBase.getAlias())
-                .append('.')
-                .append(relation)
-                .append(' ')
-                .append(node.getAliasInfo()
-                .getAlias());
+                    .append('.')
+                    .append(relation)
+                    .append(' ')
+                    .append(node.getAliasInfo()
+                            .getAlias());
 
             if (!node.getNodes()
-                .isEmpty()) {
+                    .isEmpty()) {
                 applyJoins(sb, node.getAliasInfo(), node.getNodes());
             }
         }
     }
 
     private void applyWhere(QueryGeneratorVisitor queryGenerator, StringBuilder sb) {
-        if(rootWherePredicate.predicate.getChildren().isEmpty())
+        if (rootWherePredicate.predicate.getChildren().isEmpty()) {
             return;
+        }
         sb.append(" WHERE ");
         rootWherePredicate.predicate.accept(queryGenerator);
+    }
+
+    private void applyHavings(QueryGeneratorVisitor queryGenerator, StringBuilder sb) {
+        if (rootHavingPredicate.predicate.getChildren().isEmpty()) {
+            return;
+        }
+        sb.append(" HAVING ");
+        rootHavingPredicate.predicate.accept(queryGenerator);
     }
 
     private void applyGroupBys(QueryGeneratorVisitor queryGenerator, StringBuilder sb, List<GroupByInfo> groupBys) {
@@ -644,13 +710,13 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
         QueryGeneratorVisitor queryGenerator = new QueryGeneratorVisitor(sb, paramNameGenerator);
         applySelects(queryGenerator, sb, selectInfos);
         sb.append("FROM ")
-            .append(clazz.getSimpleName())
-            .append(' ')
-            .append(rootAliasInfo.getAlias());
+                .append(clazz.getSimpleName())
+                .append(' ')
+                .append(rootAliasInfo.getAlias());
         applyJoins(sb, rootAliasInfo, rootNode.getNodes());
         applyWhere(queryGenerator, sb);
         applyGroupBys(queryGenerator, sb, groupByInfos);
-//        applyHavings();
+        applyHavings(queryGenerator, sb);
         applyOrderBys(queryGenerator, sb, orderByInfos);
 
         return sb.toString();
@@ -658,12 +724,17 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
 
     @Override
     public TypedQuery<T> getQuery(EntityManager em) {
-        TypedQuery<T> query = em.createQuery(getQueryString(), clazz);
+        TypedQuery<T> query = (TypedQuery) em.createQuery(getQueryString(), Object[].class);
+
+        if (selectObjectBuilder != null) {
+            // get hibernate query
+            Query hQuery = query.unwrap(Query.class);
+            hQuery.setResultTransformer(selectObjectTransformer);
+        }
 
         for (Map.Entry<String, Object> entry : parameters.entrySet()) {
             query.setParameter(entry.getKey(), entry.getValue());
         }
-
         return query;
     }
 
@@ -692,9 +763,15 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
     private static class SelectInfo {
 
         private Expression expression;
+        private AliasInfo aliasInfo;
 
         public SelectInfo(Expression expression) {
             this.expression = expression;
+        }
+
+        public SelectInfo(Expression expression, AliasInfo aliasInfo) {
+            this.expression = expression;
+            this.aliasInfo = aliasInfo;
         }
     }
 
@@ -712,5 +789,37 @@ public class CriteriaBuilderImpl<T> extends CriteriaBuilder<T> {
             predicate.getChildren()
                     .add(builder.getPredicate());
         }
+    }
+
+    private class SelectObjectBuilderEndedListenerImpl implements SelectObjectBuilderEndedListener {
+
+        private SelectObjectBuilder currentBuilder;
+        
+        protected void verifyBuilderEnded() {
+            if (currentBuilder != null) {
+                throw new IllegalStateException("A builder was not ended properly.");
+            }
+        }
+
+        protected <T extends SelectObjectBuilder> T startBuilder(T builder) {
+            if (currentBuilder != null) {
+                throw new IllegalStateException("There was an attempt to start a builder but a previous builder was not ended.");
+            }
+
+            currentBuilder = builder;
+            return builder;
+        }
+        
+        @Override
+        public void onBuilderEnded(Collection<Expression> expressions) {
+            if (currentBuilder == null) {
+                throw new IllegalStateException("There was an attempt to end a builder that was not started or already closed.");
+            }
+            currentBuilder = null;
+            for (Expression e : expressions) {
+                CriteriaBuilderImpl.this.selectInfos.add(new SelectInfo(e));
+            }
+        }
+
     }
 }

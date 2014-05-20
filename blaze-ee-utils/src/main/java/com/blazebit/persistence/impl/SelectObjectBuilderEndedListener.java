@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.expression.Expression;
+import java.util.Collection;
 
 /**
  *
- * @author cpbec
+ * @author ccbem
  */
-public class ArrayExpressionTransformer {
+public interface SelectObjectBuilderEndedListener {
+
+    void onBuilderEnded(Collection<Expression> expressions);
     
-    public static <T> Expression transform(Expression original, CriteriaBuilderImpl<T> builder) {
-        // TODO: transform the original expression and apply changes in the criteria builder
-        return original;
-    }
 }

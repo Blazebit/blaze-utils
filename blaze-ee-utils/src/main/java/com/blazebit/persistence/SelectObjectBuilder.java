@@ -15,15 +15,10 @@
  */
 package com.blazebit.persistence;
 
-/**
- *
- * @author cpbec
- */
 public interface SelectObjectBuilder<T> {
-    
     public SelectObjectBuilder<T> with(String expression);
     
     public SelectObjectBuilder<T> with(int position, String expression);
     
-    public T end();
+    public CriteriaBuilder<T> end();
 }

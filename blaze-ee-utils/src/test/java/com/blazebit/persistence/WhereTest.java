@@ -64,7 +64,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.partners.age").gt(0).where("d.locations.url").like("http://%");     
         
-        assertEquals("FROM Document d WHERE d.partners.age > :param_0 AND d.locations.url LIKE :param_1", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.partners partners LEFT JOIN d.locations locations WHERE partners.age > :param_0 AND locations.url LIKE :param_1", criteria.getQueryString());
     }
     
     @Test
@@ -72,23 +72,39 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.whereOr().where("d.partners.age").gt(0).where("d.locations.url").like("http://%").endOr();   
         
-        assertEquals("FROM Document d WHERE d.partners.age > :param_0 OR d.locations.url LIKE :param_1", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.partners partners LEFT JOIN d.locations locations WHERE partners.age > :param_0 OR locations.url LIKE :param_1", criteria.getQueryString());
     }
     
     @Test
     public void testWhereOrAnd(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.whereOr().whereAnd().where("d.partners.age").gt(0).where("d.locations.url").like("http://%").endAnd().whereAnd().where("d.locations.age").lt(10).where("d.locations.url").like("ftp://%").endAnd().endOr();   
+        criteria.whereOr()
+                    .whereAnd()
+                        .where("d.partners.age").gt(0)
+                        .where("d.locations.url").like("http://%")
+                    .endAnd()
+                    .whereAnd()
+                        .where("d.locations.age").lt(10)
+                        .where("d.locations.url").like("ftp://%")
+                    .endAnd()
+                .endOr();   
         
-        assertEquals("FROM Document d WHERE (d.partners.age > :param_0 AND d.locations.url LIKE :param_1) OR (d.locations.age < :param_2 AND d.locations.url LIKE :param_3)", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.partners partners LEFT JOIN d.locations locations WHERE (partners.age > :param_0 AND locations.url LIKE :param_1) OR (locations.age < :param_2 AND locations.url LIKE :param_3)", criteria.getQueryString());
     }
     
     @Test
     public void testWhereAndOr(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.whereOr().where("d.partners.age").gt(0).where("d.locations.url").like("http://%").endOr().whereOr().where("d.locations.age").lt(10).where("d.locations.url").like("ftp://%").endOr();   
+        criteria.whereOr()
+                    .where("d.partners.age").gt(0)
+                    .where("d.locations.url").like("http://%")
+                .endOr()
+                .whereOr()
+                    .where("d.locations.age").lt(10)
+                    .where("d.locations.url").like("ftp://%")
+                .endOr();   
         
-        assertEquals("FROM Document d WHERE (d.partners.age > :param_0 OR d.locations.url LIKE :param_1) AND (d.locations.age < :param_2 OR d.locations.url LIKE :param_3)", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.partners partners LEFT JOIN d.locations locations WHERE (partners.age > :param_0 OR locations.url LIKE :param_1) AND (locations.age < :param_2 OR locations.url LIKE :param_3)", criteria.getQueryString());
     }
     
     @Test
@@ -96,7 +112,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.whereOr().where("d.partners.age").gt(0).endOr();   
         
-        assertEquals("FROM Document d WHERE d.partners.age > :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE partners.age > :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -104,7 +120,7 @@ public class WhereTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.whereOr().whereAnd().where("d.partners.age").gt(0).endAnd().endOr();   
         
-        assertEquals("FROM Document d WHERE d.partners.age > :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE partners.age > :param_0", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)

@@ -43,11 +43,46 @@ public class SelectTest {
     @Test
     public void testSelectMultiple(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.select("d.partners", "d.children");
+        criteria.select(new String[]{"d.partners", "d.children"});
         
         assertEquals("SELECT d.partners, d.children FROM Document d", criteria.getQueryString());
     }
     
+    @Test
+    public void testSelectAlias(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.select("d.partners", "p").where("p").eq(2);
+        
+        assertEquals("SELECT d.partners AS p FROM Document d WHERE p = :param_0", criteria.getQueryString());
+    }
+    
+    @Test
+    public void testSelectAliasJoin(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.select("d.partners", "p").where("p").eq(2);
+        
+        assertEquals("SELECT d.partners AS p FROM Document d WHERE p = :param_0", criteria.getQueryString());
+    }
+    
+    @Test
+    public void testSelectAliasJoin2(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.select("d.children.name", "x").where("d.dwarfs.size").eq(2);
+        
+        System.out.println(criteria.getQueryString());
+        assertEquals("SELECT children.name AS x FROM Document d LEFT JOIN d.children children LEFT JOIN d.dwarfs dwarfs WHERE dwarfs.size = :param_0", criteria.getQueryString());
+    }
+    
+    @Test
+    public void testSelectAliasJoin3(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        criteria.select("d.children.name", "x").where("d.dwarfs.size").eq(2);
+        
+        System.out.println(criteria.getQueryString());
+        assertEquals("SELECT children.name AS x FROM Document d LEFT JOIN d.children children LEFT JOIN children.name name WHERE x.size = :param_0", criteria.getQueryString());
+        //TODO: how would the query actually look like? (x/name)
+    }
+        
     @Test(expected = IllegalArgumentException.class)
     public void testSelectSingleEmpty(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");

@@ -95,11 +95,11 @@ public abstract class CriteriaBuilder<T> implements Aggregateable<RestrictionBui
 
     public abstract CriteriaBuilder<T> select(ObjectBuilder<? extends T> builder);
 
-    public abstract SelectObjectBuilder<CriteriaBuilder<T>> selectNew(Class<? extends T> clazz);
+    public abstract <X> SelectObjectBuilder<X> selectNew(Class<X> clazz);
 
-    public abstract SelectObjectBuilder<CriteriaBuilder<T>> selectNew(Constructor<? extends T> constructor);
+    public abstract SelectObjectBuilder<T> selectNew(Constructor<?> constructor);
 
-    public abstract SelectObjectBuilder<CriteriaBuilder<T>> selectNew(ObjectBuilder<? extends T> builder);
+    public abstract SelectObjectBuilder<T> selectNew(ObjectBuilder<? extends T> builder);
 
     /*
      * Where methods

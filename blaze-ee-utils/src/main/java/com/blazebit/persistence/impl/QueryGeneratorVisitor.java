@@ -211,7 +211,9 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     /* Expression.Visitor */
     @Override
     public void visit(PropertyExpression expression) {
-        sb.append(expression.getProperty()); //TODO: resolve joins
+        sb.append(expression.getBaseNode().getAliasInfo().getAlias())
+                .append(".")
+                .append(expression.getField()); //TODO: resolve joins
     }
 
     @Override

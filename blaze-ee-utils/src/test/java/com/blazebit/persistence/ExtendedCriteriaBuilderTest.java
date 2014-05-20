@@ -212,7 +212,7 @@ public class ExtendedCriteriaBuilderTest {
         assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.partners partners WHERE partners.age + 1 >= :param_0", criteria.getQueryString());
     }
     
-    @Test(expected = javax.jms.IllegalStateException.class)
+    @Test(expected = IllegalStateException.class)
     public void testWhereNotClosed(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age");
