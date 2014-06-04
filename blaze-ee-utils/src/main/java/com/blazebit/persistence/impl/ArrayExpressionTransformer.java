@@ -19,6 +19,7 @@ import com.blazebit.persistence.expression.ArrayExpression;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.FooExpression;
+import com.blazebit.persistence.expression.PathExpression;
 import com.blazebit.persistence.expression.PropertyExpression;
 import com.blazebit.persistence.predicate.EqPredicate;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class ArrayExpressionTransformer {
 
     public static Expression transform(Expression original, CriteriaBuilderImpl<?> builder) {
         // TODO: transform the original expression and apply changes in the criteria builder
-        if (original instanceof PropertyExpression) {
+        if (original instanceof PathExpression) {
             // Nothing to transform here
             return original;
         }

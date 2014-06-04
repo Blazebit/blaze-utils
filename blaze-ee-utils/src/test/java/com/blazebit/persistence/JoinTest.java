@@ -16,6 +16,7 @@
 
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.entity.Document;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -189,5 +190,55 @@ public class JoinTest {
     public void testJoinEmptyAlias(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
         criteria.join("owner", "", JoinType.LEFT, true);
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testUnresolvedAlias1(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "a");
+        
+        criteria.where("z.c.x").eq(0).leftJoin("a.b", "b");
+        
+        criteria.getQueryString();
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testUnresolvedAlias2(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "a");
+        
+        criteria.where("z").eq(0);
+        
+        criteria.getQueryString();
+    }
+    
+    @Test(expected = IllegalStateException.class)
+    public void testUnresolvedAliasInOrderBy(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "a");
+        
+        criteria.orderByAsc("z");
+        
+        criteria.getQueryString();
+    }
+    
+    @Test
+    public void testImplicitRootRelativeAlias(){
+        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "a");
+        
+        criteria.where("name.c.x").eq(0).leftJoin("a.b", "b");
+        
+        System.out.println(criteria.getQueryString());
+        assertEquals("FROM Document a LEFT JOIN a.b b LEFT JOIN a.name name LEFT JOIN name.c c WHERE c.x = :param_0", criteria.getQueryString());
+    }
+    
+    @Test
+    public void testCallOrderInvariance(){
+        CriteriaBuilder<Document> criteria1 = CriteriaBuilder.from(Document.class, "a");
+        CriteriaBuilder<Document> criteria2 = CriteriaBuilder.from(Document.class, "a");
+        
+        criteria1.where("b.c.x").eq(0).leftJoin("a.b", "b");
+        criteria2.leftJoin("a.b", "b").where("b.c.x").eq(0);
+        
+        System.out.println(criteria1.getQueryString());
+        assertEquals("FROM Document a LEFT JOIN a.b b LEFT JOIN b.c c WHERE c.x = :param_0", criteria1.getQueryString());
+        assertEquals("FROM Document a LEFT JOIN a.b b LEFT JOIN b.c c WHERE c.x = :param_0", criteria2.getQueryString());
     }
 }

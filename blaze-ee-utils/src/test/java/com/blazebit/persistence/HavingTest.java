@@ -16,6 +16,7 @@
 
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.entity.Document;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -29,7 +30,7 @@ public class HavingTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.groupBy("d.owner").having("d.age").gt(0);
         
-        assertEquals("FROM Document d GROUP BY d.owner HAVING d.age > :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner GROUP BY owner HAVING d.age > :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -37,7 +38,7 @@ public class HavingTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.groupBy("d.owner").having("d.age + 1").gt(0);
         
-        assertEquals("FROM Document d GROUP BY d.owner HAVING d.age + 1 > :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner GROUP BY owner HAVING d.age+1 > :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -45,7 +46,7 @@ public class HavingTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.groupBy("d.owner").having("d.partners.age").gt(0);
         
-        assertEquals("FROM Document d LEFT JOIN d.partners partners GROUP BY d.owner HAVING partners.age > :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.partners partners GROUP BY owner HAVING partners.age > :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -53,40 +54,40 @@ public class HavingTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.groupBy("d.owner").having("d.partners.age + 1").gt(0);
         
-        assertEquals("FROM Document d LEFT JOIN d.partners partners GROUP BY d.owner HAVING partners.age > :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.partners partners GROUP BY owner HAVING partners.age+1 > :param_0", criteria.getQueryString());
     }
 
     @Test
     public void testHavingAnd(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.groupBy("d.owner").having("d.partners.age").gt(0).having("d.locations.url").like("http://%");     
+        criteria.groupBy("d.owner").having("d.partners.age").gt(0).having("d.versions.url").like("http://%");     
         
-        assertEquals("FROM Document d LEFT JOIN d.partners partners LEFT JOIN d.locations locations GROUP BY d.owner HAVING partners.age > :param_0 AND locations.url LIKE :param_1", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.partners partners LEFT JOIN d.versions versions GROUP BY owner HAVING partners.age > :param_0 AND versions.url LIKE :param_1", criteria.getQueryString());
     }
     
     @Test
     public void testHavingOr(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.groupBy("d.owner").havingOr().having("d.partners.age").gt(0).having("d.locations.url").like("http://%").endOr();   
+        criteria.groupBy("d.owner").havingOr().having("d.partners.age").gt(0).having("d.versions.url").like("http://%").endOr();   
         
-        assertEquals("FROM Document d LEFT JOIN d.partners partners LEFT JOIN d.locations locations GROUP BY d.owner HAVING partners.age > :param_0 OR locations.url LIKE :param_1", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.partners partners LEFT JOIN d.versions versions GROUP BY owner HAVING partners.age > :param_0 OR versions.url LIKE :param_1", criteria.getQueryString());
     }
     
     @Test
     public void testHavingOrAnd(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.groupBy("d.owner").havingOr().havingAnd().having("d.partners.age").gt(0).having("d.locations.url").like("http://%").endAnd().havingAnd().having("d.locations.age").lt(10).having("d.locations.url").like("ftp://%").endAnd().endOr();   
+        criteria.groupBy("d.owner").havingOr().havingAnd().having("d.partners.age").gt(0).having("d.versions.url").like("http://%").endAnd().havingAnd().having("d.versions.age").lt(10).having("d.versions.url").like("ftp://%").endAnd().endOr();   
         
-        assertEquals("FROM Document d LEFT JOIN d.partners partners LEFT JOIN d.locations locations GROUP BY d.owner HAVING (partners.age > :param_0 AND locations.url LIKE :param_1) OR (partners.age > :param_2 AND locations.url LIKE :param_3)", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.partners partners LEFT JOIN d.versions versions GROUP BY owner HAVING (partners.age > :param_0 AND versions.url LIKE :param_1) OR (versions.age < :param_2 AND versions.url LIKE :param_3)", criteria.getQueryString());
     }
     
     @Test
     public void testHavingAndOr(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.groupBy("d.owner").havingOr().having("d.partners.age").gt(0).having("d.locations.url").like("http://%").endOr().havingOr().having("d.locations.age").lt(10).having("d.locations.url").like("ftp://%").endOr();   
+        criteria.groupBy("d.owner").havingOr().having("d.partners.age").gt(0).having("d.versions.url").like("http://%").endOr().havingOr().having("d.versions.age").lt(10).having("d.versions.url").like("ftp://%").endOr();   
         
         System.out.println(criteria.getQueryString());
-        assertEquals("FROM Document d LEFT JOIN d.partners partners LEFT JOIN d.locations locations GROUP BY d.owner HAVING (partners.age > :param_0 OR locations.url LIKE :param_1) AND (partners.age > :param_2 OR locations.url LIKE :param_3)", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.partners partners LEFT JOIN d.versions versions GROUP BY owner HAVING (partners.age > :param_0 OR versions.url LIKE :param_1) AND (versions.age < :param_2 OR versions.url LIKE :param_3)", criteria.getQueryString());
     }
     
     @Test
@@ -94,7 +95,7 @@ public class HavingTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.groupBy("d.owner").havingOr().having("d.partners.age").gt(0).endOr();   
         
-        assertEquals("FROM Document d LEFT JOIN d.partners partners GROUP BY  d.owner HAVING partners.age > :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.partners partners GROUP BY owner HAVING partners.age > :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -102,7 +103,7 @@ public class HavingTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.groupBy("d.owner").havingOr().havingAnd().having("d.partners.age").gt(0).endAnd().endOr();   
         
-        assertEquals("FROM Document d LEFT JOIN d.partners partners GROUP BY d.owner HAVING partners.age > :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.partners partners GROUP BY owner HAVING partners.age > :param_0", criteria.getQueryString());
     }
     
     @Test(expected = IllegalStateException.class)

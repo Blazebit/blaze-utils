@@ -15,12 +15,17 @@
  */
 package com.blazebit.persistence.expression;
 
+import com.blazebit.persistence.parser.JPQLSelectExpressionLexer;
+import com.blazebit.persistence.parser.JPQLSelectExpressionParser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 /**
  *
@@ -28,86 +33,31 @@ import java.util.regex.Pattern;
  */
 public final class ExpressionUtils {
 
-    private static final String PATH_ELEMENT = "([a-zA-Z_][\\w]*)";
-    private static final String SIMPLE_PATH = PATH_ELEMENT + "(\\." + PATH_ELEMENT + ")*";
-    private static final String PARAMETER_OR_PATH = "(\\:[a-zA-Z_][\\w]*) | (" + SIMPLE_PATH + ")";
-    private static final String INDEX = "(\\[(" + PARAMETER_OR_PATH + ")\\])?";
-    private static final String PATH = PATH_ELEMENT + INDEX + "(\\." + PATH_ELEMENT + INDEX + ")*";
-    private static final ThreadLocal<Pattern> expressionExtractor = new ThreadLocal<Pattern>() {
-        @Override
-        protected Pattern initialValue() {
-            return Pattern.compile(PATH);
-        }
-    };
-    private static final TreeSet<String> KEYWORDS = new TreeSet<String>(Arrays.asList(
-        "AVG", "MAX", "MIN", "SUM", "COUNT", "DISTINCT", "LENGTH", "LOCATE", "ABS", "SQRT", "MOD", "SIZE", "CURRENT_DATE",
-        "CURRENT_TIME", "CURRENT_TIMESTAMP", "CONCAT", "SUBSTRING", "TRIM", "LEADING", "TRAILING", "BOTH", "FROM", "LOWER",
-        "UPPER"));
-
-    private static void parsePath(List<Expression> expressions, String expression, StringBuilder sb, Matcher matcher) {
-        // TODO: rewrite parser to support arbitrary depth of paths
-        String candidate = expression.substring(matcher.start(), matcher.end());
-
-        if (KEYWORDS.contains(candidate.toUpperCase())) {
-            sb.append(candidate);
-        } else {
-            if (sb.length() > 0) {
-                expressions.add(new FooExpression(sb.toString()));
-                sb.setLength(0);
-            }
-
-            String base = matcher.group(1);
-            String index = matcher.group(4);
-
-            if (index == null) {
-                expressions.add(new PropertyExpression(base));
-            } else {
-                index = index.trim();
-                Expression indexExpression;
-
-                if (index.charAt(0) == ':') {
-                    indexExpression = new ParameterExpression(index.substring(1));
-                } else {
-                    indexExpression = new PropertyExpression(index);
-                }
-
-                expressions.add(new ArrayExpression(new PropertyExpression(base), indexExpression));
-            }
-        }
-    }
-
     public static Expression parse(String expression) {
-        final List<Expression> expressions = new ArrayList<Expression>();
-        final Matcher matcher = expressionExtractor.get().matcher(expression);
-        StringBuilder sb = new StringBuilder();
-
-        if (matcher.matches()) {
-            matcher.find(0);
-            parsePath(expressions, expression, sb, matcher);
-        } else {
-            int start = 0;
-
-            while (start < expression.length() && matcher.find(start)) {
-                if (matcher.start() != start) {
-                    sb.append(expression.substring(start, matcher.start()));
-                }
-                
-                parsePath(expressions, expression, sb, matcher);
-                start = matcher.end();
-            }
-
-            if (start == 0) {
-                throw new IllegalArgumentException("Just literals are not allowed!");
-            } else if (start != expression.length()) {
-                sb.append(expression.substring(start, expression.length()));
-            }
-
-            if (sb.length() > 0) {
-                expressions.add(new FooExpression(sb.toString()));
-            }
+        if(expression == null){
+            throw new NullPointerException("expression");
         }
+        if(expression.isEmpty()){
+            throw new IllegalArgumentException("expression");
+        }
+        JPQLSelectExpressionLexer l = new JPQLSelectExpressionLexer(new ANTLRInputStream(expression));
+        CommonTokenStream tokens = new CommonTokenStream(l);
+        JPQLSelectExpressionParser p = new JPQLSelectExpressionParser(tokens);
+        JPQLSelectExpressionParser.ParseSimpleExpressionContext ctx = p.parseSimpleExpression();
 
-        return new CompositeExpression(expressions);
+        ParseTreeWalker w = new ParseTreeWalker();
+        
+        JPQLParseTreeListenerImpl antlrToExpressionTransformer = new JPQLParseTreeListenerImpl();
+        
+        w.walk(antlrToExpressionTransformer, ctx);
+        
+        CompositeExpression expr = antlrToExpressionTransformer.getCompositeExpression();
+        
+        // unwrap composite expression with single child
+        if(expr.getExpressions().size() == 1){
+            return expr.getExpressions().get(0);
+        }
+        return expr;
     }
 
     public static Expression parseCaseOperand(String caseOperandExpression) {
@@ -116,5 +66,16 @@ public final class ExpressionUtils {
 
     public static Expression parseScalarExpression(String expression) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    public static String getFirstPathElement(String path) {
+        String elem;
+        int firstDotIndex;
+        if ((firstDotIndex = path.indexOf('.')) == -1) {
+            elem = path;
+        } else {
+            elem = path.substring(0, firstDotIndex);
+        }
+        return elem;
     }
 }

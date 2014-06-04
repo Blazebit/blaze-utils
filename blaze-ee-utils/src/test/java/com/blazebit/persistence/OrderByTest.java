@@ -16,6 +16,7 @@
 
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.entity.Document;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -55,16 +56,16 @@ public class OrderByTest {
     @Test
     public void testOrderByNested(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.orderBy("d.employees.contacts.age", false, false);
-        assertEquals("FROM Document d LEFT JOIN d.employees employees LEFT JOIN employees.contacts contacts ORDER BY contacts.age DESC NULLS LAST", criteria.getQueryString());
+        criteria.orderBy("d.versions.contacts.age", false, false);
+        assertEquals("FROM Document d LEFT JOIN d.versions versions LEFT JOIN versions.contacts contacts ORDER BY contacts.age DESC NULLS LAST", criteria.getQueryString());
     }
     
     @Test
     public void testOrderByMultiple(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.orderBy("d.employees.contacts.age", false, false).orderBy("d.employees.supervisors.joinDate", true, true);
+        criteria.orderBy("d.versions.contacts.age", false, false).orderBy("d.versions.supervisors.joinDate", true, true);
 
-        assertEquals("FROM Document d LEFT JOIN d.employees employees LEFT JOIN employees.contacts contacts LEFT JOIN employees.supervisors supervisors ORDER BY contacts.age DESC NULLS LAST, supervisors.joinDate ASC NULLS FIRST", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.versions versions LEFT JOIN versions.contacts contacts LEFT JOIN versions.supervisors supervisors ORDER BY contacts.age DESC NULLS LAST, supervisors.joinDate ASC NULLS FIRST", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)

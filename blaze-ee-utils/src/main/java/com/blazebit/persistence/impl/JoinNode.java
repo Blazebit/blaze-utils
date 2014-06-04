@@ -28,6 +28,7 @@ public class JoinNode {
     private AliasInfo aliasInfo;
     private JoinType type = JoinType.LEFT;
     private boolean fetch = false;
+    // Use TreeMap so that joins get applied alphabetically for easier testing
     private final Map<String, JoinNode> nodes = new TreeMap<String, JoinNode>();
 
     public JoinNode(AliasInfo aliasInfo, JoinType type, boolean fetch) {

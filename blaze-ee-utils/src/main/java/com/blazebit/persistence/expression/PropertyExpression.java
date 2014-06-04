@@ -24,8 +24,6 @@ import com.blazebit.persistence.impl.JoinNode;
 public class PropertyExpression implements Expression {
 
     private final String property;
-    private JoinNode baseNode;
-    private String field;
 
     public PropertyExpression(String property) {
         this.property = property;
@@ -39,26 +37,33 @@ public class PropertyExpression implements Expression {
     public String getProperty() {
         return property;
     }
-
-    public JoinNode getBaseNode() {
-        return baseNode;
-    }
-
-    public void setBaseNode(JoinNode baseNode) {
-        this.baseNode = baseNode;
-    }
-
-    public String getField() {
-        return field;
-    }
-
-    public void setField(String field) {
-        this.field = field;
-    }
     
     @Override
     public String toString() {
         return property;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 29 * hash + (this.property != null ? this.property.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final PropertyExpression other = (PropertyExpression) obj;
+        if ((this.property == null) ? (other.property != null) : !this.property.equals(other.property)) {
+            return false;
+        }
+        return true;
+    }
+    
     
 }

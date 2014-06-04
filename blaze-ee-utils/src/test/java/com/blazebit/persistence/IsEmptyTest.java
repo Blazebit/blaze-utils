@@ -16,6 +16,7 @@
 
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.entity.Document;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

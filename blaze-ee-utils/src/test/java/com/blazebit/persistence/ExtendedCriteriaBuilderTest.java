@@ -16,6 +16,7 @@
 
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.entity.Document;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -193,7 +194,7 @@ public class ExtendedCriteriaBuilderTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age").ge(25);
 
-        assertEquals("FROM Document d d.age >= :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE d.age >= :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -201,7 +202,7 @@ public class ExtendedCriteriaBuilderTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.age + 1").ge(25);
 
-        assertEquals("FROM Document d d.age + 1 >= :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d WHERE d.age+1 >= :param_0", criteria.getQueryString());
     }
     
     @Test
@@ -209,7 +210,7 @@ public class ExtendedCriteriaBuilderTest {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
         criteria.where("d.owner.partners.age + 1").ge(25);
 
-        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.partners partners WHERE partners.age + 1 >= :param_0", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.partners partners WHERE partners.age+1 >= :param_0", criteria.getQueryString());
     }
     
     @Test(expected = IllegalStateException.class)

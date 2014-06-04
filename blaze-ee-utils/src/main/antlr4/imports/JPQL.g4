@@ -21,35 +21,45 @@ grammar JPQL;
  composable_qualified_identification_variable : 'KEY('Identification_variable')' |
                                                   'VALUE('Identification_variable')';
 
- single_valued_path_expression : qualified_identification_variable |
-                                   state_field_path_expression |
-                                   single_valued_object_path_expression;
+ single_valued_path_expression 
+     : qualified_identification_variable
+     | state_field_path_expression 
+     | single_valued_object_path_expression
+     ;
  
  general_identification_variable : Identifier |
                                     composable_qualified_identification_variable;
 
- general_subpath : general_identification_variable('.'Identifier)*;
+ general_path_element : Identifier
+                      | Single_valued_object_field
+                      | Collection_valued_field
+                      ;
+ 
+ general_subpath : general_identification_variable('.'general_path_element)*;
 
- state_field_path_expression : general_subpath'.'Identifier;
+ state_field_path_expression : general_subpath'.'general_path_element;
 
- single_valued_object_path_expression : general_subpath'.'Single_valued_object_field;
+ single_valued_object_path_expression : general_subpath'.'general_path_element;
 
- collection_valued_path_expression : general_subpath'.'Collection_valued_field;
+ collection_valued_path_expression : general_subpath'.'general_path_element;
+ 
+ simple_identifier : Identifier
+                   ;
 
  simple_expression : single_valued_path_expression |
                        scalar_expression |
                        aggregate_expression |
-                       Identifier ;
+                       simple_identifier ;
 
  aggregate_expression : ( 'AVG' | 'MAX' | 'MIN' | 'SUM' ) '('('DISTINCT')? state_field_path_expression')' |
                           'COUNT' (('DISTINCT')? Identification_variable |
                                             state_field_path_expression |
                                             single_valued_object_path_expression) ;
 
- derived_path_expression : simple_derived_path'.'Single_valued_object_field |
+ /*derived_path_expression : simple_derived_path'.'Single_valued_object_field |
                              simple_derived_path'.'Collection_valued_field;
 
- simple_derived_path : Superquery_identification_variable('.'Single_valued_object_field)*;
+ simple_derived_path : Superquery_identification_variable('.'Single_valued_object_field)*;*/
 
  scalar_expression : arithmetic_expression |
                        string_expression |
@@ -162,4 +172,3 @@ grammar JPQL;
      | Time_literal 
      | Timestamp_literal
      ;
-

@@ -16,15 +16,15 @@
 package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.ParameterNameGenerator;
-import com.blazebit.persistence.expression.ArrayExpression;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.FooExpression;
 import com.blazebit.persistence.expression.ParameterExpression;
+import com.blazebit.persistence.expression.PathExpression;
 import com.blazebit.persistence.expression.PropertyExpression;
+import com.blazebit.persistence.impl.CriteriaBuilderImpl.SelectInfo;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.BetweenPredicate;
-import com.blazebit.persistence.predicate.BinaryExpressionPredicate;
 import com.blazebit.persistence.predicate.EqPredicate;
 import com.blazebit.persistence.predicate.GePredicate;
 import com.blazebit.persistence.predicate.GtPredicate;
@@ -40,7 +40,6 @@ import com.blazebit.persistence.predicate.OrPredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateQuantifier;
 import com.blazebit.persistence.predicate.QuantifiableBinaryExpressionPredicate;
-import java.util.Map;
 
 /**
  *
@@ -50,15 +49,18 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     private final StringBuilder sb;
     private final ParameterNameGenerator paramNameGenerator;
+    private boolean replaceSelectAliases = true;
+    private final CriteriaBuilderImpl<?> builder;
 
-    public QueryGeneratorVisitor(StringBuilder sb, ParameterNameGenerator paramNameGenerator) {
+    public QueryGeneratorVisitor(CriteriaBuilderImpl<?> builder, StringBuilder sb, ParameterNameGenerator paramNameGenerator) {
         this.sb = sb;
         this.paramNameGenerator = paramNameGenerator;
+        this.builder = builder;
     }
 
     @Override
     public void visit(AndPredicate predicate) {
-        if(predicate.getChildren().size() == 1){
+        if (predicate.getChildren().size() == 1) {
             predicate.getChildren().get(0).accept(this);
             return;
         }
@@ -80,7 +82,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     @Override
     public void visit(OrPredicate predicate) {
-        if(predicate.getChildren().size() == 1){
+        if (predicate.getChildren().size() == 1) {
             predicate.getChildren().get(0).accept(this);
             return;
         }
@@ -176,7 +178,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
         sb.append(")");
     }
 
-    private void visitQuantifiableBinaryPredicate(QuantifiableBinaryExpressionPredicate predicate, String operator){
+    private void visitQuantifiableBinaryPredicate(QuantifiableBinaryExpressionPredicate predicate, String operator) {
         predicate.getLeft().accept(this);
         sb.append(operator);
         if (predicate.getQuantifier() != PredicateQuantifier.ONE) {
@@ -188,6 +190,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
             sb.append(")");
         }
     }
+
     @Override
     public void visit(GtPredicate predicate) {
         visitQuantifiableBinaryPredicate(predicate, " > ");
@@ -209,11 +212,10 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     }
 
     /* Expression.Visitor */
+    //TODO: remove
     @Override
     public void visit(PropertyExpression expression) {
-        sb.append(expression.getBaseNode().getAliasInfo().getAlias())
-                .append(".")
-                .append(expression.getField()); //TODO: resolve joins
+
     }
 
     @Override
@@ -234,4 +236,36 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     public void visit(FooExpression expression) {
         sb.append(expression.getString());
     }
+
+    @Override
+    public void visit(PathExpression expression) {
+        if (replaceSelectAliases) {
+            if (expression.getBaseNode() != null) {
+                String absPath = expression.getBaseNode().getAliasInfo().getAbsolutePath();
+                SelectInfo selectInfo = builder.selectAbsolutePathToInfoMap.get(absPath);
+                if (selectInfo != null) {
+                    sb.append(selectInfo.getAlias());
+                    return;
+                }
+            }
+        }
+        if (expression.getBaseNode() == null) {
+            sb.append(expression.getPath());
+        } else if (expression.getField() == null) {
+            sb.append(expression.getBaseNode().getAliasInfo().getAlias());
+        } else {
+            sb.append(expression.getBaseNode().getAliasInfo().getAlias())
+                    .append(".")
+                    .append(expression.getField());
+        }
+    }
+
+    public boolean isReplaceSelectAliases() {
+        return replaceSelectAliases;
+    }
+
+    public void setReplaceSelectAliases(boolean replaceSelectAliases) {
+        this.replaceSelectAliases = replaceSelectAliases;
+    }
+
 }

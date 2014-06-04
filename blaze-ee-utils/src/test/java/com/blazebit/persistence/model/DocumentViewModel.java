@@ -13,41 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.blazebit.persistence;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+package com.blazebit.persistence.model;
 
 /**
  *
  * @author ccbem
  */
-@Entity
-public class Document {
-    private long id;
+public class DocumentViewModel {
+
     private String name;
-    
-    public Document(){}
-    
-    public Document(String name){}
 
-    @Id
-    @GeneratedValue
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
+    public DocumentViewModel(String name) {
+        this.name = name;
     }
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 }

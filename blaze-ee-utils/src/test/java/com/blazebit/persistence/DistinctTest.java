@@ -15,6 +15,7 @@
  */
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.entity.Document;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -27,9 +28,9 @@ public class DistinctTest {
     @Test
     public void testDistinct() {
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.select("d.children.name").distinct();
+        criteria.select("d.partners.name").distinct();
         
-        assertEquals("SELECT DISTINCT children.name FROM Document d LEFT JOIN d.children children author LEFT JOIN d.title title WHERE title.legnth < :param_0", criteria.getQueryString());
+        assertEquals("SELECT DISTINCT partners.name FROM Document d LEFT JOIN d.partners partners", criteria.getQueryString());
     }
     
     @Test(expected = IllegalStateException.class)

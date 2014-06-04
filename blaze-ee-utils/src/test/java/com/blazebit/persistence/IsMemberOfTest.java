@@ -16,6 +16,7 @@
 
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.entity.Document;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -27,9 +28,9 @@ public class IsMemberOfTest {
     @Test
     public void testIsMemberOf(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.name").isMemberOf("d.parentDocuments.childDocuments.name");
+        criteria.where("d.name").isMemberOf("d.versions.childDocuments.name");
         
-        assertEquals("FROM Document d LEFT JOIN d.parentDocuments parentDocuments LEFT JOIN parentDocuments.childDocuments childDocuments WHERE d.name MEMBER OF childDocuments", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.versions versions LEFT JOIN versions.childDocuments childDocuments WHERE d.name MEMBER OF childDocuments.name", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
@@ -47,9 +48,9 @@ public class IsMemberOfTest {
     @Test
     public void testIsNotMemberOf(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.name").isNotMemberOf("d.parentDocuments.childDocuments.name");
+        criteria.where("d.name").isNotMemberOf("d.versions.childDocuments.name");
         
-        assertEquals("FROM Document d LEFT JOIN d.parentDocuments parentDocuments LEFT JOIN parentDocuments.childDocuments childDocuments WHERE d.name NOT MEMBER OF childDocuments", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.versions versions LEFT JOIN versions.childDocuments childDocuments WHERE NOT d.name MEMBER OF childDocuments.name", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)

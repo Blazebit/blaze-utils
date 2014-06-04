@@ -16,6 +16,7 @@
 
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.entity.Document;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -41,9 +42,9 @@ public class EqTest {
     @Test
     public void testEqualToExpression(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").eqExpression("d.age2 + 1");
+        criteria.where("d.age").eqExpression("d.versions.age + 1");
         
-        assertEquals("FROM Document d WHERE d.age = d.age2 + 1", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.versions versions WHERE d.age = versions.age+1", criteria.getQueryString());
     }
     
     @Test(expected = IllegalArgumentException.class)
@@ -92,9 +93,9 @@ public class EqTest {
     @Test
     public void testNotEqualToExpression(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").notEqExpression("d.age2 + 1");
+        criteria.where("d.age").notEqExpression("d.versions.age + 1");
         
-        assertEquals("FROM Document d WHERE NOT d.age = d.age2 + 1", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.versions versions WHERE NOT d.age = versions.age+1", criteria.getQueryString());
     }
     
     @Test(expected = IllegalArgumentException.class)

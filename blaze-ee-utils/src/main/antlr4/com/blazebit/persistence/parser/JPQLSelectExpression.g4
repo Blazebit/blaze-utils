@@ -17,8 +17,12 @@ grammar JPQLSelectExpression;
 
 import JPQL, JPQL_lexer;
 
-parseSimpleExpression
-    : simple_expression;
+parseSimpleExpression /*[CompositeExpression c]
+@init {
+ 	$c = new CompositeExpression();
+ 	}
+    : { $c.add(simple_expression); }*/ : simple_expression 
+    ;
 parseScalarExpression
     : scalar_expression;
 parseCaseOperandExpression

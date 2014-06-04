@@ -21,11 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.antlr.v4.runtime.tree.RuleNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 /**
@@ -34,182 +31,77 @@ import org.junit.Test;
  */
 public class JPQLSelectExpressionTest {
 
-    @Test
-    public void testParser() {
-        JPQLSelectExpressionLexer l = new JPQLSelectExpressionLexer(new ANTLRInputStream("AVG(d.age)"));
+    private CompositeExpression parse(String expr){
+        JPQLSelectExpressionLexer l = new JPQLSelectExpressionLexer(new ANTLRInputStream(expr));
         CommonTokenStream tokens = new CommonTokenStream(l);
         JPQLSelectExpressionParser p = new JPQLSelectExpressionParser(tokens);
         JPQLSelectExpressionParser.ParseSimpleExpressionContext ctx = p.parseSimpleExpression();
 
-        ExpressionParseTreeVisitor visitor = new ExpressionParseTreeVisitor();
-        ctx.accept(visitor);
-        System.out.println(visitor.expression);
+        ParseTreeWalker w = new ParseTreeWalker();
+        
+        JPQLParseTreeListenerImpl listener = new JPQLParseTreeListenerImpl();
+        w.walk(listener, ctx);
+        
+        return listener.getCompositeExpression();
     }
-
-    static class ExpressionParseTreeVisitor implements ParseTreeVisitor<Expression> {
-
-        List<Expression> expressions = new ArrayList<Expression>();
-        CompositeExpression expression = new CompositeExpression(expressions);
-
-        @Override
-        public Expression visit(ParseTree pt) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//            System.out.println(pt.getClass());
-//            System.out.println(pt.getText());
-//            return null;
+    
+    private PathExpression path(String ... properties){
+        PathExpression p = new PathExpression(new ArrayList<PropertyExpression>());
+        for(String pathElem : properties){
+            p.getExpressions().add(new PropertyExpression(pathElem));
         }
-
-        @Override
-        public Expression visitChildren(RuleNode rn) {
-            switch (rn.getRuleContext().getRuleIndex()) {
-//                case JPQLSelectExpressionParser.RULE_parseSimpleExpression:
-//
-//                    break;
-//                case JPQLSelectExpressionParser.RULE_parseScalarExpression:
-//
-//                    break;
-//                case JPQLSelectExpressionParser.RULE_parseCaseOperandExpression:
-//
-//                    break;
-                case JPQLSelectExpressionParser.RULE_qualified_identification_variable:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_composable_qualified_identification_variable:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_single_valued_path_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_general_identification_variable:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_general_subpath:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_state_field_path_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_single_valued_object_path_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_collection_valued_path_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_simple_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_aggregate_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_derived_path_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_simple_derived_path:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_scalar_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_comparison_operator:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_arithmetic_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_arithmetic_term:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_arithmetic_factor:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_arithmetic_primary:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_string_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_datetime_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_boolean_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_enum_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_entity_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_simple_entity_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_entity_type_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_type_discriminator:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_functions_returning_numerics:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_functions_returning_datetime:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_functions_returning_strings:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_trim_specification:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_function_invocation:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_function_arg:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_case_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_case_operand:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_coalesce_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_nullif_expression:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_literal:
-
-                    break;
-                case JPQLSelectExpressionParser.RULE_literal_temporal:
-
-                    break;
-                default:
-                    break;
-            }
-
-            for (int i = 0; i < rn.getChildCount(); i++) {
-                rn.getChild(i)
-                    .accept(this);
-            }
-
-            return null;
-        }
-
-        @Override
-        public Expression visitTerminal(TerminalNode tn) {
-            System.out.println(tn.getSymbol()
-                .getType());
-            System.out.println(tn.getText());
-            return null;
-        }
-
-        @Override
-        public Expression visitErrorNode(ErrorNode en) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
+        return p;
     }
-
+    
+    @Test
+    public void testParser1() {
+        CompositeExpression result = parse("AVG(d.age)");
+        List<Expression> expressions = result.getExpressions();
+        
+        System.out.println(result.toString());
+        
+        assertTrue(expressions.size() == 3);
+        assertTrue(expressions.get(0).equals(new FooExpression("AVG(")));
+        assertTrue(expressions.get(1).equals(path("d", "age")));
+        assertTrue(expressions.get(2).equals(new FooExpression(")")));
+    }
+    
+    
+    
+    @Test
+    public void testParser2() {
+        CompositeExpression result = parse("d.problem.age");
+        List<Expression> expressions = result.getExpressions();
+        
+        System.out.println(result.toString());
+        
+        assertTrue(expressions.size() == 1);
+        assertTrue(expressions.get(0).equals(path("d", "problem", "age")));
+    }
+    
+    @Test
+    public void testParser3() {
+        CompositeExpression result = parse("age");
+        List<Expression> expressions = result.getExpressions();
+        
+        System.out.println(result.toString());
+        
+        assertTrue(expressions.size() == 1);
+        assertTrue(expressions.get(0).equals(path("age")));
+    }
+    
+    @Test
+    public void testParserArithmetic() {
+        CompositeExpression result = parse("d.age + SUM(d.children.age)");
+        List<Expression> expressions = result.getExpressions();
+        
+        System.out.println(result.toString());
+        
+        assertTrue(expressions.size() == 4);
+        
+        assertTrue(expressions.get(0).equals(path("d", "age")));
+        assertTrue(expressions.get(1).equals(new FooExpression("+SUM(")));
+        assertTrue(expressions.get(2).equals(path("d", "children", "age")));
+        assertTrue(expressions.get(3).equals(new FooExpression(")")));
+    }
 }

@@ -40,5 +40,29 @@ public class FooExpression implements Expression {
     public String toString() {
         return string;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 23 * hash + (this.string != null ? this.string.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FooExpression other = (FooExpression) obj;
+        if ((this.string == null) ? (other.string != null) : !this.string.equals(other.string)) {
+            return false;
+        }
+        return true;
+    }
+    
+    
     
 }

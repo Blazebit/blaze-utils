@@ -23,6 +23,8 @@ public interface Expression {
     
     public static interface Visitor {
         
+        public void visit(PathExpression expression);
+        
         public void visit(PropertyExpression expression);
         
         public void visit(ParameterExpression expression);

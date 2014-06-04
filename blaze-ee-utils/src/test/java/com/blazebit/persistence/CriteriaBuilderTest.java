@@ -15,6 +15,7 @@
  */
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.entity.Document;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import org.junit.After;

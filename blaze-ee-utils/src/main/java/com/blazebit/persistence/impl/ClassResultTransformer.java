@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.blazebit.persistence.impl;
 
 import java.lang.reflect.Constructor;
@@ -24,33 +23,44 @@ import org.hibernate.transform.ResultTransformer;
  *
  * @author ccbem
  */
-public class ClassResultTransformer implements ResultTransformer{
+public class ClassResultTransformer implements ResultTransformer {
 
     private final Class<?> clazz;
 
     public ClassResultTransformer(Class<?> clazz) {
         this.clazz = clazz;
     }
-     
+
+    // TODO: implement collection awareness
     @Override
     public Object transformTuple(Object[] tuple, String[] aliases) {
         Constructor<?>[] constructors = clazz.getConstructors();
         Constructor<?> matchingConstr = null;
-        for(Constructor<?> constr : constructors){
-            if(constr.getParameterTypes().length == tuple.length){
-                if(matchingConstr != null){
-                    throw new RuntimeException("Multiple constructors matching");
+        for (Constructor<?> constr : constructors) {
+            Class<?>[] paramTypes = constr.getParameterTypes();
+            if (paramTypes.length == tuple.length) {
+                boolean match = true;
+                for (int i = 0; i < paramTypes.length; i++) {
+                    if (!paramTypes[i].isAssignableFrom(tuple[i].getClass())) {
+                        match = false;
+                        break;
+                    }
                 }
-                matchingConstr = constr; 
+                if (match == true) {
+                    if (matchingConstr != null) {
+                        throw new RuntimeException("Multiple constructors matching");
+                    }
+                    matchingConstr = constr;
+                }
+
             }
         }
-        
-        if(matchingConstr == null){
+        if (matchingConstr == null) {
             throw new RuntimeException("No matching constructor");
         }
         try {
             return matchingConstr.newInstance(tuple);
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -59,5 +69,5 @@ public class ClassResultTransformer implements ResultTransformer{
     public List transformList(List collection) {
         return collection;
     }
-    
+
 }

@@ -15,8 +15,13 @@
  */
 package com.blazebit.persistence;
 
+import com.blazebit.persistence.model.DocumentViewModel;
+import com.blazebit.persistence.entity.Document;
+import com.blazebit.persistence.entity.Person;
+import com.blazebit.persistence.entity.Version;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -47,12 +52,13 @@ public class SelectNewTest {
         properties.put("hibernate.hbm2ddl.auto", "create-drop");
         properties.put("hibernate.show_sql", "true");
         properties.put("hibernate.format_sql", "true");
-//
+
         Ejb3Configuration cfg = new Ejb3Configuration();
         cfg.addProperties(properties);
         cfg.addAnnotatedClass(Document.class);
-        //cfg.addAnnotatedClass(LocalCustomer.class);
-//
+        cfg.addAnnotatedClass(Version.class);
+        cfg.addAnnotatedClass(Person.class);
+
         EntityManagerFactory factory = cfg.buildEntityManagerFactory();
         em = factory.createEntityManager();
     }
@@ -62,8 +68,14 @@ public class SelectNewTest {
         EntityTransaction tx = em.getTransaction();
         try {
             tx.begin();
-            em.persist(new Document("Doc1"));
-            em.persist(new Document("Doc2"));
+            Version v1 = new Version();
+            Version v2 = new Version();
+            Version v3 = new Version();
+            em.persist(v1);
+            em.persist(v2);
+            em.persist(v3);
+            em.persist(new Document("Doc1", v1, v3));
+            em.persist(new Document("Doc2", v2));
             em.flush();
             tx.commit();
         } catch (Exception e) {
@@ -77,7 +89,7 @@ public class SelectNewTest {
         CriteriaBuilder<DocumentViewModel> criteria = CriteriaBuilder.from(Document.class)
                 .selectNew(DocumentViewModel.class).with("name").end().orderByAsc("name");
         
-        assertEquals("SELECT document.name FROM Document document ORDER BY document.name ASC", criteria.getQueryString());
+        assertEquals("SELECT document.name FROM Document document ORDER BY document.name ASC NULLS LAST", criteria.getQueryString());
         List<DocumentViewModel>  actual = criteria.getQuery(em).getResultList();
         
         /* expected */
@@ -92,8 +104,8 @@ public class SelectNewTest {
     @Test
     public void testSelectNewDocument(){
         CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.selectNew(Document.class).with("d.name").end().where("LENGTH(d.name)").lt(4).orderByAsc("d.name");
-        assertEquals("SELECT d.name FROM Document d WHERE LENGTH(d.name) < :param_0 ORDER BY d.name ASC", criteria.getQueryString());
+        criteria.selectNew(Document.class).with("d.name").end().where("LENGTH(d.name)").le(4).orderByAsc("d.name");
+        assertEquals("SELECT d.name FROM Document d WHERE LENGTH(d.name) <= :param_0 ORDER BY d.name ASC NULLS LAST", criteria.getQueryString());
         List<Document>  actual = criteria.getQuery(em).getResultList();
         
         /* expected */
@@ -103,6 +115,17 @@ public class SelectNewTest {
         for(int i = 0; i < actual.size(); i++){
             assertEquals(actual.get(i).getName(), expected.get(i).getName());
         }
+    }
+    
+    @Test
+    public void testTest(){
+        List<Set<Version>> expected = (List<Set<Version>>)em.createQuery("SELECT d.versions FROM Document d").getResultList();
+        
+        System.out.println(expected);
+//        assertEquals(expected.size(), actual.size());
+//        for(int i = 0; i < actual.size(); i++){
+//            assertEquals(actual.get(i).getName(), expected.get(i).getName());
+//        }
     }
     
 //    
