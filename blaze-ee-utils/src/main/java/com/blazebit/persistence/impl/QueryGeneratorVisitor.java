@@ -15,7 +15,6 @@
  */
 package com.blazebit.persistence.impl;
 
-import com.blazebit.persistence.ParameterNameGenerator;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.FooExpression;
@@ -48,13 +47,13 @@ import java.util.Map;
 public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visitor {
 
     private final StringBuilder sb;
-    private final ParameterNameGenerator paramNameGenerator;
+    private final ParameterManager parameterManager;
     private boolean replaceSelectAliases = true;
     private final Map<String, AbstractCriteriaBuilder.SelectInfo> selectAbsolutePathToInfoMap;
 
-    public QueryGeneratorVisitor(Map<String, AbstractCriteriaBuilder.SelectInfo> selectAbsolutePathToInfoMap, StringBuilder sb, ParameterNameGenerator paramNameGenerator) {
+    public QueryGeneratorVisitor(Map<String, AbstractCriteriaBuilder.SelectInfo> selectAbsolutePathToInfoMap, StringBuilder sb, ParameterManager parameterManager) {
         this.sb = sb;
-        this.paramNameGenerator = paramNameGenerator;
+        this.parameterManager = parameterManager;
         this.selectAbsolutePathToInfoMap = selectAbsolutePathToInfoMap;
         
     }
@@ -223,7 +222,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     public void visit(ParameterExpression expression) {
         String paramName;
         if (expression.getName() == null) {
-            paramName = paramNameGenerator.getParamNameForObject(expression.getValue());
+            paramName = parameterManager.getParamNameForObject(expression.getValue());
 
         } else {
             paramName = expression.getName();

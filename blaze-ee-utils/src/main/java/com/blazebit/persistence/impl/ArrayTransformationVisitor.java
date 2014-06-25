@@ -15,7 +15,6 @@
  */
 package com.blazebit.persistence.impl;
 
-import com.blazebit.persistence.ParameterNameGenerator;
 import com.blazebit.persistence.expression.ArrayExpression;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;

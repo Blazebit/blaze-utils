@@ -16,8 +16,10 @@
 
 package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.PagedList;
 import com.blazebit.persistence.PaginatedCriteriaBuilder;
+import com.blazebit.persistence.QueryBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
 import javax.persistence.EntityManager;
 
@@ -29,8 +31,8 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
     private final int page;
     private final int objectsPerPage;
     
-    public PaginatedCriteriaBuilderImpl(AbstractCriteriaBuilder<T, ?> baseBuilder, int page, int objectsPerPage) {
-        super(baseBuilder.clazz, baseBuilder.rootAliasInfo.getAlias());
+    public PaginatedCriteriaBuilderImpl(AbstractCriteriaBuilder<T, ? extends QueryBuilder<T, ?>> baseBuilder, int page, int objectsPerPage) {
+        super(baseBuilder);
         this.page = page;
         this.objectsPerPage = objectsPerPage;
 //        this.parameters = baseBuilder.parameters;
@@ -49,7 +51,7 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
         
         countQuery.append("SELECT COUNT(*)");
         countQuery.append("FROM ").append(clazz.getSimpleName()).append(' ').append(rootAliasInfo.getAlias());
-//        applyJoins(sb, rootAliasInfo, rootNode.getNodes());
+        applyJoins(countQuery, rootAliasInfo, rootNode.getNodes());
 //        applyWhere(queryGenerator, sb);
 //        applyGroupBys(queryGenerator, sb, groupByInfos);
 //        applyHavings(queryGenerator, sb);

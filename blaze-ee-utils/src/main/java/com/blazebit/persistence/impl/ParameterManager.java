@@ -16,8 +16,8 @@
 
 package com.blazebit.persistence.impl;
 
-import com.blazebit.persistence.ParameterNameGenerator;
 import com.blazebit.persistence.expression.Expression;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
@@ -25,17 +25,16 @@ import java.util.Map;
  *
  * @author ccbem
  */
-public class ParameterNameGeneratorImpl implements ParameterNameGenerator {
+public class ParameterManager {
     private static final String prefix = "param_";
     private int counter;
     private final Map<Object, String> nameCache = new IdentityHashMap<Object, String>();
-    private final Map<String, Object> parameters;
-    
-    public ParameterNameGeneratorImpl(Map<String, Object> parameters){
-        this.parameters = parameters;
+    private final Map<String, Object> parameters = new HashMap<String, Object>();
+
+    public Map<String, Object> getParameters() {
+        return parameters;
     }
     
-    @Override
     public String getParamNameForObject(Object o) {
         if(o == null)
             throw new NullPointerException();

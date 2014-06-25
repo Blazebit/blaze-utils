@@ -22,6 +22,7 @@ import com.blazebit.persistence.SelectBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
 import com.blazebit.persistence.SimpleCaseWhenBuilder;
 import com.blazebit.persistence.expression.Expression;
+import com.blazebit.persistence.expression.Expression.Visitor;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.PathExpression;
 import java.lang.reflect.Constructor;
@@ -37,32 +38,43 @@ import org.hibernate.transform.ResultTransformer;
  *
  * @author ccbem
  */
-public class SelectBuilderImpl<T, U extends QueryBuilder<T, U>> implements SelectBuilder<T, U> {
+public class SelectBuilderImpl<T> {
 
-    protected final List<AbstractCriteriaBuilder.SelectInfo> selectInfos = new ArrayList<AbstractCriteriaBuilder.SelectInfo>();
-    protected boolean distinct = false;
-    protected SelectObjectBuilder<?> selectObjectBuilder;
-    protected ResultTransformer selectObjectTransformer;
+    private final List<AbstractCriteriaBuilder.SelectInfo> selectInfos = new ArrayList<AbstractCriteriaBuilder.SelectInfo>();
+    private boolean distinct = false;
+    private SelectObjectBuilder<?> selectObjectBuilder;
+    private ResultTransformer selectObjectTransformer;
     // Maps alias to SelectInfo
-    protected final Map<String, AbstractCriteriaBuilder.SelectInfo> selectAliasToInfoMap = new HashMap<String, AbstractCriteriaBuilder.SelectInfo>();
-    protected final Map<String, AbstractCriteriaBuilder.SelectInfo> selectAbsolutePathToInfoMap = new HashMap<String, AbstractCriteriaBuilder.SelectInfo>();
-    protected final SelectObjectBuilderEndedListenerImpl selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
-    protected final AbstractCriteriaBuilder<T,U> builder;
+    private final Map<String, AbstractCriteriaBuilder.SelectInfo> selectAliasToInfoMap = new HashMap<String, AbstractCriteriaBuilder.SelectInfo>();
+    private final Map<String, AbstractCriteriaBuilder.SelectInfo> selectAbsolutePathToInfoMap = new HashMap<String, AbstractCriteriaBuilder.SelectInfo>();
+    private final SelectObjectBuilderEndedListenerImpl selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
 
-    public SelectBuilderImpl(AbstractCriteriaBuilder<T, U> builder) {
-        this.builder = builder;
-    }
-    
-    public void verifyBuilderEnded(){
+    public void verifyBuilderEnded() {
         selectObjectBuilderEndedListener.verifyBuilderEnded();
     }
-    
+
     public ResultTransformer getSelectObjectTransformer() {
         return selectObjectTransformer;
     }
+
+    Map<String, AbstractCriteriaBuilder.SelectInfo> getSelectAbsolutePathToInfoMap() {
+        return selectAbsolutePathToInfoMap;
+    }
+
+    Map<String, AbstractCriteriaBuilder.SelectInfo> getSelectAliasToInfoMap() {
+        return selectAliasToInfoMap;
+    }
+
+    public void acceptVisitor(Visitor v) {
+        // carry out implicit joins
+        for (AbstractCriteriaBuilder.SelectInfo selectInfo : selectInfos) {
+            selectInfo.getExpression().accept(v);
+        }
+    }
+
     public String buildSelect() {
         if (selectInfos.isEmpty()) {
-            return null;
+            return "";
         }
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT ");
@@ -84,20 +96,17 @@ public class SelectBuilderImpl<T, U extends QueryBuilder<T, U>> implements Selec
         return sb.toString();
     }
 
-    @Override
     public U select(String... expressions) {
         for (String expression : expressions) {
             select(expression);
         }
-        return (U) this;
+        return (U) builder;
     }
 
-    @Override
     public U select(String expression) {
         return select(expression, null);
     }
 
-    @Override
     public U select(String expression, String selectAlias) {
         Expression expr = ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), builder);
         AbstractCriteriaBuilder.SelectInfo selectInfo = new AbstractCriteriaBuilder.SelectInfo(expr, selectAlias);
@@ -105,37 +114,31 @@ public class SelectBuilderImpl<T, U extends QueryBuilder<T, U>> implements Selec
             selectAliasToInfoMap.put(selectAlias, selectInfo);
         }
         selectInfos.add(selectInfo);
-        return (U) this;
+        return (U) builder;
     }
 
-    @Override
     public U select(Class<? extends T> clazz) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public U select(Constructor<? extends T> constructor) {
         throw new UnsupportedOperationException();
     }
 
     // TODO: needed?
-    @Override
     public U select(ObjectBuilder<? extends T> builder) {
         throw new UnsupportedOperationException();
     }
 
-    @Override
     public CaseWhenBuilder<U> selectCase() {
         return new CaseWhenBuilderImpl<U>((U) this);
     }
 
     /* CASE caseOperand (WHEN scalarExpression THEN scalarExpression)+ ELSE scalarExpression END */
-    @Override
     public SimpleCaseWhenBuilder<U> selectCase(String expression) {
         return new SimpleCaseWhenBuilderImpl<U>((U) this, expression);
     }
 
-    @Override
     public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Class<Y> clazz) {
         if (selectObjectBuilder != null) {
             throw new IllegalStateException("Only one selectNew is allowed");
@@ -149,7 +152,6 @@ public class SelectBuilderImpl<T, U extends QueryBuilder<T, U>> implements Selec
         return (SelectObjectBuilder) selectObjectBuilder;
     }
 
-    @Override
     public SelectObjectBuilder<U> selectNew(Constructor<?> constructor) {
         if (selectObjectBuilder != null) {
             throw new IllegalStateException("Only one selectNew is allowed");
@@ -163,7 +165,6 @@ public class SelectBuilderImpl<T, U extends QueryBuilder<T, U>> implements Selec
         return (SelectObjectBuilder) selectObjectBuilder;
     }
 
-    @Override
     public SelectObjectBuilder<U> selectNew(ObjectBuilder<? extends T> builder) {
         if (selectObjectBuilder != null) {
             throw new IllegalStateException("Only one selectNew is allowed");
@@ -173,14 +174,13 @@ public class SelectBuilderImpl<T, U extends QueryBuilder<T, U>> implements Selec
         }
         throw new UnsupportedOperationException();
     }
-    
-    @Override
+
     public U distinct() {
         if (selectInfos.isEmpty()) {
             throw new IllegalStateException("Distinct requires select");
         }
         this.distinct = true;
-        return (U) this;
+        return (U) builder;
     }
 
     protected void applySelect(QueryGeneratorVisitor queryGenerator, StringBuilder sb, AbstractCriteriaBuilder.SelectInfo select) {
@@ -209,7 +209,7 @@ public class SelectBuilderImpl<T, U extends QueryBuilder<T, U>> implements Selec
         sb.append(" ");
         queryGenerator.setReplaceSelectAliases(true);
     }
-    
+
     protected void populateSelectAliasAbsolutePaths() {
         for (Map.Entry<String, AbstractCriteriaBuilder.SelectInfo> selectAliasEntry : selectAliasToInfoMap.entrySet()) {
             Expression selectExpr = selectAliasEntry.getValue().getExpression();
@@ -220,7 +220,7 @@ public class SelectBuilderImpl<T, U extends QueryBuilder<T, U>> implements Selec
             }
         }
     }
-    
+
     private class SelectObjectBuilderEndedListenerImpl implements SelectObjectBuilderEndedListener {
 
         private SelectObjectBuilder currentBuilder;

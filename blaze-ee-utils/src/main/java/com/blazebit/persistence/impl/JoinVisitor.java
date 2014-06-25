@@ -57,7 +57,7 @@ public class JoinVisitor extends VisitorAdapter {
         String potentialSelectAlias = ExpressionUtils.getFirstPathElement(path);
 
         // do not join select aliases
-        if (builder.selectAliasToInfoMap.containsKey(potentialSelectAlias)) {
+        if (builder.selectBuilder.getSelectAliasToInfoMap().containsKey(potentialSelectAlias)) {
             if (!potentialSelectAlias.equals(path)) {
                 throw new IllegalStateException("Path starting with select alias not allowed");
             }

@@ -23,31 +23,5 @@ import java.lang.reflect.Constructor;
  * @author ccbem
  */
 public interface SelectBuilder<T, X extends QueryBuilder<T, X>> {
-    /*
-     * Select methods
-     */
-    public X distinct();
     
-    public CaseWhenBuilder<? extends X> selectCase();
-
-    /* CASE caseOperand (WHEN scalarExpression THEN scalarExpression)+ ELSE scalarExpression END */
-    public SimpleCaseWhenBuilder<? extends X> selectCase(String expression);
-
-    public X select(String... expressions);
-
-    public X select(String expression);
-
-    public X select(String expression, String alias);
-
-    public X select(Class<? extends T> clazz);
-
-    public X select(Constructor<? extends T> constructor);
-
-    public X select(ObjectBuilder<? extends T> builder);
-
-    public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Class<Y> clazz);
-
-    public SelectObjectBuilder<? extends X> selectNew(Constructor<?> constructor);
-
-    public SelectObjectBuilder<? extends X> selectNew(ObjectBuilder<? extends T> builder);
 }

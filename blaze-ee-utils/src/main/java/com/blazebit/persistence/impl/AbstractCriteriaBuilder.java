@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.CaseWhenBuilder;
@@ -23,7 +22,6 @@ import com.blazebit.persistence.JoinType;
 import com.blazebit.persistence.ModelUtils;
 import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.PaginatedCriteriaBuilder;
-import com.blazebit.persistence.ParameterNameGenerator;
 import com.blazebit.persistence.QueryBuilder;
 import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
@@ -58,16 +56,55 @@ import org.hibernate.transform.ResultTransformer;
  * @author ccbem
  */
 public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> implements QueryBuilder<T, U> {
+
     protected static final Logger log = Logger.getLogger(CriteriaBuilderImpl.class.getName());
+
+    protected final Class<T> clazz;
+    protected final AliasInfo rootAliasInfo;
+    // Maps alias to join path with the root as base
+    protected final Map<String, AliasInfo> joinAliasInfos;
+    // we might have multiple nodes that depend on the same unresolved alias,
+    // hence we need a List of NodeInfos.
+    // e.g. SELECT a.X, a.Y FROM A a
+    // a is unresolved for both X and Y
+    protected final JoinNode rootNode;
+    protected final List<OrderByInfo> orderByInfos;
+    protected final RootPredicate rootWherePredicate;
+    protected final RootPredicate rootHavingPredicate;
+    protected final List<NodeInfo> groupByInfos;
+    protected final ParameterManager parameterManager;
+
+    protected final SelectBuilderImpl<T, U> selectBuilder;
+
+    /**
+     * Create flat copy of builder
+     * @param builder 
+     */
+    protected AbstractCriteriaBuilder(AbstractCriteriaBuilder<T, ? extends QueryBuilder<T, ?>> builder) {
+        this.clazz = builder.clazz;
+        this.rootAliasInfo = builder.rootAliasInfo;
+        this.joinAliasInfos = builder.joinAliasInfos;
+        this.rootNode = builder.rootNode;
+        this.orderByInfos = builder.orderByInfos;
+        this.rootWherePredicate = builder.rootWherePredicate;
+        this.rootHavingPredicate = builder.rootHavingPredicate;
+        this.groupByInfos = builder.groupByInfos;
+        this.parameterManager = builder.parameterManager;
+        this.selectBuilder = builder.selectBuilder;
+    }
 
     public AbstractCriteriaBuilder(Class<T> clazz, String alias) {
         this.clazz = clazz;
         this.rootAliasInfo = new AliasInfo(alias, "", true);
+        this.joinAliasInfos = new HashMap<String, AliasInfo>();
         this.joinAliasInfos.put(alias, rootAliasInfo);
         this.rootNode = new JoinNode(rootAliasInfo, null, false, null);
         this.rootWherePredicate = new RootPredicate(this);
         this.rootHavingPredicate = new RootPredicate(this);
         this.selectBuilder = new SelectBuilderImpl<T, U>(this);
+        this.orderByInfos = new ArrayList<OrderByInfo>();
+        this.groupByInfos = new ArrayList<NodeInfo>();
+        this.parameterManager = new ParameterManager();
     }
 
     private static class JoinResult {
@@ -115,7 +152,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         }
     }
 
-    private class RootPredicate extends AbstractBuilderEndedListener {
+    private static class RootPredicate extends AbstractBuilderEndedListener {
 
         private final AndPredicate predicate;
         private final ArrayTransformationVisitor transformer;
@@ -193,24 +230,6 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
             sb.append(" NULLS LAST");
         }
     }
-    
-    protected final Class<T> clazz;
-    protected final AliasInfo rootAliasInfo;
-    // Maps alias to join path with the root as base
-    protected final Map<String, AliasInfo> joinAliasInfos = new HashMap<String, AliasInfo>();
-    // we might have multiple nodes that depend on the same unresolved alias,
-    // hence we need a List of NodeInfos.
-    // e.g. SELECT a.X, a.Y FROM A a
-    // a is unresolved for both X and Y
-    protected final JoinNode rootNode;
-    protected final List<OrderByInfo> orderByInfos = new ArrayList<OrderByInfo>();
-    protected final RootPredicate rootWherePredicate;
-    protected final RootPredicate rootHavingPredicate;
-    protected final List<NodeInfo> groupByInfos = new ArrayList<NodeInfo>();
-    protected final Map<String, Object> parameters = new HashMap<String, Object>();
-    protected final ParameterNameGenerator paramNameGenerator = new ParameterNameGeneratorImpl(parameters);
-    
-    protected final SelectBuilderImpl<T,U> selectBuilder;
 
     @Override
     public U setParameter(String name, Object value) {
@@ -255,7 +274,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     @Override
     public PaginatedCriteriaBuilder<T> page(int page, int objectsPerPage) {
         return new PaginatedCriteriaBuilderImpl<T>(this, page, objectsPerPage);
-       
+
     }
 
     @Override
@@ -320,7 +339,6 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     /*
      * Where methods
      */
-
     @Override
     public RestrictionBuilder<U> where(String expression) {
         if (expression == null) {
@@ -348,7 +366,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     @Override
     public U groupBy(String expression) {
         verifyBuilderEnded();
-        Expression exp = implicitJoin(ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this), true);
+        Expression exp = ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this);
         groupByInfos.add(new NodeInfo(exp));
         return (U) this;
     }
@@ -522,7 +540,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
             throw new IllegalArgumentException("expression");
         }
         verifyBuilderEnded();
-        Expression exp = implicitJoin(ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this), false);
+        Expression exp = ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this);
         orderByInfos.add(new OrderByInfo(exp, ascending, nullFirst));
         return (U) this;
     }
@@ -778,9 +796,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     protected void applyImplicitJoins() {
         final JoinVisitor joinVisitor = new JoinVisitor(this);
         // carry out implicit joins
-        for (SelectInfo selectInfo : selectInfos) {
-            selectInfo.getExpression().accept(joinVisitor);
-        }
+        selectBuilder.acceptVisitor(joinVisitor);
         rootWherePredicate.predicate.accept(joinVisitor);
         for (NodeInfo groupBy : groupByInfos) {
             groupBy.getExpression().accept(joinVisitor);
@@ -807,7 +823,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         // join("a.b", "b").where("b.c")
         // in the first case
         applyImplicitJoins();
-        QueryGeneratorVisitor queryGenerator = new QueryGeneratorVisitor(selectAbsolutePathToInfoMap, sb, paramNameGenerator);
+        QueryGeneratorVisitor queryGenerator = new QueryGeneratorVisitor(selectBuilder.getSelectAbsolutePathToInfoMap(), sb, parameterManager);
         sb.append(selectBuilder.buildSelect());
         sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(rootAliasInfo.getAlias());
         applyJoins(sb, rootAliasInfo, rootNode.getNodes());
@@ -826,7 +842,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
             Query hQuery = query.unwrap(Query.class);
             hQuery.setResultTransformer(selectBuilder.getSelectObjectTransformer());
         }
-        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+        for (Map.Entry<String, Object> entry : parameterManager.getParameters().entrySet()) {
             query.setParameter(entry.getKey(), entry.getValue());
         }
         return query;
@@ -835,5 +851,5 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     void addWherePredicate(Predicate predicate) {
         rootWherePredicate.predicate.getChildren().add(predicate);
     }
-    
+
 }
