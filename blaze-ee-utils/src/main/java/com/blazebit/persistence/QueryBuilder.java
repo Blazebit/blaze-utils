@@ -28,7 +28,7 @@ import javax.persistence.TypedQuery;
  *
  * @author ccbem
  */
-public interface QueryBuilder<T, X extends QueryBuilder<T, X>> extends Aggregateable<RestrictionBuilder<? extends X>>, Filterable<RestrictionBuilder<? extends X>> {
+public interface QueryBuilder<T, X extends QueryBuilder<T, X>> extends Aggregateable<RestrictionBuilder<? extends X>>, Filterable<RestrictionBuilder<? extends X>> , SelectBuilder<T, X>{
     
     public TypedQuery<T> getQuery(EntityManager em);
 
@@ -77,34 +77,6 @@ public interface QueryBuilder<T, X extends QueryBuilder<T, X>> extends Aggregate
     public X orderByDesc(String expression);
 
     public X orderByDesc(String expression, boolean nullFirst);
-
-    /*
-     * Select methods
-     */
-    public X distinct();
-
-    public CaseWhenBuilder<? extends X> selectCase();
-
-    /* CASE caseOperand (WHEN scalarExpression THEN scalarExpression)+ ELSE scalarExpression END */
-    public SimpleCaseWhenBuilder<? extends X> selectCase(String expression);
-
-    public X select(String... expressions);
-
-    public X select(String expression);
-
-    public X select(String expression, String alias);
-
-    public X select(Class<? extends T> clazz);
-
-    public X select(Constructor<? extends T> constructor);
-
-    public X select(ObjectBuilder<? extends T> builder);
-
-    public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Class<Y> clazz);
-
-    public SelectObjectBuilder<? extends X> selectNew(Constructor<?> constructor);
-
-    public SelectObjectBuilder<? extends X> selectNew(ObjectBuilder<? extends T> builder);
 
     /*
      * Where methods

@@ -67,8 +67,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         this.rootNode = new JoinNode(rootAliasInfo, null, false, null);
         this.rootWherePredicate = new RootPredicate(this);
         this.rootHavingPredicate = new RootPredicate(this);
-        this.selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
-        this.unresolvedAliasRegistrationVisitor = new UnresolvedAliasRegistrationVisitor(this);
+        this.selectBuilder = new SelectBuilderImpl<T, U>(this);
     }
 
     private static class JoinResult {
@@ -139,38 +138,6 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         }
     }
 
-    private class SelectObjectBuilderEndedListenerImpl implements SelectObjectBuilderEndedListener {
-
-        private SelectObjectBuilder currentBuilder;
-
-        protected void verifyBuilderEnded() {
-            if (currentBuilder != null) {
-                throw new IllegalStateException("A builder was not ended properly.");
-            }
-        }
-
-        protected <T extends SelectObjectBuilder> T startBuilder(T builder) {
-            if (currentBuilder != null) {
-                throw new IllegalStateException("There was an attempt to start a builder but a previous builder was not ended.");
-            }
-
-            currentBuilder = builder;
-            return builder;
-        }
-
-        @Override
-        public void onBuilderEnded(Collection<Expression> expressions) {
-            if (currentBuilder == null) {
-                throw new IllegalStateException("There was an attempt to end a builder that was not started or already closed.");
-            }
-            currentBuilder = null;
-            for (Expression e : expressions) {
-                e.accept(unresolvedAliasRegistrationVisitor);
-                AbstractCriteriaBuilder.this.selectInfos.add(new SelectInfo(e));
-            }
-        }
-
-    }
     protected static void applyJoins(StringBuilder sb, AliasInfo joinBase, Map<String, JoinNode> nodes) {
         for (Map.Entry<String, JoinNode> nodeEntry : nodes.entrySet()) {
             String relation = nodeEntry.getKey();
@@ -231,28 +198,19 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     protected final AliasInfo rootAliasInfo;
     // Maps alias to join path with the root as base
     protected final Map<String, AliasInfo> joinAliasInfos = new HashMap<String, AliasInfo>();
-    // Maps alias to SelectInfo
-    final Map<String, SelectInfo> selectAliasToInfoMap = new HashMap<String, SelectInfo>();
-    final Map<String, SelectInfo> selectAbsolutePathToInfoMap = new HashMap<String, SelectInfo>();
     // we might have multiple nodes that depend on the same unresolved alias,
     // hence we need a List of NodeInfos.
     // e.g. SELECT a.X, a.Y FROM A a
     // a is unresolved for both X and Y
-    protected final Map<String, List<NodeInfo>> unresolvedAliasMap = new HashMap<String, List<NodeInfo>>();
     protected final JoinNode rootNode;
     protected final List<OrderByInfo> orderByInfos = new ArrayList<OrderByInfo>();
     protected final RootPredicate rootWherePredicate;
     protected final RootPredicate rootHavingPredicate;
-    protected final List<SelectInfo> selectInfos = new ArrayList<SelectInfo>();
     protected final List<NodeInfo> groupByInfos = new ArrayList<NodeInfo>();
     protected final Map<String, Object> parameters = new HashMap<String, Object>();
     protected final ParameterNameGenerator paramNameGenerator = new ParameterNameGeneratorImpl(parameters);
-    protected boolean distinct = false;
-    protected SelectObjectBuilder<?> selectObjectBuilder;
-    protected ResultTransformer selectObjectTransformer;
-    protected final SelectObjectBuilderEndedListenerImpl selectObjectBuilderEndedListener;
-    // Visitors
-    protected final UnresolvedAliasRegistrationVisitor unresolvedAliasRegistrationVisitor;
+    
+    protected final SelectBuilderImpl<T,U> selectBuilder;
 
     @Override
     public U setParameter(String name, Object value) {
@@ -279,11 +237,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
      */
     @Override
     public U distinct() {
-        if (selectInfos.isEmpty()) {
-            throw new IllegalStateException("Distinct requires select");
-        }
-        this.distinct = true;
-        return (U) this;
+        return selectBuilder.distinct();
     }
 
     /* CASE (WHEN condition THEN scalarExpression)+ ELSE scalarExpression END */
@@ -326,14 +280,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
             throw new IllegalArgumentException("selectAlias");
         }
         verifyBuilderEnded();
-        Expression expr = ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this);
-        SelectInfo selectInfo = new SelectInfo(expr, selectAlias);
-        if (selectAlias != null) {
-            selectAliasToInfoMap.put(selectAlias, selectInfo);
-        }
-        selectInfos.add(selectInfo);
-        //        expr.accept(unresolvedAliasRegistrationVisitor);
-        return (U) this;
+        return selectBuilder.select(expression, selectAlias);
     }
 
     @Override
@@ -354,47 +301,22 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
 
     @Override
     public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Class<Y> clazz) {
-        checkSelectNewAllowed();
-        //TODO: maybe unify with selectNew(ObjectBuilder)
-        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl(this, this, selectObjectBuilderEndedListener));
-        selectObjectTransformer = new ClassResultTransformer(clazz);
-        return (SelectObjectBuilder) selectObjectBuilder;
+        verifyBuilderEnded();
+        return selectBuilder.selectNew(clazz);
     }
 
     @Override
     public SelectObjectBuilder<U> selectNew(Constructor<?> constructor) {
-        checkSelectNewAllowed();
-        //TODO: maybe unify with selectNew(ObjectBuilder)
-        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl(this, this, selectObjectBuilderEndedListener));
-        selectObjectTransformer = new ConstructorResultTransformer(constructor);
-        return (SelectObjectBuilder) selectObjectBuilder;
+        verifyBuilderEnded();
+        return selectBuilder.selectNew(constructor);
     }
 
     @Override
     public SelectObjectBuilder<U> selectNew(ObjectBuilder<? extends T> builder) {
-        throw new UnsupportedOperationException();
-    }
-
-    protected void checkSelectNewAllowed() {
         verifyBuilderEnded();
-        if (selectObjectBuilder != null) {
-            throw new IllegalStateException("Only one selectNew is allowed");
-        }
-        if (!selectInfos.isEmpty()) {
-            throw new IllegalStateException("No mixture of select and selectNew is allowed");
-        }
+        return selectBuilder.selectNew(builder);
     }
 
-    void addUnresolvedAlias(String alias, NodeInfo nodeInfo) {
-        List<NodeInfo> l = unresolvedAliasMap.get(alias);
-        if (l == null) {
-            l = new ArrayList<NodeInfo>();
-            l.add(nodeInfo);
-            unresolvedAliasMap.put(alias, l);
-        } else {
-            l.add(nodeInfo);
-        }
-    }
     /*
      * Where methods
      */
@@ -473,7 +395,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     protected void verifyBuilderEnded() {
         rootWherePredicate.verifyBuilderEnded();
         rootHavingPredicate.verifyBuilderEnded();
-        selectObjectBuilderEndedListener.verifyBuilderEnded();
+        selectBuilder.verifyBuilderEnded();
     }
 
     Expression implicitJoin(Expression expression, boolean objectLeafAllowed) {
@@ -601,7 +523,6 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         }
         verifyBuilderEnded();
         Expression exp = implicitJoin(ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this), false);
-        exp.accept(unresolvedAliasRegistrationVisitor);
         orderByInfos.add(new OrderByInfo(exp, ascending, nullFirst));
         return (U) this;
     }
@@ -825,36 +746,6 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         return node;
     }
 
-    /*
-     * Apply methods
-     */
-    protected void applySelects(QueryGeneratorVisitor queryGenerator, StringBuilder sb, List<SelectInfo> selects) {
-        if (selects.isEmpty()) {
-            return;
-        }
-        sb.append("SELECT ");
-        if (distinct) {
-            sb.append("DISTINCT ");
-        }
-        // we must not replace select alias since we would loose the original expressions
-        queryGenerator.setReplaceSelectAliases(false);
-        Iterator<SelectInfo> iter = selects.iterator();
-        applySelect(queryGenerator, sb, iter.next());
-        while (iter.hasNext()) {
-            sb.append(", ");
-            applySelect(queryGenerator, sb, iter.next());
-        }
-        sb.append(" ");
-        queryGenerator.setReplaceSelectAliases(true);
-    }
-
-    protected void applySelect(QueryGeneratorVisitor queryGenerator, StringBuilder sb, SelectInfo select) {
-        select.getExpression().accept(queryGenerator);
-        if (select.alias != null) {
-            sb.append(" AS ").append(select.alias);
-        }
-    }
-
     protected void applyWhere(QueryGeneratorVisitor queryGenerator, StringBuilder sb) {
         if (rootWherePredicate.predicate.getChildren().isEmpty()) {
             return;
@@ -902,29 +793,6 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         joinVisitor.setJoinWithObjectLeafAllowed(true);
     }
 
-    protected void resolveAliases() {
-        for (Map.Entry<String, List<NodeInfo>> unresolvedAliasEntry : unresolvedAliasMap.entrySet()) {
-            String unresolvedAlias = unresolvedAliasEntry.getKey();
-            if (joinAliasInfos.containsKey(unresolvedAlias)) {
-                // alias is now resolvable
-                for (NodeInfo info : unresolvedAliasEntry.getValue()) {
-                    implicitJoin(info.getExpression(), true);
-                }
-            }
-        }
-    }
-
-    protected void populateSelectAliasAbsolutePaths() {
-        for (Map.Entry<String, SelectInfo> selectAliasEntry : selectAliasToInfoMap.entrySet()) {
-            Expression selectExpr = selectAliasEntry.getValue().getExpression();
-            if (selectExpr instanceof PathExpression) {
-                PathExpression pathExpr = (PathExpression) selectExpr;
-                String absPath = pathExpr.getBaseNode().getAliasInfo().getAbsolutePath();
-                selectAbsolutePathToInfoMap.put(absPath, selectAliasEntry.getValue());
-            }
-        }
-    }
-
     @Override
     public String getQueryString() {
         verifyBuilderEnded();
@@ -939,9 +807,8 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         // join("a.b", "b").where("b.c")
         // in the first case
         applyImplicitJoins();
-        populateSelectAliasAbsolutePaths();
-        QueryGeneratorVisitor queryGenerator = new QueryGeneratorVisitor(this, sb, paramNameGenerator);
-        applySelects(queryGenerator, sb, selectInfos);
+        QueryGeneratorVisitor queryGenerator = new QueryGeneratorVisitor(selectAbsolutePathToInfoMap, sb, paramNameGenerator);
+        sb.append(selectBuilder.buildSelect());
         sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(rootAliasInfo.getAlias());
         applyJoins(sb, rootAliasInfo, rootNode.getNodes());
         applyWhere(queryGenerator, sb);
@@ -954,10 +821,10 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     @Override
     public TypedQuery<T> getQuery(EntityManager em) {
         TypedQuery<T> query = (TypedQuery) em.createQuery(getQueryString(), Object[].class);
-        if (selectObjectBuilder != null) {
+        if (selectBuilder.getSelectObjectTransformer() != null) {
             // get hibernate query
             Query hQuery = query.unwrap(Query.class);
-            hQuery.setResultTransformer(selectObjectTransformer);
+            hQuery.setResultTransformer(selectBuilder.getSelectObjectTransformer());
         }
         for (Map.Entry<String, Object> entry : parameters.entrySet()) {
             query.setParameter(entry.getKey(), entry.getValue());

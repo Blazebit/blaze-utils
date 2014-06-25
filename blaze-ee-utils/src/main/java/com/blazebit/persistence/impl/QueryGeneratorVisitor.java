@@ -39,6 +39,7 @@ import com.blazebit.persistence.predicate.OrPredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateQuantifier;
 import com.blazebit.persistence.predicate.QuantifiableBinaryExpressionPredicate;
+import java.util.Map;
 
 /**
  *
@@ -49,12 +50,13 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     private final StringBuilder sb;
     private final ParameterNameGenerator paramNameGenerator;
     private boolean replaceSelectAliases = true;
-    private final AbstractCriteriaBuilder<?, ?> builder;
+    private final Map<String, AbstractCriteriaBuilder.SelectInfo> selectAbsolutePathToInfoMap;
 
-    public QueryGeneratorVisitor(AbstractCriteriaBuilder<?, ?> builder, StringBuilder sb, ParameterNameGenerator paramNameGenerator) {
+    public QueryGeneratorVisitor(Map<String, AbstractCriteriaBuilder.SelectInfo> selectAbsolutePathToInfoMap, StringBuilder sb, ParameterNameGenerator paramNameGenerator) {
         this.sb = sb;
         this.paramNameGenerator = paramNameGenerator;
-        this.builder = builder;
+        this.selectAbsolutePathToInfoMap = selectAbsolutePathToInfoMap;
+        
     }
 
     @Override
@@ -247,7 +249,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
         if (replaceSelectAliases) {
             if (expression.getBaseNode() != null) {
                 String absPath = expression.getBaseNode().getAliasInfo().getAbsolutePath();
-                AbstractCriteriaBuilder.SelectInfo selectInfo = builder.selectAbsolutePathToInfoMap.get(absPath);
+                AbstractCriteriaBuilder.SelectInfo selectInfo = selectAbsolutePathToInfoMap.get(absPath);
                 if (selectInfo != null) {
                     sb.append(selectInfo.getAlias());
                     return;
