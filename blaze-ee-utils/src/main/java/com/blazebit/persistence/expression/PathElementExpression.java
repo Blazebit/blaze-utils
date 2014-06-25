@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
 
-public interface SelectObjectBuilder<T> {
-    public SelectObjectBuilder<T> with(String expression);
+package com.blazebit.persistence.expression;
+
+/**
+ *
+ * @author ccbem
+ */
+public abstract class PathElementExpression implements Expression{
     
-    public SelectObjectBuilder<T> with(int position, String expression);
-    
-    public T end();
 }

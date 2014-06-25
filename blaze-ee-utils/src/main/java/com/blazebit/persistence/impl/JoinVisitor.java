@@ -44,10 +44,10 @@ import com.blazebit.persistence.predicate.Predicate;
  */
 public class JoinVisitor extends VisitorAdapter {
 
-    private final CriteriaBuilderImpl<?> builder;
+    private final AbstractCriteriaBuilder<?, ?> builder;
     private boolean joinWithObjectLeafAllowed = true;
 
-    public JoinVisitor(CriteriaBuilderImpl<?> builder) {
+    public JoinVisitor(AbstractCriteriaBuilder<?, ?> builder) {
         this.builder = builder;
     }
 

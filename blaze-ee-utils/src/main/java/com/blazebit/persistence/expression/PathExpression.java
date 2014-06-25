@@ -25,11 +25,11 @@ import java.util.List;
  */
 public class PathExpression implements Expression {
 
-    private List<PropertyExpression> pathProperties;
+    private List<PathElementExpression> pathProperties;
     private JoinNode baseNode;
     private String field;
 
-    public PathExpression(List<PropertyExpression> pathProperties) {
+    public PathExpression(List<PathElementExpression> pathProperties) {
         this.pathProperties = pathProperties;
     }
 
@@ -38,7 +38,7 @@ public class PathExpression implements Expression {
         visitor.visit(this);
     }
 
-    public List<PropertyExpression> getExpressions() {
+    public List<PathElementExpression> getExpressions() {
         return pathProperties;
     }
 
@@ -60,7 +60,7 @@ public class PathExpression implements Expression {
 
     public String getPath() {
         StringBuilder sb = new StringBuilder();
-        Iterator<PropertyExpression> iter = pathProperties.iterator();
+        Iterator<PathElementExpression> iter = pathProperties.iterator();
 
         if (iter.hasNext()) {
             sb.append(iter.next());
@@ -97,7 +97,7 @@ public class PathExpression implements Expression {
 
     @Override
     public String toString() {
-        Iterator<PropertyExpression> iter = pathProperties.iterator();
+        Iterator<PathElementExpression> iter = pathProperties.iterator();
         StringBuilder sb = new StringBuilder();
         if(iter.hasNext()){
             sb.append(iter.next());

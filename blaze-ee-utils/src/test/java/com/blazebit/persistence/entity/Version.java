@@ -16,6 +16,7 @@
 
 package com.blazebit.persistence.entity;
 
+import java.util.Calendar;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -29,6 +30,8 @@ import javax.persistence.ManyToOne;
 public class Version {
     private long id;
     private Document document;
+    private Calendar date;
+    private String url;
     
     @Id
     @GeneratedValue
@@ -48,6 +51,20 @@ public class Version {
     public void setDocument(Document document) {
         this.document = document;
     }
-    
-    
+
+    public Calendar getDate() {
+        return date;
+    }
+
+    public void setDate(Calendar date) {
+        this.date = date;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }

@@ -19,7 +19,7 @@ package com.blazebit.persistence.expression;
  *
  * @author cpbec
  */
-public class ArrayExpression implements Expression {
+public class ArrayExpression extends PathElementExpression {
 
     private final PropertyExpression base;
     private final Expression index;
@@ -45,4 +45,32 @@ public class ArrayExpression implements Expression {
     public String toString() {
         return base.toString() + "[" + index.toString() + "]";
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 61 * hash + (this.base != null ? this.base.hashCode() : 0);
+        hash = 61 * hash + (this.index != null ? this.index.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ArrayExpression other = (ArrayExpression) obj;
+        if (this.base != other.base && (this.base == null || !this.base.equals(other.base))) {
+            return false;
+        }
+        if (this.index != other.index && (this.index == null || !this.index.equals(other.index))) {
+            return false;
+        }
+        return true;
+    }
+    
+    
 }

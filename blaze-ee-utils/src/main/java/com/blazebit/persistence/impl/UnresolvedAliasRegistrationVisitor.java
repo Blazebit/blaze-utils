@@ -24,9 +24,9 @@ import com.blazebit.persistence.expression.PathExpression;
  */
 public class UnresolvedAliasRegistrationVisitor extends VisitorAdapter {
 
-    private CriteriaBuilderImpl<?> builder;
+    private AbstractCriteriaBuilder<?, ?> builder;
 
-    public UnresolvedAliasRegistrationVisitor(CriteriaBuilderImpl<?> builder) {
+    public UnresolvedAliasRegistrationVisitor(AbstractCriteriaBuilder<?, ?> builder) {
         this.builder = builder;
     }
 

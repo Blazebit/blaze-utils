@@ -13,32 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence.model;
+
+package com.blazebit.persistence;
+
+import com.blazebit.lang.StringUtils;
+import com.blazebit.persistence.impl.CriteriaBuilderImpl;
 
 /**
  *
  * @author ccbem
  */
-public class DocumentViewModel {
-
-    private String name;
-    private String ownerName;
-    private String firstLocalizedItem;
-    private String partnerDocumentName;
-    
-    public DocumentViewModel(String name) {
-        this.name = name;
+public class CriteriaProvider {
+    public static <T> CriteriaBuilder<T> from(Class<T> clazz) {
+        return new CriteriaBuilderImpl<T>(clazz, StringUtils.firstToLower(clazz.getSimpleName()));
     }
 
-    public DocumentViewModel(String name, String ownerName, String firstLocalizedItem, String secondLocalizedItem) {
-        this.name = name;
-        this.ownerName = ownerName;
-        this.firstLocalizedItem = firstLocalizedItem;
-        this.partnerDocumentName = secondLocalizedItem;
-    }
-
-
-    public String getName() {
-        return name;
+    public static <T> CriteriaBuilder<T> from(Class<T> clazz, String alias) {
+        if (clazz == null || alias == null) {
+            throw new NullPointerException();
+        }
+        return new CriteriaBuilderImpl<T>(clazz, alias);
     }
 }

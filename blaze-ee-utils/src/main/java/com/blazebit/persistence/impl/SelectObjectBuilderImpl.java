@@ -29,13 +29,15 @@ import java.util.TreeMap;
  */
 public class SelectObjectBuilderImpl<T> implements SelectObjectBuilder<T>{
 
-    private final CriteriaBuilderImpl<T> criteriaBuilder;
+    private final AbstractCriteriaBuilder<?, ?> criteriaBuilder;
+    private final T result;
     // maps positions to expressions
     private final SortedMap<Integer, Expression> expressions = new TreeMap<Integer, Expression>();
     private final SelectObjectBuilderEndedListener listener;
     
-    public SelectObjectBuilderImpl(CriteriaBuilderImpl<T> criteriaBuilder, SelectObjectBuilderEndedListener listener) {
+    public SelectObjectBuilderImpl(AbstractCriteriaBuilder<?, ?> criteriaBuilder, T result, SelectObjectBuilderEndedListener listener) {
         this.criteriaBuilder = criteriaBuilder;
+        this.result = result;
         this.listener = listener;
     }
 
@@ -61,8 +63,8 @@ public class SelectObjectBuilderImpl<T> implements SelectObjectBuilder<T>{
     }
     
     @Override
-    public CriteriaBuilder<T> end() {
+    public T end() {
         listener.onBuilderEnded(expressions.values());
-        return criteriaBuilder;
+        return result;
     } 
 }

@@ -27,7 +27,7 @@ public class DistinctTest {
 
     @Test
     public void testDistinct() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.select("d.partners.name").distinct();
         
         assertEquals("SELECT DISTINCT partners.name FROM Document d LEFT JOIN d.partners partners", criteria.getQueryString());
@@ -35,7 +35,7 @@ public class DistinctTest {
     
     @Test(expected = IllegalStateException.class)
     public void testDistinctWithoutSelect() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.distinct();     
     }
     

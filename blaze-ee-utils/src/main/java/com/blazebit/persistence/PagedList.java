@@ -13,12 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.blazebit.persistence;
 
-public interface SelectObjectBuilder<T> {
-    public SelectObjectBuilder<T> with(String expression);
+import java.util.List;
+
+/**
+ *
+ * @author ccbem
+ */
+public interface PagedList<T> extends List<T>{
     
-    public SelectObjectBuilder<T> with(int position, String expression);
-    
-    public T end();
+    public long totalSize();
 }

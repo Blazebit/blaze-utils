@@ -229,6 +229,11 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
     }
 
     @Override
+    public T like(String value, boolean caseSensitive) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
     public T like(String value, boolean caseSensitive, Character escapeCharacter) {
         if(value == null) throw new NullPointerException();
         return chain(new LikePredicate(leftExpression, new ParameterExpression((Object)value), caseSensitive, escapeCharacter));
@@ -240,9 +245,16 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
     }
 
     @Override
+    public T likeExpression(String value, boolean caseSensitive) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
     public T likeExpression(String expression, boolean caseSensitive, Character escapeCharacter) {
         return chain(new LikePredicate(leftExpression, ExpressionUtils.parse(expression), caseSensitive, escapeCharacter));
     }
+    
+    //TODO: notLike overload with 2 args
 
     @Override
     public T notLike(String value) {
@@ -265,5 +277,5 @@ public class RestrictionBuilderImpl<T> extends AbstractBuilderEndedListener impl
     public T notLikeExpression(String expression, boolean caseSensitive, Character escapeCharacter) {
         return chain(new NotPredicate(new LikePredicate(leftExpression, ExpressionUtils.parse(expression), caseSensitive, escapeCharacter)));
     }
-    
+
 }

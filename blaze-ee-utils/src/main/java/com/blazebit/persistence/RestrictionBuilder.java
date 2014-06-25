@@ -97,9 +97,13 @@ public interface RestrictionBuilder<T> {
     
     public T like(String value);
     
+    public T like(String value, boolean caseSensitive);
+    
     public T like(String value, boolean caseSensitive, Character escapeCharacter);
     
     public T likeExpression(String expression);
+    
+    public T likeExpression(String value, boolean caseSensitive);
     
     public T likeExpression(String expression, boolean caseSensitive, Character escapeCharacter);
     

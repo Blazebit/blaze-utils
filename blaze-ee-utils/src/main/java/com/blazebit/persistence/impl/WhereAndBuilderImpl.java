@@ -18,8 +18,8 @@ package com.blazebit.persistence.impl;
 import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.WhereAndBuilder;
 import com.blazebit.persistence.WhereOrBuilder;
+import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
-import com.blazebit.persistence.expression.PropertyExpression;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
@@ -33,11 +33,13 @@ public class WhereAndBuilderImpl<T> extends AbstractBuilderEndedListener impleme
     private final T result;
     private final BuilderEndedListener listener;
     private final AndPredicate predicate;
+    private final AbstractCriteriaBuilder<?, ?> criteriaBuilder;
     
-    public WhereAndBuilderImpl(T result, BuilderEndedListener listener) {
+    public WhereAndBuilderImpl(AbstractCriteriaBuilder<?, ?> criteriaBuilder, T result, BuilderEndedListener listener) {
         this.result = result;
         this.listener = listener;
         this.predicate = new AndPredicate();
+        this.criteriaBuilder = criteriaBuilder;
     }
     
     @Override
@@ -60,11 +62,12 @@ public class WhereAndBuilderImpl<T> extends AbstractBuilderEndedListener impleme
 
     @Override
     public WhereOrBuilder<WhereAndBuilderImpl<T>> whereOr() {
-        return startBuilder(new WhereOrBuilderImpl<WhereAndBuilderImpl<T>>(this, this));
+        return startBuilder(new WhereOrBuilderImpl<WhereAndBuilderImpl<T>>(criteriaBuilder, this, this));
     }
-
+ 
     @Override
     public RestrictionBuilder<? extends WhereAndBuilder<T>> where(String expression) {
-        return startBuilder(new RestrictionBuilderImpl<WhereAndBuilderImpl<T>>(this, this, ExpressionUtils.parse(expression)));
+        Expression exp = ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), criteriaBuilder);
+        return startBuilder(new RestrictionBuilderImpl<WhereAndBuilderImpl<T>>(this, this, exp));
     }
 }

@@ -15,11 +15,11 @@
  */
 lexer grammar JPQL_lexer;
 
- Input_parameter
-     : ':'(Identifier)+
+ Input_parameter : 'abc'
+     //: ':'Identifier
      ;
  
- String_literal : '\''Identifier?'\'';
+ String_literal : '\'' ~[\']* '\'';
  
  Character_literal : '\''JavaLetter'\'';
  

@@ -19,6 +19,7 @@ import com.blazebit.persistence.expression.ArrayExpression;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.FooExpression;
+import com.blazebit.persistence.expression.PathElementExpression;
 import com.blazebit.persistence.expression.PathExpression;
 import com.blazebit.persistence.expression.PropertyExpression;
 import com.blazebit.persistence.predicate.EqPredicate;
@@ -30,42 +31,59 @@ import java.util.ArrayList;
  */
 public class ArrayExpressionTransformer {
 
-    public static Expression transform(Expression original, CriteriaBuilderImpl<?> builder) {
+    public static Expression transform(Expression original, AbstractCriteriaBuilder<?, ?> builder) {
         // TODO: transform the original expression and apply changes in the criteria builder
-        if (original instanceof PathExpression) {
-            // Nothing to transform here
+        if(original instanceof FooExpression){
             return original;
         }
+        
+        if (original instanceof CompositeExpression) {
+            CompositeExpression composite = (CompositeExpression) original;
+            CompositeExpression transformed = new CompositeExpression(new ArrayList<Expression>());
+            for (Expression e : composite.getExpressions()) {
+                transformed.getExpressions().add(transform(e, builder));
+            }
+            return transformed;
+        }
 
-        if (!(original instanceof CompositeExpression)) {
+        if (!(original instanceof PathExpression)) {
             throw new IllegalArgumentException("Probably a programming error");
         }
-        
-        CompositeExpression comp = (CompositeExpression) original;
-        
-        for (int i = 0; i < comp.getExpressions().size(); i++) {
-            Expression expr = comp.getExpressions().get(i);
+
+        PathExpression path = (PathExpression) original;
+
+        ArrayExpression arrayExp = null;
+        PathExpression transformedPath = new PathExpression(new ArrayList<PathElementExpression>());
+        for (int i = 0; i < path.getExpressions().size(); i++) {
+            Expression expr = path.getExpressions().get(i);
             if (expr instanceof ArrayExpression) {
-                ArrayExpression arrayExp = (ArrayExpression) expr;
-                if(i == 0){
-//                    comp.getExpressions().
-                }
-                // i-1 will get "VALUE(" appended
-                comp.getExpressions().set(i, arrayExp.getBase());
-                // i+1 will get ")" prepended
-                
-                // Add implicit join
-                builder.implicitJoin(arrayExp.getBase(), true);
-                
-                // Add where condition
+                arrayExp = (ArrayExpression) expr;
+
                 CompositeExpression keyExpression = new CompositeExpression(new ArrayList<Expression>());
                 keyExpression.getExpressions().add(new FooExpression("KEY("));
-                keyExpression.getExpressions().add(arrayExp.getBase());
+
+                PathExpression keyPath = new PathExpression(new ArrayList<PathElementExpression>(transformedPath.getExpressions()));
+                keyPath.getExpressions().add(arrayExp.getBase());
+                keyExpression.getExpressions().add(keyPath);
                 keyExpression.getExpressions().add(new FooExpression(")"));
                 builder.addWherePredicate(new EqPredicate(keyExpression, arrayExp.getIndex()));
+                
+                transformedPath.getExpressions().add(arrayExp.getBase());
+            }else{
+                transformedPath.getExpressions().add((PropertyExpression)expr);
             }
         }
-        
+
+        if (arrayExp != null) {
+            // add value for last array expression
+            CompositeExpression valueExpression = new CompositeExpression(new ArrayList<Expression>());
+            valueExpression.getExpressions().add(new FooExpression("VALUE("));
+            PathExpression valuePath = new PathExpression(new ArrayList<PathElementExpression>(transformedPath.getExpressions()));
+            valueExpression.getExpressions().add(valuePath);
+            valueExpression.getExpressions().add(new FooExpression(")"));
+            return valueExpression;
+        }
+
         return original;
     }
 }

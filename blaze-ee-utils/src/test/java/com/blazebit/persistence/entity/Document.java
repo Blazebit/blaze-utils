@@ -17,8 +17,12 @@
 package com.blazebit.persistence.entity;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import javax.persistence.CollectionTable;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -40,6 +44,7 @@ public class Document {
     private Person owner;
     private long age;
     private String nonJoinable;
+    private Map<Integer, Person> contacts = new HashMap<Integer, Person>();
     
     public Document(){}
     
@@ -79,7 +84,7 @@ public class Document {
         this.someTransientField = someTransientField;
     }
 
-    @OneToMany
+    @OneToMany(mappedBy = "document")
     public Set<Version> getVersions() {
         return versions;
     }
@@ -96,7 +101,7 @@ public class Document {
         this.age = age;
     }
 
-    @OneToMany
+    @OneToMany(mappedBy = "partnerDocument")
     public Set<Person> getPartners() {
         return partners;
     }
@@ -120,5 +125,14 @@ public class Document {
 
     public void setNonJoinable(String nonJoinable) {
         this.nonJoinable = nonJoinable;
+    }
+
+    @ElementCollection
+    public Map<Integer, Person> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(Map<Integer, Person> localized) {
+        this.contacts = localized;
     }
 }

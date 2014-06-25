@@ -30,7 +30,7 @@ import org.junit.Test;
 public class IsEmptyTest {
     @Test
     public void testIsEmpty(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.name").isEmpty();
         
         assertEquals("FROM Document d WHERE d.name IS EMPTY", criteria.getQueryString());
@@ -38,7 +38,7 @@ public class IsEmptyTest {
     
     @Test
     public void testIsNotEmpty(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.name").isNotEmpty();
         
         assertEquals("FROM Document d WHERE NOT d.name IS EMPTY", criteria.getQueryString());

@@ -49,9 +49,9 @@ import java.util.Map;
  */
 public class ArrayTransformationVisitor implements Predicate.Visitor, Expression.Visitor {
     
-    private final CriteriaBuilderImpl<?> builder;
+    private final AbstractCriteriaBuilder<?, ?> builder;
 
-    public ArrayTransformationVisitor(CriteriaBuilderImpl<?> builder) {
+    public ArrayTransformationVisitor(AbstractCriteriaBuilder<?, ?> builder) {
         this.builder = builder;
     }
 

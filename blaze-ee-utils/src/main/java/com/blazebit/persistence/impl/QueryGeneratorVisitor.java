@@ -22,7 +22,6 @@ import com.blazebit.persistence.expression.FooExpression;
 import com.blazebit.persistence.expression.ParameterExpression;
 import com.blazebit.persistence.expression.PathExpression;
 import com.blazebit.persistence.expression.PropertyExpression;
-import com.blazebit.persistence.impl.CriteriaBuilderImpl.SelectInfo;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.BetweenPredicate;
 import com.blazebit.persistence.predicate.EqPredicate;
@@ -50,9 +49,9 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
     private final StringBuilder sb;
     private final ParameterNameGenerator paramNameGenerator;
     private boolean replaceSelectAliases = true;
-    private final CriteriaBuilderImpl<?> builder;
+    private final AbstractCriteriaBuilder<?, ?> builder;
 
-    public QueryGeneratorVisitor(CriteriaBuilderImpl<?> builder, StringBuilder sb, ParameterNameGenerator paramNameGenerator) {
+    public QueryGeneratorVisitor(AbstractCriteriaBuilder<?, ?> builder, StringBuilder sb, ParameterNameGenerator paramNameGenerator) {
         this.sb = sb;
         this.paramNameGenerator = paramNameGenerator;
         this.builder = builder;
@@ -220,7 +219,13 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
 
     @Override
     public void visit(ParameterExpression expression) {
-        String paramName = paramNameGenerator.getParamNameForObject(expression.getValue());
+        String paramName;
+        if (expression.getName() == null) {
+            paramName = paramNameGenerator.getParamNameForObject(expression.getValue());
+
+        } else {
+            paramName = expression.getName();
+        }
         sb.append(":");
         sb.append(paramName);
     }
@@ -242,7 +247,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
         if (replaceSelectAliases) {
             if (expression.getBaseNode() != null) {
                 String absPath = expression.getBaseNode().getAliasInfo().getAbsolutePath();
-                SelectInfo selectInfo = builder.selectAbsolutePathToInfoMap.get(absPath);
+                AbstractCriteriaBuilder.SelectInfo selectInfo = builder.selectAbsolutePathToInfoMap.get(absPath);
                 if (selectInfo != null) {
                     sb.append(selectInfo.getAlias());
                     return;

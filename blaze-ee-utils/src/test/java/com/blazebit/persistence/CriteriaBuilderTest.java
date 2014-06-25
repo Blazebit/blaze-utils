@@ -33,7 +33,7 @@ public class CriteriaBuilderTest {
     
     @Test
     public void testCaseWhen() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.selectCase("document.type")
             .when("'vertrag'", "2")
             .when("'info'", "1")
@@ -69,7 +69,7 @@ public class CriteriaBuilderTest {
     
     @Test
     public void testJoin1() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.join("owner", "owner", JoinType.INNER, false);
         criteria.join("owner.test", "test", JoinType.INNER, false);
         criteria.join("owner.test.bla", "bla", JoinType.INNER, false);
@@ -79,7 +79,7 @@ public class CriteriaBuilderTest {
     
     @Test
     public void testJoin2() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.join("owner", "owner", JoinType.INNER, false);
         criteria.join("owner.test", "test", JoinType.INNER, false);
         criteria.join("test.bla", "bla", JoinType.RIGHT, false);
@@ -88,7 +88,7 @@ public class CriteriaBuilderTest {
     
     @Test
     public void testJoin3() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.join("document.owner", "owner", JoinType.INNER, false);
         criteria.join("document.owner.test", "test", JoinType.INNER, false);
         criteria.join("document.owner.test.bla", "bla", JoinType.OUTER, false);
@@ -97,7 +97,7 @@ public class CriteriaBuilderTest {
     
     @Test
     public void testJoin4() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.join("document.owner", "owner123", JoinType.INNER, false);
         criteria.join("document.owner.test", "test123", JoinType.INNER, false);
         criteria.join("document.owner.test.bla", "bla123", JoinType.INNER, false);
@@ -106,7 +106,7 @@ public class CriteriaBuilderTest {
     
     @Test
     public void testJoin5() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.join("owner", "owner123", JoinType.INNER, false);
         criteria.join("owner.test", "test123", JoinType.INNER, false);
         criteria.join("owner.test.bla", "bla123", JoinType.INNER, false);
@@ -115,26 +115,26 @@ public class CriteriaBuilderTest {
     
     @Test
     public void testOrderBy1() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.orderBy("name", true, true);
         System.out.println(criteria.getQueryString());
     }
     @Test
     public void testOrderBy2() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.orderBy("owner.test", true, true);
         System.out.println(criteria.getQueryString());
     }
     @Test
     public void testOrderBy3() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.join("owner", "owner123", JoinType.INNER, false);
         criteria.orderBy("owner123.test", true, true);
         System.out.println(criteria.getQueryString());
     }
     @Test
     public void testOrderBy4() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.join("owner", "owner123", JoinType.INNER, false);
         criteria.join("owner.test", "test123", JoinType.INNER, false);
         criteria.orderBy("test123.bla", true, true);
@@ -142,7 +142,7 @@ public class CriteriaBuilderTest {
     }
     @Test
     public void testOrderBy5() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.join("owner", "owner123", JoinType.INNER, false);
         criteria.join("owner.test", "test123", JoinType.INNER, false);
         criteria.orderBy("owner.test.bla", true, true);
@@ -150,13 +150,13 @@ public class CriteriaBuilderTest {
     }
     @Test
     public void testOrderBy6() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         criteria.orderBy("owner.test.bla", true, true);
         System.out.println(criteria.getQueryString());
     }
     @Test
     public void testWhere1() {
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class);
         /*
          WHERE
           (owner.id = 1 OR owner.id IS NULL)
@@ -181,7 +181,7 @@ public class CriteriaBuilderTest {
                 .endAnd()
             .endOr()
             .where("name").like("Test");
-//            .where("owner").in(CriteriaBuilder.from(CompanyCategoryEntry.class)
+//            .where("owner").in(CriteriaProvider.from(CompanyCategoryEntry.class)
 //                .where("owner.active").eq(true)
 //            )
         

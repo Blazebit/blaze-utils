@@ -16,8 +16,11 @@
 
 package com.blazebit.persistence.entity;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -31,8 +34,17 @@ import javax.persistence.OneToMany;
 @Entity
 public class Person {
     private long id;
+    private String name;
     private Document partnerDocument;
     private Set<Document> ownedDocuments = new HashSet<Document>();
+    private Map<Integer, String> localized = new HashMap<Integer, String>();
+
+    public Person(){
+    }
+    
+    public Person(String name) {
+        this.name = name;
+    }
     
     @Id
     @GeneratedValue
@@ -53,7 +65,7 @@ public class Person {
         this.partnerDocument = partnerDocument;
     }
 
-    @OneToMany
+    @OneToMany(mappedBy = "owner")
     public Set<Document> getOwnedDocuments() {
         return ownedDocuments;
     }
@@ -61,6 +73,21 @@ public class Person {
     public void setOwnedDocuments(Set<Document> ownedDocuments) {
         this.ownedDocuments = ownedDocuments;
     }
-    
-    
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @ElementCollection
+    public Map<Integer, String> getLocalized() {
+        return localized;
+    }
+
+    public void setLocalized(Map<Integer, String> localized) {
+        this.localized = localized;
+    }
 }

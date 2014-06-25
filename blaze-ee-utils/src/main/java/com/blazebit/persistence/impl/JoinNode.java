@@ -16,6 +16,7 @@
 package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.JoinType;
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -28,13 +29,15 @@ public class JoinNode {
     private AliasInfo aliasInfo;
     private JoinType type = JoinType.LEFT;
     private boolean fetch = false;
+    private Class<?> propertyClass;
     // Use TreeMap so that joins get applied alphabetically for easier testing
     private final Map<String, JoinNode> nodes = new TreeMap<String, JoinNode>();
 
-    public JoinNode(AliasInfo aliasInfo, JoinType type, boolean fetch) {
+    public JoinNode(AliasInfo aliasInfo, JoinType type, boolean fetch, Class<?> propertyClass) {
         this.aliasInfo = aliasInfo;
         this.type = type;
         this.fetch = fetch;
+        this.propertyClass = propertyClass;
     }
 
     public AliasInfo getAliasInfo() {
@@ -63,6 +66,14 @@ public class JoinNode {
 
     public Map<String, JoinNode> getNodes() {
         return nodes;
+    }
+
+    public Class<?> getPropertyClass() {
+        return propertyClass;
+    }
+
+    public void setPropertyClass(Class<?> propertyClass) {
+        this.propertyClass = propertyClass;
     }
 }
 

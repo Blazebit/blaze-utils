@@ -21,7 +21,7 @@ import com.blazebit.persistence.impl.JoinNode;
  *
  * @author cpbec
  */
-public class PropertyExpression implements Expression {
+public class PropertyExpression extends PathElementExpression {
 
     private final String property;
 

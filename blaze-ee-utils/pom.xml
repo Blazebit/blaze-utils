@@ -56,7 +56,7 @@
             <artifactId>hibernate-entitymanager</artifactId>
             <!-- Use the old version for the bug workaround test -->
             <!-- <version>4.2.4.Final</version>  -->
-            <version>4.2.5.Final</version>
+            <version>4.2.13.Final</version>
         </dependency>
         
         <dependency>

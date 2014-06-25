@@ -27,7 +27,7 @@ import org.junit.Test;
 public class GreaterTest {
     @Test
     public void testGt(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.age").gt(20);
         
         assertEquals("FROM Document d WHERE d.age > :param_0", criteria.getQueryString());
@@ -35,27 +35,27 @@ public class GreaterTest {
     
     @Test(expected = NullPointerException.class)
     public void testGtNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.age").gt(null);        
     }
     
     @Test
     public void testGtExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").gtExpression("d.owner.age");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        criteria.where("d.age").gtExpression("d.owner.name");
         
-        assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE d.age > owner.age", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE d.age > owner.name", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
     public void testGtExpressionNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.age").gtExpression(null);        
     }
     
     @Test
     public void testGe(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.age").ge(20);
         
         assertEquals("FROM Document d WHERE d.age >= :param_0", criteria.getQueryString());
@@ -63,21 +63,21 @@ public class GreaterTest {
     
     @Test(expected = NullPointerException.class)
     public void testGeNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.age").ge(null);        
     }
     
     @Test
     public void testGeExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.age").geExpression("d.owner.age");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        criteria.where("d.age").geExpression("d.owner.name");
         
-        assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE d.age >= owner.age", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE d.age >= owner.name", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
     public void testGeExpressionNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.age").geExpression(null);        
     }
 }

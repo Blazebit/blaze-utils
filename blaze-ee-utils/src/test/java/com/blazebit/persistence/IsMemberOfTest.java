@@ -27,41 +27,41 @@ import org.junit.Test;
 public class IsMemberOfTest {
     @Test
     public void testIsMemberOf(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.name").isMemberOf("d.versions.childDocuments.name");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        criteria.where("d.name").isMemberOf("d.versions.document.name");
         
-        assertEquals("FROM Document d LEFT JOIN d.versions versions LEFT JOIN versions.childDocuments childDocuments WHERE d.name MEMBER OF childDocuments.name", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.versions versions LEFT JOIN versions.document document WHERE d.name MEMBER OF document.name", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
     public void testIsMemberOfNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.name").isMemberOf(null);
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testIsMemberOfEmpty(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.name").isMemberOf("");
     }
     
     @Test
     public void testIsNotMemberOf(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.where("d.name").isNotMemberOf("d.versions.childDocuments.name");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        criteria.where("d.name").isNotMemberOf("d.versions.document.name");
         
-        assertEquals("FROM Document d LEFT JOIN d.versions versions LEFT JOIN versions.childDocuments childDocuments WHERE NOT d.name MEMBER OF childDocuments.name", criteria.getQueryString());
+        assertEquals("FROM Document d LEFT JOIN d.versions versions LEFT JOIN versions.document document WHERE NOT d.name MEMBER OF document.name", criteria.getQueryString());
     }
     
     @Test(expected = NullPointerException.class)
     public void testIsNotMemberOfNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.name").isNotMemberOf(null);
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void testIsNotMemberOfEmpty(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.name").isNotMemberOf("");
     }
 }

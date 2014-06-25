@@ -25,17 +25,35 @@ grammar JPQL;
      : qualified_identification_variable
      | state_field_path_expression 
      | single_valued_object_path_expression
+     | single_element_path_expression
      ;
  
- general_identification_variable : Identifier |
-                                    composable_qualified_identification_variable;
+ general_path_start : general_path_element
+                    | composable_qualified_identification_variable
+                    ;
 
- general_path_element : Identifier
-                      | Single_valued_object_field
-                      | Collection_valued_field
+ simple_path_element : Identifier
+                        | Single_valued_object_field
+                        | Collection_valued_field
+                        ;
+  
+ general_path_element : simple_path_element
+                      | array_expression
                       ;
  
- general_subpath : general_identification_variable('.'general_path_element)*;
+ //TODO: allow only in certain clauses??
+ array_expression : simple_path_element '[' arithmetic_primary ']'
+                  ;
+ 
+ array_index : state_field_path_expression
+             | ':' input_parameter
+             | Numeric_literal
+             ;
+ 
+ input_parameter : Identifier
+                 ;
+      
+ general_subpath : general_path_start('.'general_path_element)*;
 
  state_field_path_expression : general_subpath'.'general_path_element;
 
@@ -43,13 +61,15 @@ grammar JPQL;
 
  collection_valued_path_expression : general_subpath'.'general_path_element;
  
- simple_identifier : Identifier
-                   ;
+ single_element_path_expression : general_path_start
+                              ;
+ 
+
 
  simple_expression : single_valued_path_expression |
                        scalar_expression |
                        aggregate_expression |
-                       simple_identifier ;
+                   ;
 
  aggregate_expression : ( 'AVG' | 'MAX' | 'MIN' | 'SUM' ) '('('DISTINCT')? state_field_path_expression')' |
                           'COUNT' (('DISTINCT')? Identification_variable |
@@ -81,7 +101,7 @@ grammar JPQL;
  arithmetic_primary : state_field_path_expression |
                         Numeric_literal |
                         '('arithmetic_expression')' |
-                        Input_parameter |
+                        ':' input_parameter |
                         functions_returning_numerics |
                         aggregate_expression |
                         case_expression |

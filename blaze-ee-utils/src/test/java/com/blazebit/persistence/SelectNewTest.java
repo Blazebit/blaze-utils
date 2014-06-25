@@ -76,62 +76,71 @@ public class SelectNewTest {
             em.persist(v3);
             em.persist(new Document("Doc1", v1, v3));
             em.persist(new Document("Doc2", v2));
+
             em.flush();
             tx.commit();
         } catch (Exception e) {
+            e.printStackTrace(System.err);
             tx.rollback();
         }
     }
 
     @Test
     public void testSelectNewDocumentViewModel() {
-
-        CriteriaBuilder<DocumentViewModel> criteria = CriteriaBuilder.from(Document.class)
+        CriteriaBuilder<DocumentViewModel> criteria = CriteriaProvider.from(Document.class)
                 .selectNew(DocumentViewModel.class).with("name").end().orderByAsc("name");
-        
-        assertEquals("SELECT document.name FROM Document document ORDER BY document.name ASC NULLS LAST", criteria.getQueryString());
-        List<DocumentViewModel>  actual = criteria.getQuery(em).getResultList();
-        
-        /* expected */
-        List<Document> expected = em.createQuery("FROM Document d ORDER BY d.name ASC", Document.class).getResultList();
-        
-        assertEquals(expected.size(), actual.size());
-        for(int i = 0; i < actual.size(); i++){
-            assertEquals(actual.get(i).getName(), expected.get(i).getName());
-        }        
-    }
 
-    @Test
-    public void testSelectNewDocument(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
-        criteria.selectNew(Document.class).with("d.name").end().where("LENGTH(d.name)").le(4).orderByAsc("d.name");
-        assertEquals("SELECT d.name FROM Document d WHERE LENGTH(d.name) <= :param_0 ORDER BY d.name ASC NULLS LAST", criteria.getQueryString());
-        List<Document>  actual = criteria.getQuery(em).getResultList();
-        
+        assertEquals("SELECT document.name FROM Document document ORDER BY document.name ASC NULLS LAST", criteria.getQueryString());
+        List<DocumentViewModel> actual = criteria.getQuery(em).getResultList();
+
         /* expected */
         List<Document> expected = em.createQuery("FROM Document d ORDER BY d.name ASC", Document.class).getResultList();
-        
+
         assertEquals(expected.size(), actual.size());
-        for(int i = 0; i < actual.size(); i++){
+        for (int i = 0; i < actual.size(); i++) {
             assertEquals(actual.get(i).getName(), expected.get(i).getName());
         }
     }
-    
+
     @Test
-    public void testTest(){
-        List<Set<Version>> expected = (List<Set<Version>>)em.createQuery("SELECT d.versions FROM Document d").getResultList();
-        
+    public void testSelectNewDocument() {
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        criteria.selectNew(Document.class).with("d.name").end().where("LENGTH(d.name)").le(4).orderByAsc("d.name");
+        assertEquals("SELECT d.name FROM Document d WHERE LENGTH(d.name) <= :param_0 ORDER BY d.name ASC NULLS LAST", criteria.getQueryString());
+        List<Document> actual = criteria.getQuery(em).getResultList();
+
+        /* expected */
+        List<Document> expected = em.createQuery("FROM Document d ORDER BY d.name ASC", Document.class).getResultList();
+
+        assertEquals(expected.size(), actual.size());
+        for (int i = 0; i < actual.size(); i++) {
+            assertEquals(actual.get(i).getName(), expected.get(i).getName());
+        }
+    }
+
+    @Test
+    public void testTest() {
+        Person p = new Person();
+        p.getLocalized().put(2, "JUHU");
+        em.persist(p);
+
+        Document d = new Document("Doc1");
+        d.getPartners().add(p);
+        d.getContacts().put(1, p);
+        em.persist(d);
+        List<String> expected = (List<String>) em.createQuery("SELECT VALUE(x.localized) FROM Document d LEFT JOIN d.contacts x WHERE KEY(x)=1 AND KEY(x.localized)=2").getResultList();
+
         System.out.println(expected);
 //        assertEquals(expected.size(), actual.size());
 //        for(int i = 0; i < actual.size(); i++){
 //            assertEquals(actual.get(i).getName(), expected.get(i).getName());
 //        }
     }
-    
+
 //    
 //    @Test
 //    public void testSelectNewModel(){
-//        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
 //        criteria.selectNew(Document.class).with("d.author.name").end().where("d.title.length").lt(4);
 //        
 //        
@@ -140,13 +149,13 @@ public class SelectNewTest {
 //    
 //    @Test(expected = NullPointerException.class)
 //    public void testSelectNewNullClass(){
-//        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
 //        criteria.selectNew((Class<Document>)null);        
 //    }
 //    
 //    @Test(expected = NullPointerException.class)
 //    public void testSelectNewNullConstructor(){
-//        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
 //        criteria.selectNew((Constructor<Document>)null);        
 //    }
 }

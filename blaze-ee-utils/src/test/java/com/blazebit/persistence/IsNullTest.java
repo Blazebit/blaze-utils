@@ -27,7 +27,7 @@ import org.junit.Test;
 public class IsNullTest {
     @Test
     public void testIsNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.name").isNull();
         
         assertEquals("FROM Document d WHERE d.name IS NULL", criteria.getQueryString());
@@ -35,7 +35,7 @@ public class IsNullTest {
     
     @Test
     public void testIsNotNull(){
-        CriteriaBuilder<Document> criteria = CriteriaBuilder.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
         criteria.where("d.name").isNotNull();
         
         assertEquals("FROM Document d WHERE NOT d.name IS NULL", criteria.getQueryString());
