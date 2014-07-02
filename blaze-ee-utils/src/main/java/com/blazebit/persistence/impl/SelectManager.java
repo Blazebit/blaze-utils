@@ -18,7 +18,6 @@ package com.blazebit.persistence.impl;
 import com.blazebit.persistence.CaseWhenBuilder;
 import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.QueryBuilder;
-import com.blazebit.persistence.SelectBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
 import com.blazebit.persistence.SimpleCaseWhenBuilder;
 import com.blazebit.persistence.expression.Expression;
@@ -38,41 +37,47 @@ import org.hibernate.transform.ResultTransformer;
  *
  * @author ccbem
  */
-public class SelectBuilderImpl<T> {
+public class SelectManager<T> extends AbstractManager {
 
-    private final List<AbstractCriteriaBuilder.SelectInfo> selectInfos = new ArrayList<AbstractCriteriaBuilder.SelectInfo>();
+    private final List<SelectInfo> selectInfos = new ArrayList<SelectInfo>();
     private boolean distinct = false;
     private SelectObjectBuilder<?> selectObjectBuilder;
     private ResultTransformer selectObjectTransformer;
     // Maps alias to SelectInfo
-    private final Map<String, AbstractCriteriaBuilder.SelectInfo> selectAliasToInfoMap = new HashMap<String, AbstractCriteriaBuilder.SelectInfo>();
-    private final Map<String, AbstractCriteriaBuilder.SelectInfo> selectAbsolutePathToInfoMap = new HashMap<String, AbstractCriteriaBuilder.SelectInfo>();
+    private final Map<String, SelectInfo> selectAliasToInfoMap = new HashMap<String, SelectInfo>();
+    private final Map<String, SelectInfo> selectAbsolutePathToInfoMap = new HashMap<String, SelectInfo>();
     private final SelectObjectBuilderEndedListenerImpl selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
 
-    public void verifyBuilderEnded() {
+    public SelectManager(QueryGenerator queryGenerator) {
+        //TODO: adapt AbstractManager
+        super(queryGenerator, null);
+    }
+    
+    void verifyBuilderEnded() {
         selectObjectBuilderEndedListener.verifyBuilderEnded();
     }
 
-    public ResultTransformer getSelectObjectTransformer() {
+    ResultTransformer getSelectObjectTransformer() {
         return selectObjectTransformer;
     }
 
-    Map<String, AbstractCriteriaBuilder.SelectInfo> getSelectAbsolutePathToInfoMap() {
+    Map<String, SelectInfo> getSelectAbsolutePathToInfoMap() {
         return selectAbsolutePathToInfoMap;
     }
 
-    Map<String, AbstractCriteriaBuilder.SelectInfo> getSelectAliasToInfoMap() {
+    Map<String, SelectInfo> getSelectAliasToInfoMap() {
         return selectAliasToInfoMap;
     }
 
-    public void acceptVisitor(Visitor v) {
+    void acceptVisitor(Visitor v) {
+        //TODO: implement test for select new with joins!! - we might also have to do implicit joins for constructor arguments
         // carry out implicit joins
-        for (AbstractCriteriaBuilder.SelectInfo selectInfo : selectInfos) {
+        for (SelectInfo selectInfo : selectInfos) {
             selectInfo.getExpression().accept(v);
         }
     }
 
-    public String buildSelect() {
+    String buildSelect() {
         if (selectInfos.isEmpty()) {
             return "";
         }
@@ -83,9 +88,9 @@ public class SelectBuilderImpl<T> {
         }
         // we must not replace select alias since we would loose the original expressions
         populateSelectAliasAbsolutePaths();
-        QueryGeneratorVisitor queryGenerator = new QueryGeneratorVisitor(selectAbsolutePathToInfoMap, sb, null);
+        queryGenerator.setQueryBuffer(sb);
         queryGenerator.setReplaceSelectAliases(false);
-        Iterator<AbstractCriteriaBuilder.SelectInfo> iter = selectInfos.iterator();
+        Iterator<SelectInfo> iter = selectInfos.iterator();
         applySelect(queryGenerator, sb, iter.next());
         while (iter.hasNext()) {
             sb.append(", ");
@@ -95,51 +100,49 @@ public class SelectBuilderImpl<T> {
         queryGenerator.setReplaceSelectAliases(true);
         return sb.toString();
     }
-
-    public U select(String... expressions) {
-        for (String expression : expressions) {
-            select(expression);
+    
+    void applyTransformer(ArrayExpressionTransformer transformer){
+        // carry out transformations
+        for (SelectInfo selectInfo : selectInfos) {
+            Expression transformed = transformer.transform(selectInfo.getExpression());
+            if(transformed != null){
+                selectInfo.setExpression(transformed);
+            }
         }
-        return (U) builder;
     }
 
-    public U select(String expression) {
-        return select(expression, null);
-    }
-
-    public U select(String expression, String selectAlias) {
-        Expression expr = ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), builder);
-        AbstractCriteriaBuilder.SelectInfo selectInfo = new AbstractCriteriaBuilder.SelectInfo(expr, selectAlias);
+    void select(AbstractCriteriaBuilder<?, ?> builder, String expression, String selectAlias) {
+        Expression expr = ExpressionUtils.parse(expression);
+        SelectInfo selectInfo = new SelectInfo(expr, selectAlias);
         if (selectAlias != null) {
             selectAliasToInfoMap.put(selectAlias, selectInfo);
         }
         selectInfos.add(selectInfo);
-        return (U) builder;
     }
 
-    public U select(Class<? extends T> clazz) {
-        throw new UnsupportedOperationException();
-    }
+//    public U select(Class<? extends T> clazz) {
+//        throw new UnsupportedOperationException();
+//    }
+//
+//    public U select(Constructor<? extends T> constructor) {
+//        throw new UnsupportedOperationException();
+//    }
+//
+//    // TODO: needed?
+//    public U select(ObjectBuilder<? extends T> builder) {
+//        throw new UnsupportedOperationException();
+//    }
 
-    public U select(Constructor<? extends T> constructor) {
-        throw new UnsupportedOperationException();
-    }
-
-    // TODO: needed?
-    public U select(ObjectBuilder<? extends T> builder) {
-        throw new UnsupportedOperationException();
-    }
-
-    public CaseWhenBuilder<U> selectCase() {
-        return new CaseWhenBuilderImpl<U>((U) this);
-    }
+//    public CaseWhenBuilder<U> selectCase() {
+//        return new CaseWhenBuilderImpl<U>((U) this);
+//    }
 
     /* CASE caseOperand (WHEN scalarExpression THEN scalarExpression)+ ELSE scalarExpression END */
-    public SimpleCaseWhenBuilder<U> selectCase(String expression) {
-        return new SimpleCaseWhenBuilderImpl<U>((U) this, expression);
-    }
+//    public SimpleCaseWhenBuilder<U> selectCase(String expression) {
+//        return new SimpleCaseWhenBuilderImpl<U>((U) this, expression);
+//    }
 
-    public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Class<Y> clazz) {
+    <Y, T extends AbstractCriteriaBuilder<?, ?>> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(T builder, Class<Y> clazz) {
         if (selectObjectBuilder != null) {
             throw new IllegalStateException("Only one selectNew is allowed");
         }
@@ -147,12 +150,12 @@ public class SelectBuilderImpl<T> {
             throw new IllegalStateException("No mixture of select and selectNew is allowed");
         }
         //TODO: maybe unify with selectNew(ObjectBuilder)
-        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl(builder, builder, selectObjectBuilderEndedListener));
+        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl(transformer, builder, selectObjectBuilderEndedListener));
         selectObjectTransformer = new ClassResultTransformer(clazz);
         return (SelectObjectBuilder) selectObjectBuilder;
     }
 
-    public SelectObjectBuilder<U> selectNew(Constructor<?> constructor) {
+    <Y, T extends AbstractCriteriaBuilder<?, ?>> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(T builder, Constructor<Y> constructor) {
         if (selectObjectBuilder != null) {
             throw new IllegalStateException("Only one selectNew is allowed");
         }
@@ -160,12 +163,12 @@ public class SelectBuilderImpl<T> {
             throw new IllegalStateException("No mixture of select and selectNew is allowed");
         }
         //TODO: maybe unify with selectNew(ObjectBuilder)
-        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl(builder, builder, selectObjectBuilderEndedListener));
+        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl(transformer, builder, selectObjectBuilderEndedListener));
         selectObjectTransformer = new ConstructorResultTransformer(constructor);
         return (SelectObjectBuilder) selectObjectBuilder;
     }
 
-    public SelectObjectBuilder<U> selectNew(ObjectBuilder<? extends T> builder) {
+    <U> SelectObjectBuilder<U> selectNew(ObjectBuilder<? extends T> builder) {
         if (selectObjectBuilder != null) {
             throw new IllegalStateException("Only one selectNew is allowed");
         }
@@ -175,22 +178,21 @@ public class SelectBuilderImpl<T> {
         throw new UnsupportedOperationException();
     }
 
-    public U distinct() {
+    void distinct() {
         if (selectInfos.isEmpty()) {
             throw new IllegalStateException("Distinct requires select");
         }
         this.distinct = true;
-        return (U) builder;
     }
 
-    protected void applySelect(QueryGeneratorVisitor queryGenerator, StringBuilder sb, AbstractCriteriaBuilder.SelectInfo select) {
+    private void applySelect(QueryGenerator queryGenerator, StringBuilder sb, SelectInfo select) {
         select.getExpression().accept(queryGenerator);
-        if (select.getAlias() != null) {
-            sb.append(" AS ").append(select.getAlias());
+        if (select.alias != null) {
+            sb.append(" AS ").append(select.alias);
         }
     }
 
-    protected void applySelects(QueryGeneratorVisitor queryGenerator, StringBuilder sb, List<AbstractCriteriaBuilder.SelectInfo> selects) {
+    private void applySelects(QueryGenerator queryGenerator, StringBuilder sb, List<SelectInfo> selects) {
         if (selects.isEmpty()) {
             return;
         }
@@ -200,7 +202,7 @@ public class SelectBuilderImpl<T> {
         }
         // we must not replace select alias since we would loose the original expressions
         queryGenerator.setReplaceSelectAliases(false);
-        Iterator<AbstractCriteriaBuilder.SelectInfo> iter = selects.iterator();
+        Iterator<SelectInfo> iter = selects.iterator();
         applySelect(queryGenerator, sb, iter.next());
         while (iter.hasNext()) {
             sb.append(", ");
@@ -211,7 +213,8 @@ public class SelectBuilderImpl<T> {
     }
 
     protected void populateSelectAliasAbsolutePaths() {
-        for (Map.Entry<String, AbstractCriteriaBuilder.SelectInfo> selectAliasEntry : selectAliasToInfoMap.entrySet()) {
+        selectAbsolutePathToInfoMap.clear();
+        for (Map.Entry<String, SelectInfo> selectAliasEntry : selectAliasToInfoMap.entrySet()) {
             Expression selectExpr = selectAliasEntry.getValue().getExpression();
             if (selectExpr instanceof PathExpression) {
                 PathExpression pathExpr = (PathExpression) selectExpr;
@@ -247,9 +250,27 @@ public class SelectBuilderImpl<T> {
             }
             currentBuilder = null;
             for (Expression e : expressions) {
-                SelectBuilderImpl.this.selectInfos.add(new AbstractCriteriaBuilder.SelectInfo(e));
+                SelectManager.this.selectInfos.add(new SelectInfo(e));
             }
         }
 
+    }
+    
+    static class SelectInfo extends NodeInfo {
+
+        private String alias;
+
+        public SelectInfo(Expression expression) {
+            super(expression);
+        }
+
+        public SelectInfo(Expression expression, String alias) {
+            super(expression);
+            this.alias = alias;
+        }
+
+        public String getAlias() {
+            return alias;
+        }
     }
 }

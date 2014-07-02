@@ -16,12 +16,13 @@
 
 package com.blazebit.persistence.impl;
 
-import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.PagedList;
 import com.blazebit.persistence.PaginatedCriteriaBuilder;
 import com.blazebit.persistence.QueryBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
 import javax.persistence.EntityManager;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 /**
  *
@@ -49,9 +50,14 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
     public String getCountQueryString() {
         StringBuilder countQuery = new StringBuilder();
         
-        countQuery.append("SELECT COUNT(*)");
-        countQuery.append("FROM ").append(clazz.getSimpleName()).append(' ').append(rootAliasInfo.getAlias());
-        applyJoins(countQuery, rootAliasInfo, rootNode.getNodes());
+        applyImplicitJoins();
+        
+        countQuery.append("SELECT COUNT(*) ");
+        countQuery.append("FROM ").append(clazz.getSimpleName()).append(' ').append(joinManager.getRootAlias());
+        countQuery.append(joinManager.buildJoins(false));
+        countQuery.append(whereManager.buildClause());
+        countQuery.append(groupByManager.buildGroupBy());        
+        countQuery.append(havingManager.buildClause());
 //        applyWhere(queryGenerator, sb);
 //        applyGroupBys(queryGenerator, sb, groupByInfos);
 //        applyHavings(queryGenerator, sb);
@@ -60,12 +66,25 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
 
     @Override
     public String getIdQueryString() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        StringBuilder idQuery = new StringBuilder();
+        Metamodel m = em.getMetamodel();
+        EntityType<T> entityType = m.entity(clazz);
+        String idName = entityType.getId(entityType.getIdType().getJavaType()).getName();
+        
+        idQuery.append("SELECT ").append(idName);
+        idQuery.append(" FROM ").append(clazz.getSimpleName()).append(' ').append(joinManager.getRootAlias());
+        idQuery.append(joinManager.buildJoins(false));
+        idQuery.append(whereManager.buildClause());
+        idQuery.append(groupByManager.buildGroupBy());        
+        idQuery.append(havingManager.buildClause());
+        idQuery.append(orderByManager.buildOrderBy());
+        
+        return idQuery.toString();
     }
 
     @Override
     public <Y> SelectObjectBuilder<PaginatedCriteriaBuilder<Y>> selectNew(Class<Y> clazz) {
         return (SelectObjectBuilder<PaginatedCriteriaBuilder<Y>>) super.selectNew(clazz);
     }
-    
+   
 }

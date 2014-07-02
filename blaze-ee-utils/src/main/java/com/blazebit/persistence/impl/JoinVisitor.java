@@ -44,11 +44,22 @@ import com.blazebit.persistence.predicate.Predicate;
  */
 public class JoinVisitor extends VisitorAdapter {
 
-    private final AbstractCriteriaBuilder<?, ?> builder;
+    private final JoinManager joinManager;
+    private final SelectManager<?> selectManager;
     private boolean joinWithObjectLeafAllowed = true;
+    private boolean fromSelect = false;
 
-    public JoinVisitor(AbstractCriteriaBuilder<?, ?> builder) {
-        this.builder = builder;
+    public JoinVisitor(JoinManager joinManager, SelectManager<?> selectManager) {
+        this.joinManager = joinManager;
+        this.selectManager = selectManager;
+    }
+
+    public boolean isFromSelect() {
+        return fromSelect;
+    }
+
+    public void setFromSelect(boolean fromSelect) {
+        this.fromSelect = fromSelect;
     }
 
     @Override
@@ -57,14 +68,14 @@ public class JoinVisitor extends VisitorAdapter {
         String potentialSelectAlias = ExpressionUtils.getFirstPathElement(path);
 
         // do not join select aliases
-        if (builder.selectBuilder.getSelectAliasToInfoMap().containsKey(potentialSelectAlias)) {
+        if (selectManager.getSelectAliasToInfoMap().containsKey(potentialSelectAlias)) {
             if (!potentialSelectAlias.equals(path)) {
                 throw new IllegalStateException("Path starting with select alias not allowed");
             }
             return;
         }
 
-        builder.implicitJoin(expression, joinWithObjectLeafAllowed);
+        joinManager.implicitJoin(expression, joinWithObjectLeafAllowed, fromSelect);
     }
 
     public boolean isJoinWithObjectLeafAllowed() {

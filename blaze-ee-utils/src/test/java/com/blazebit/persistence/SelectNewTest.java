@@ -35,34 +35,7 @@ import org.junit.Test;
  *
  * @author ccbem
  */
-public class SelectNewTest {
-
-    private static EntityManager em;
-
-    @BeforeClass
-    public static void init() {
-        Properties properties = new Properties();
-        properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
-        properties.put("javax.persistence.transactionType", "RESOURCE_LOCAL");
-        properties.put("hibernate.connection.url", "jdbc:h2:mem:test");
-        properties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-        properties.put("hibernate.connection.driver_class", "org.h2.Driver");
-        properties.put("hibernate.connection.password", "admin");
-        properties.put("hibernate.connection.username", "admin");
-        properties.put("hibernate.hbm2ddl.auto", "create-drop");
-        properties.put("hibernate.show_sql", "true");
-        properties.put("hibernate.format_sql", "true");
-
-        Ejb3Configuration cfg = new Ejb3Configuration();
-        cfg.addProperties(properties);
-        cfg.addAnnotatedClass(Document.class);
-        cfg.addAnnotatedClass(Version.class);
-        cfg.addAnnotatedClass(Person.class);
-
-        EntityManagerFactory factory = cfg.buildEntityManagerFactory();
-        em = factory.createEntityManager();
-    }
-
+public class SelectNewTest extends AbstractPersistenceTest {
     @Before
     public void setUp() {
         EntityTransaction tx = em.getTransaction();
@@ -87,7 +60,7 @@ public class SelectNewTest {
 
     @Test
     public void testSelectNewDocumentViewModel() {
-        CriteriaBuilder<DocumentViewModel> criteria = CriteriaProvider.from(Document.class)
+        CriteriaBuilder<DocumentViewModel> criteria = CriteriaProvider.from(em, Document.class)
                 .selectNew(DocumentViewModel.class).with("name").end().orderByAsc("name");
 
         assertEquals("SELECT document.name FROM Document document ORDER BY document.name ASC NULLS LAST", criteria.getQueryString());
@@ -104,7 +77,7 @@ public class SelectNewTest {
 
     @Test
     public void testSelectNewDocument() {
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.selectNew(Document.class).with("d.name").end().where("LENGTH(d.name)").le(4).orderByAsc("d.name");
         assertEquals("SELECT d.name FROM Document d WHERE LENGTH(d.name) <= :param_0 ORDER BY d.name ASC NULLS LAST", criteria.getQueryString());
         List<Document> actual = criteria.getQuery(em).getResultList();
@@ -140,7 +113,7 @@ public class SelectNewTest {
 //    
 //    @Test
 //    public void testSelectNewModel(){
-//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
 //        criteria.selectNew(Document.class).with("d.author.name").end().where("d.title.length").lt(4);
 //        
 //        
@@ -149,13 +122,13 @@ public class SelectNewTest {
 //    
 //    @Test(expected = NullPointerException.class)
 //    public void testSelectNewNullClass(){
-//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
 //        criteria.selectNew((Class<Document>)null);        
 //    }
 //    
 //    @Test(expected = NullPointerException.class)
 //    public void testSelectNewNullConstructor(){
-//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
 //        criteria.selectNew((Constructor<Document>)null);        
 //    }
 }

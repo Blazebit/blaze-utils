@@ -23,11 +23,11 @@ import org.junit.Test;
  *
  * @author ccbem
  */
-public class ArrayExpressionTest {
+public class ArrayExpressionTest extends AbstractPersistenceTest {
 
     @Test
     public void testSelectPathIndex() {
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.select("d.contacts[d.age]");
 
         assertEquals("SELECT VALUE(contacts) FROM Document d LEFT JOIN d.contacts contacts WHERE KEY(contacts) = d.age", criteria.getQueryString());
@@ -35,7 +35,7 @@ public class ArrayExpressionTest {
 
     @Test
     public void testSelectParameterIndex() {
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.select("d.contacts[:age]");
 
         assertEquals("SELECT VALUE(contacts) FROM Document d LEFT JOIN d.contacts contacts WHERE KEY(contacts) = :age", criteria.getQueryString());
@@ -43,7 +43,7 @@ public class ArrayExpressionTest {
 
     @Test
     public void testSelectMultipleArrayPath() {
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.select("d.contacts[:age].localized[d.age]");
 
         assertEquals("SELECT VALUE(localized) FROM Document d LEFT JOIN d.contacts contacts LEFT JOIN contacts.localized localized WHERE KEY(contacts) = :age AND KEY(localized) = d.age", criteria.getQueryString());
@@ -51,7 +51,7 @@ public class ArrayExpressionTest {
 
     @Test
     public void testSelectAlternatingArrayPath() {
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.select("d.contacts[:age].partnerDocument.versions[d.age]");
 
         assertEquals("SELECT VALUE(versions) FROM Document d LEFT JOIN d.contacts contacts LEFT JOIN contacts.partnerDocument partnerDocument LEFT JOIN partnerDocument.versions versions WHERE KEY(contacts) = :age AND KEY(versions) = d.age", criteria.getQueryString());
@@ -59,7 +59,7 @@ public class ArrayExpressionTest {
 
     @Test
     public void testArrayIndexSelectAlias() {
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.select("SUM(d.owner.ownedDocuments.age)", "ageSum").select("d.contacts[:age].partnerDocument.versions[ageSum]");
 
         assertEquals("SELECT SUM(ownedDocuments.age) AS ageSum, VALUE(versions) FROM Document d LEFT JOIN d.contacts contacts LEFT JOIN contacts.partnerDocument partnerDocument LEFT JOIN partnerDocument.versions versions LEFT JOIN d.owner owner LEFT JOIN owner.ownedDocuments ownedDocuments WHERE KEY(contacts) = :age AND KEY(versions) = ageSum", criteria.getQueryString());
@@ -67,7 +67,7 @@ public class ArrayExpressionTest {
 
     @Test
     public void testArrayIndexImplicitJoin() {
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.select("d.contacts[d.versions.date]");
 
         assertEquals("SELECT VALUE(contacts) FROM Document d LEFT JOIN d.contacts contacts LEFT JOIN d.versions versions WHERE KEY(contacts) = versions.date", criteria.getQueryString());
@@ -75,7 +75,7 @@ public class ArrayExpressionTest {
     
     @Test
     public void testArrayIndexExplicitJoinAlias() {
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.select("d.contacts[v.date]").leftJoin("d.versions", "v"); 
         
         assertEquals("SELECT VALUE(contacts) FROM Document d LEFT JOIN d.contacts contacts LEFT JOIN d.versions v WHERE KEY(contacts) = v.date", criteria.getQueryString());

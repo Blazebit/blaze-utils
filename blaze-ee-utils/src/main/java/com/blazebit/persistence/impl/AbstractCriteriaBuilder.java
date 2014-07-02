@@ -60,192 +60,61 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     protected static final Logger log = Logger.getLogger(CriteriaBuilderImpl.class.getName());
 
     protected final Class<T> clazz;
-    protected final AliasInfo rootAliasInfo;
-    // Maps alias to join path with the root as base
-    protected final Map<String, AliasInfo> joinAliasInfos;
-    // we might have multiple nodes that depend on the same unresolved alias,
-    // hence we need a List of NodeInfos.
-    // e.g. SELECT a.X, a.Y FROM A a
-    // a is unresolved for both X and Y
-    protected final JoinNode rootNode;
-    protected final List<OrderByInfo> orderByInfos;
-    protected final RootPredicate rootWherePredicate;
-    protected final RootPredicate rootHavingPredicate;
-    protected final List<NodeInfo> groupByInfos;
-    protected final ParameterManager parameterManager;
+    protected final EntityManager em;
 
-    protected final SelectBuilderImpl<T, U> selectBuilder;
+    protected final ParameterManager parameterManager;
+    protected final SelectManager<T> selectManager;
+    protected final WhereManager<U> whereManager;
+    protected final HavingManager<U> havingManager;
+    protected final GroupByManager groupByManager;
+    protected final OrderByManager orderByManager;
+    protected final JoinManager joinManager;
+    private final ArrayExpressionTransformer arrayTransformer;
+    private final QueryGenerator queryGenerator;
 
     /**
      * Create flat copy of builder
-     * @param builder 
+     *
+     * @param builder
      */
     protected AbstractCriteriaBuilder(AbstractCriteriaBuilder<T, ? extends QueryBuilder<T, ?>> builder) {
         this.clazz = builder.clazz;
-        this.rootAliasInfo = builder.rootAliasInfo;
-        this.joinAliasInfos = builder.joinAliasInfos;
-        this.rootNode = builder.rootNode;
-        this.orderByInfos = builder.orderByInfos;
-        this.rootWherePredicate = builder.rootWherePredicate;
-        this.rootHavingPredicate = builder.rootHavingPredicate;
-        this.groupByInfos = builder.groupByInfos;
+        this.orderByManager = builder.orderByManager;
         this.parameterManager = builder.parameterManager;
-        this.selectBuilder = builder.selectBuilder;
+        this.selectManager = builder.selectManager;
+        this.whereManager = (WhereManager<U>) builder.whereManager;
+        this.havingManager = (HavingManager<U>) builder.havingManager;
+        this.groupByManager = builder.groupByManager;
+        this.joinManager = builder.joinManager;
+        this.arrayTransformer = builder.arrayTransformer;
+        this.queryGenerator = builder.queryGenerator;
+        this.em = builder.em;
     }
 
-    public AbstractCriteriaBuilder(Class<T> clazz, String alias) {
+    public AbstractCriteriaBuilder(EntityManager em, Class<T> clazz, String alias) {
         this.clazz = clazz;
-        this.rootAliasInfo = new AliasInfo(alias, "", true);
-        this.joinAliasInfos = new HashMap<String, AliasInfo>();
-        this.joinAliasInfos.put(alias, rootAliasInfo);
-        this.rootNode = new JoinNode(rootAliasInfo, null, false, null);
-        this.rootWherePredicate = new RootPredicate(this);
-        this.rootHavingPredicate = new RootPredicate(this);
-        this.selectBuilder = new SelectBuilderImpl<T, U>(this);
-        this.orderByInfos = new ArrayList<OrderByInfo>();
-        this.groupByInfos = new ArrayList<NodeInfo>();
+        
+        this.joinManager = new JoinManager(alias, clazz);
+                
         this.parameterManager = new ParameterManager();
+        
+        this.arrayTransformer = new ArrayExpressionTransformer();
+        this.queryGenerator = new QueryGenerator(parameterManager);
+        
+        
+        this.whereManager = new WhereManager<U>(queryGenerator, arrayTransformer);
+        this.havingManager = new HavingManager<U>(queryGenerator, arrayTransformer);
+        this.groupByManager = new GroupByManager(queryGenerator, arrayTransformer);
+                
+        this.selectManager = new SelectManager<T>(queryGenerator);
+        this.orderByManager = new OrderByManager(queryGenerator, arrayTransformer);
+        
+        //resolve cyclic dependencies
+        this.arrayTransformer.setRootWherePredicate(whereManager.getRootPredicate());
+        this.queryGenerator.setSelectManager(selectManager);
+        this.em = em;
     }
-
-    private static class JoinResult {
-
-        private final JoinNode baseNode;
-        private final String field;
-
-        public JoinResult(JoinNode baseNode, String field) {
-            this.baseNode = baseNode;
-            this.field = field;
-        }
-    }
-
-    private static class OrderByInfo extends NodeInfo {
-
-        private boolean ascending;
-        private boolean nullFirst;
-
-        public OrderByInfo(Expression expression, boolean ascending, boolean nullFirst) {
-            super(expression);
-            this.ascending = ascending;
-            this.nullFirst = nullFirst;
-        }
-    }
-
-    static class SelectInfo extends NodeInfo {
-
-        private String alias;
-
-        public SelectInfo(Expression expression) {
-            super(expression);
-        }
-
-        public SelectInfo(Expression expression, String alias) {
-            super(expression);
-            this.alias = alias;
-        }
-
-        public String getAlias() {
-            return alias;
-        }
-
-        public void setAlias(String alias) {
-            this.alias = alias;
-        }
-    }
-
-    private static class RootPredicate extends AbstractBuilderEndedListener {
-
-        private final AndPredicate predicate;
-        private final ArrayTransformationVisitor transformer;
-
-        public RootPredicate(AbstractCriteriaBuilder<?, ?> builder) {
-            this.predicate = new AndPredicate();
-            this.transformer = new ArrayTransformationVisitor(builder);
-        }
-
-        @Override
-        public void onBuilderEnded(PredicateBuilder builder) {
-            super.onBuilderEnded(builder);
-            Predicate pred = builder.getPredicate();
-
-            pred.accept(transformer);
-//            pred.accept(unresolvedAliasRegistrationVisitor);
-
-            predicate.getChildren()
-                    .add(pred);
-        }
-    }
-
-    protected static void applyJoins(StringBuilder sb, AliasInfo joinBase, Map<String, JoinNode> nodes) {
-        for (Map.Entry<String, JoinNode> nodeEntry : nodes.entrySet()) {
-            String relation = nodeEntry.getKey();
-            JoinNode node = nodeEntry.getValue();
-            sb.append(' ');
-            switch (node.getType()) {
-                case INNER:
-                    sb.append("JOIN ");
-                    break;
-                case LEFT:
-                    sb.append("LEFT JOIN ");
-                    break;
-                case RIGHT:
-                    sb.append("RIGHT JOIN ");
-                    break;
-                case OUTER:
-                    sb.append("OUTER JOIN ");
-                    break;
-            }
-            if (node.isFetch()) {
-                sb.append("FETCH ");
-            }
-            sb.append(joinBase.getAlias()).append('.').append(relation).append(' ').append(node.getAliasInfo().getAlias());
-            if (!node.getNodes().isEmpty()) {
-                applyJoins(sb, node.getAliasInfo(), node.getNodes());
-            }
-        }
-    }
-
-    protected static void applyOrderBys(QueryGeneratorVisitor queryGenerator, StringBuilder sb, List<OrderByInfo> orderBys) {
-        if (orderBys.isEmpty()) {
-            return;
-        }
-        sb.append(" ORDER BY ");
-        Iterator<OrderByInfo> iter = orderBys.iterator();
-        applyOrderBy(queryGenerator, sb, iter.next());
-        while (iter.hasNext()) {
-            sb.append(", ");
-            applyOrderBy(queryGenerator, sb, iter.next());
-        }
-    }
-
-    protected static void applyOrderBy(QueryGeneratorVisitor queryGenerator, StringBuilder sb, OrderByInfo orderBy) {
-        orderBy.getExpression().accept(queryGenerator);
-        if (!orderBy.ascending) {
-            sb.append(" DESC");
-        } else {
-            sb.append(" ASC");
-        }
-        if (orderBy.nullFirst) {
-            sb.append(" NULLS FIRST");
-        } else {
-            sb.append(" NULLS LAST");
-        }
-    }
-
-    @Override
-    public U setParameter(String name, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public U setParameter(String name, Calendar value, TemporalType temporalType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public U setParameter(String name, Date value, TemporalType temporalType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    
     @Override
     public List<T> getResultList(EntityManager em) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -256,7 +125,8 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
      */
     @Override
     public U distinct() {
-        return selectBuilder.distinct();
+        selectManager.distinct();
+        return (U) this;
     }
 
     /* CASE (WHEN condition THEN scalarExpression)+ ELSE scalarExpression END */
@@ -299,7 +169,8 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
             throw new IllegalArgumentException("selectAlias");
         }
         verifyBuilderEnded();
-        return selectBuilder.select(expression, selectAlias);
+        selectManager.select(this, expression, selectAlias);
+        return (U) this;
     }
 
     @Override
@@ -321,19 +192,19 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     @Override
     public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Class<Y> clazz) {
         verifyBuilderEnded();
-        return selectBuilder.selectNew(clazz);
+        return selectManager.selectNew(this, clazz);
     }
 
     @Override
-    public SelectObjectBuilder<U> selectNew(Constructor<?> constructor) {
+    public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Constructor<Y> constructor) {
         verifyBuilderEnded();
-        return selectBuilder.selectNew(constructor);
+        return selectManager.selectNew(this, constructor);
     }
 
     @Override
     public SelectObjectBuilder<U> selectNew(ObjectBuilder<? extends T> builder) {
         verifyBuilderEnded();
-        return selectBuilder.selectNew(builder);
+        return selectManager.selectNew(builder);
     }
 
     /*
@@ -347,12 +218,12 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         if (expression.isEmpty()) {
             throw new IllegalArgumentException("expression");
         }
-        return rootWherePredicate.startBuilder(new RestrictionBuilderImpl<U>((U) this, rootWherePredicate, ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this)));
+        return whereManager.restrict(this, expression);
     }
 
     @Override
     public WhereOrBuilder<U> whereOr() {
-        return rootWherePredicate.startBuilder(new WhereOrBuilderImpl<U>(this, (U) this, rootWherePredicate));
+        return whereManager.whereOr(this);
     }
 
     @Override
@@ -366,8 +237,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     @Override
     public U groupBy(String expression) {
         verifyBuilderEnded();
-        Expression exp = ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this);
-        groupByInfos.add(new NodeInfo(exp));
+        groupByManager.groupBy(expression);
         return (U) this;
     }
 
@@ -376,15 +246,15 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
      */
     @Override
     public RestrictionBuilder<U> having(String expression) {
-        if (groupByInfos.isEmpty()) {
+        if (groupByManager.getGroupByInfos().isEmpty()) {
             throw new IllegalStateException();
         }
-        return rootHavingPredicate.startBuilder(new RestrictionBuilderImpl<U>((U) this, rootHavingPredicate, ExpressionUtils.parse(expression)));
+        return havingManager.restrict(this, expression);
     }
 
     @Override
     public HavingOrBuilder<U> havingOr() {
-        return rootHavingPredicate.startBuilder(new HavingOrBuilderImpl<U>((U) this, rootHavingPredicate));
+        return havingManager.havingOr(this);
     }
 
     /*
@@ -411,125 +281,12 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     }
 
     protected void verifyBuilderEnded() {
-        rootWherePredicate.verifyBuilderEnded();
-        rootHavingPredicate.verifyBuilderEnded();
-        selectBuilder.verifyBuilderEnded();
+        whereManager.verifyBuilderEnded();
+        havingManager.verifyBuilderEnded();
+        selectManager.verifyBuilderEnded();
     }
 
-    Expression implicitJoin(Expression expression, boolean objectLeafAllowed) {
-        PathExpression pathExpression;
-        if (expression instanceof PathExpression) {
-            pathExpression = (PathExpression) expression;
-            JoinResult result = implicitJoin(pathExpression.getPath(), objectLeafAllowed);
-            pathExpression.setBaseNode(result.baseNode);
-            pathExpression.setField(result.field);
-        } else {
-            // We know it can only be a composite expression
-            for (Expression exp : ((CompositeExpression) expression).getExpressions()) {
-                if (exp instanceof PathExpression) {
-                    pathExpression = (PathExpression) exp;
-                    JoinResult result = implicitJoin(pathExpression.getPath(), objectLeafAllowed);
-                    pathExpression.setBaseNode(result.baseNode);
-                    pathExpression.setField(result.field);
-                }
-            }
-        }
-        return expression;
-    }
-
-    protected String normalizePath(String path) {
-        String normalizedPath;
-        if (startsAtRootAlias(path)) {
-            // The given path is relative to the root
-            normalizedPath = path.substring(rootAliasInfo.getAlias().length() + 1);
-        } else {
-            // The path is either already normalized or uses a specific alias as base
-            normalizedPath = path;
-        }
-        return normalizedPath;
-    }
-
-    JoinResult implicitJoin(String path, boolean objectLeafAllowed) {
-        String normalizedPath = normalizePath(path);
-        JoinNode baseNode;
-        String field;
-        int dotIndex;
-        int fieldStartDotIndex;
-        if ((fieldStartDotIndex = normalizedPath.lastIndexOf('.')) != -1) {
-            // First we extract the field by which should be ordered
-            field = normalizedPath.substring(fieldStartDotIndex + 1);
-            String joinPath = normalizedPath.substring(0, fieldStartDotIndex);
-            //TEST
-            joinPath = normalizedPath;
-            AliasInfo potentialBaseInfo;
-            if ((dotIndex = joinPath.indexOf('.')) != -1) {
-                // We found a dot in the path, so it either uses an alias or does chained joining
-                String potentialBase = normalizedPath.substring(0, dotIndex);
-                potentialBaseInfo = joinAliasInfos.get(potentialBase);
-            } else {
-                potentialBaseInfo = joinAliasInfos.get(joinPath);
-            }
-            if (potentialBaseInfo != null) {
-                // We found an alias for the first part of the path
-                String potentialBasePath = potentialBaseInfo.getAbsolutePath();
-                JoinNode aliasNode = findNode(rootNode, potentialBasePath);
-                // TODO: if aliasNode is null, then probably a subpath is not yet joined
-                String relativePath = normalizedPath.substring(aliasNode.getAliasInfo().getAlias().length() + 1);
-                normalizedPath = potentialBasePath + '.' + relativePath;
-                String relativeJoinPath = relativePath.substring(0, relativePath.length() - field.length());
-                //TEST
-                relativeJoinPath = relativePath;
-                if (relativeJoinPath.isEmpty()) {
-                    baseNode = aliasNode;
-                } else {
-                    baseNode = createOrUpdateNode(aliasNode, potentialBasePath, relativeJoinPath, null, null, false, true);
-                    if (baseNode.getAliasInfo().getAbsolutePath().endsWith(relativeJoinPath)) {
-                        field = null;
-                    }
-                }
-            } else {
-                //                String potentialRootProperty = ExpressionUtils.getFirstPathElement(normalizedPath);
-                //                if (ReflectionUtils.getField(clazz, potentialRootProperty) == null) {
-                //                    throw new IllegalStateException("Unresolved alias: " + normalizedPath);
-                //                }
-                // check if field is joinable
-                // The given path is relative to the root
-                baseNode = createOrUpdateNode(rootNode, "", joinPath, null, null, false, true);
-                if (baseNode.getAliasInfo().getAbsolutePath().endsWith(joinPath)) {
-                    field = null;
-                }
-            }
-        } else {
-            // The given path may be relative to the root or it might be an alias
-            if (objectLeafAllowed) {
-                AliasInfo alias = joinAliasInfos.get(normalizedPath);
-                if (alias == rootAliasInfo) {
-                    baseNode = rootNode;
-                    field = null;
-                } else if (alias != null) {
-                    baseNode = findNode(rootNode, alias.getAbsolutePath());
-                    field = null;
-                } else {
-                    // check if the path is joinable, assuming it is relative to the root (implicit root prefix)
-                    baseNode = createOrUpdateNode(rootNode, "", normalizedPath, null, null, false, true);
-                    // check if the last path element was also joined
-                    if (baseNode.getAliasInfo().getAbsolutePath().endsWith(normalizedPath)) {
-                        field = null;
-                    } else {
-                        field = normalizedPath;
-                    }
-                }
-            } else {
-                Class<?> fieldClass = ModelUtils.resolveFieldClass(clazz, normalizedPath);
-                if (ModelUtils.isJoinable(fieldClass)) {
-                    throw new IllegalArgumentException("No object leaf allowed but " + normalizedPath + " is an object leaf");
-                }
-                baseNode = rootNode;
-                field = normalizedPath;
-            }
-        }
-        return new JoinResult(baseNode, field);
-    }
+    
 
     @Override
     public U orderBy(String expression, boolean ascending, boolean nullFirst) {
@@ -540,8 +297,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
             throw new IllegalArgumentException("expression");
         }
         verifyBuilderEnded();
-        Expression exp = ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), this);
-        orderByInfos.add(new OrderByInfo(exp, ascending, nullFirst));
+        orderByManager.orderBy(expression, ascending, nullFirst);
         return (U) this;
     }
 
@@ -597,216 +353,35 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
             throw new IllegalArgumentException();
         }
         verifyBuilderEnded();
-        String normalizedPath;
-        if (startsAtRootAlias(path)) {
-            // The given path is relative to the root
-            normalizedPath = path.substring(rootAliasInfo.getAlias().length() + 1);
-            createOrUpdateNode(rootNode, "", normalizedPath, alias, type, fetch, false);
-        } else {
-            // The path is either already normalized or uses a specific alias as base
-            normalizedPath = path;
-            int dotIndex;
-            if ((dotIndex = normalizedPath.indexOf('.')) != -1) {
-                // We found a dot in the path, so it either uses an alias or does chained joining
-                String potentialBase = normalizedPath.substring(0, dotIndex);
-                AliasInfo potentialBaseInfo = joinAliasInfos.get(potentialBase);
-                if (potentialBaseInfo != null) {
-                    // We found an alias for the first part of the path
-                    String potentialBasePath = potentialBaseInfo.getAbsolutePath();
-                    JoinNode aliasNode = findNode(rootNode, potentialBasePath);
-                    String relativePath = normalizedPath.substring(dotIndex + 1);
-                    //                    normalizedPath = potentialBasePath + '.' + relativePath;
-                    createOrUpdateNode(aliasNode, potentialBasePath, relativePath, alias, type, fetch, false);
-                    //if fetch is true we have to fetch the whole path from aliasNode back to the root
-                    if (fetch) {
-                        fetchPath(rootNode, potentialBasePath);
-                    }
-                } else {
-                    // The given path is relative to the root
-                    createOrUpdateNode(rootNode, "", normalizedPath, alias, type, fetch, false);
-                }
-            } else {
-                // The given path is relative to the root
-                createOrUpdateNode(rootNode, "", normalizedPath, alias, type, fetch, false);
-            }
-        }
-        // resolve any previously unresolved aliases
-        // TODO: use entity model to check if leafObject is allowed
-        // TODO: maybe do this at query generation time??
-        //        List<NodeInfo> unresolved = unresolvedAliasMap.remove(alias);
-        //        if (unresolved != null) {
-        //            for (NodeInfo info : unresolved) {
-        //                implicitJoin(info.getExpression(), true);
-        //            }
-        //        }
+        joinManager.join(path, alias, type, fetch);
         return (U) this;
     }
 
-    boolean startsAtRootAlias(String path) {
-        return path.startsWith(rootAliasInfo.getAlias()) && path.length() > rootAliasInfo.getAlias().length() && path.charAt(rootAliasInfo.getAlias().length()) == '.';
-    }
-
-    protected JoinNode findNode(JoinNode baseNode, String path) {
-        JoinNode currentNode = baseNode;
-        String[] pathElements = path.split("\\.");
-        for (int i = 0; i < pathElements.length; i++) {
-            currentNode = currentNode.getNodes().get(pathElements[i]);
-        }
-        return currentNode;
-    }
-
-    /**
-     * Base node will NOT be fetched
-     *
-     * @param baseNode
-     * @param path
-     */
-    protected void fetchPath(JoinNode baseNode, String path) {
-        JoinNode currentNode = baseNode;
-        String[] pathElements = path.split("\\.");
-        for (int i = 0; i < pathElements.length; i++) {
-            currentNode = currentNode.getNodes().get(pathElements[i]);
-            currentNode.setFetch(true);
-        }
-    }
-
-    protected JoinNode createOrUpdateNode(JoinNode baseNode, String basePath, String joinPath, String alias, JoinType type, boolean fetch, boolean implicit) {
-        JoinNode currentNode = baseNode;
-        StringBuilder currentPath = new StringBuilder(basePath);
-        String joinAlias = alias;
-        String[] pathElements = joinPath.split("\\.");
-        //        for (int i = 0; i < loopBound; i++) {
-        //            // TODO: Implement model aware joining or use fetch profiles or so to decide the join types automatically
-        //            currentNode = getOrCreate(currentPath, currentNode, pathElements[i], pathElements[i], JoinType.LEFT, false,
-        //                    "Ambiguous implicit join", true);
-        //        }
-        //        getOrCreate(currentPath, currentNode, pathElements[pathElements.length - 1], joinAlias, type, fetch,
-        //                "Ambiguous alias", implicit);
-        Class<?> currentClass;
-        if (baseNode.getPropertyClass() == null) {
-            currentClass = clazz;
-        } else {
-            currentClass = baseNode.getPropertyClass();
-        }
-        // Iterate through all property names
-        for (int j = 0; j < pathElements.length; j++) {
-            String propertyName = pathElements[j];
-            //            Field propertyField = ReflectionUtils.getField(currentClass, propertyName);
-            Class<?> rawFieldClass = ReflectionUtils.getResolvedFieldType(currentClass, propertyName);
-            Class<?> resolvedFieldClass = ModelUtils.resolveFieldClass(currentClass, propertyName);
-            // Parseable types do not need to be fetched, so also sub
-            // properties would not have to be fetched
-            // Christian Beikov 14.09.13:
-            // Added check for collection and map types since fieldClass evaluates to V if the field is of type Map<K, V>
-            if (!ModelUtils.isJoinable(rawFieldClass)) {
-                log.info(new StringBuilder("Field with name ").append(propertyName).append(" of class ").append(currentClass.getName()).append(" is parseable and therefore it has not to be fetched explicitly.").toString());
-                break;
-            }
-            currentClass = resolvedFieldClass;
-            if (j == pathElements.length - 1) {
-                // use parameters for joining the last path property
-                if (joinAlias == null) {
-                    joinAlias = pathElements[pathElements.length - 1];
-                }
-                if (type == null) {
-                    // TODO: Implement model aware joining
-                    type = JoinType.LEFT;
-                }
-                currentNode = getOrCreate(currentPath, currentNode, propertyName, resolvedFieldClass, joinAlias, type, fetch, "Ambiguous implicit join", implicit);
-            } else {
-                currentNode = getOrCreate(currentPath, currentNode, propertyName, resolvedFieldClass, propertyName, JoinType.LEFT, fetch, "Ambiguous implicit join", true);
-            }
-            if (fetch) {
-                currentNode.setFetch(true);
-            }
-        }
-        return currentNode;
-    }
-
-    protected JoinNode getOrCreate(StringBuilder currentPath, JoinNode currentNode, String joinRelationName, Class<?> joinRelationClass, String alias, JoinType type, boolean fetch, String errorMessage, boolean implicit) {
-        JoinNode node = currentNode.getNodes().get(joinRelationName);
-        if (currentPath.length() > 0) {
-            currentPath.append('.');
-        }
-        currentPath.append(joinRelationName);
-        if (node == null) {
-            String currentJoinPath = currentPath.toString();
-            AliasInfo oldAliasInfo = joinAliasInfos.get(alias);
-            if (oldAliasInfo != null) {
-                if (!oldAliasInfo.getAbsolutePath().equals(currentJoinPath)) {
-                    throw new IllegalArgumentException(errorMessage);
-                } else {
-                    throw new RuntimeException("Probably a programming error if this happens. An alias[" + alias + "] for the same join path[" + currentJoinPath + "] is available but the join node is not!");
-                }
-            } else {
-                node = new JoinNode(new AliasInfo(alias, currentJoinPath, implicit), type, fetch, joinRelationClass);
-                joinAliasInfos.put(alias, node.getAliasInfo());
-            }
-            currentNode.getNodes().put(joinRelationName, node);
-        } else {
-            AliasInfo nodeAliasInfo = node.getAliasInfo();
-            if (!alias.equals(nodeAliasInfo.getAlias())) {
-                // Aliases for the same join paths don't match
-                if (nodeAliasInfo.isImplicit() && !implicit) {
-                    // Overwrite implicit aliases
-                    String oldAlias = nodeAliasInfo.getAlias();
-                    nodeAliasInfo.setAlias(alias);
-                    nodeAliasInfo.setImplicit(false);
-                    // We can only change the join type if the existing node is implicit and the update on the node is not implicit
-                    node.setType(type);
-                    joinAliasInfos.remove(oldAlias);
-                    joinAliasInfos.put(alias, nodeAliasInfo);
-                } else if (!nodeAliasInfo.isImplicit() && !implicit) {
-                    throw new IllegalArgumentException("Alias conflict[" + nodeAliasInfo.getAlias() + "=" + nodeAliasInfo.getAbsolutePath() + ", " + alias + "=" + currentPath.toString() + "]");
-                }
-            }
-        }
-        return node;
-    }
-
-    protected void applyWhere(QueryGeneratorVisitor queryGenerator, StringBuilder sb) {
-        if (rootWherePredicate.predicate.getChildren().isEmpty()) {
-            return;
-        }
-        sb.append(" WHERE ");
-        rootWherePredicate.predicate.accept(queryGenerator);
-    }
-
-    protected void applyHavings(QueryGeneratorVisitor queryGenerator, StringBuilder sb) {
-        if (rootHavingPredicate.predicate.getChildren().isEmpty()) {
-            return;
-        }
-        sb.append(" HAVING ");
-        rootHavingPredicate.predicate.accept(queryGenerator);
-    }
-
-    protected void applyGroupBys(QueryGeneratorVisitor queryGenerator, StringBuilder sb, List<NodeInfo> groupBys) {
-        if (groupBys.isEmpty()) {
-            return;
-        }
-        sb.append(" GROUP BY ");
-        Iterator<NodeInfo> iter = groupBys.iterator();
-        iter.next().getExpression().accept(queryGenerator);
-        while (iter.hasNext()) {
-            sb.append(", ");
-            iter.next().getExpression().accept(queryGenerator);
-        }
-    }
-
     protected void applyImplicitJoins() {
-        final JoinVisitor joinVisitor = new JoinVisitor(this);
+        final JoinVisitor joinVisitor = new JoinVisitor(joinManager, selectManager);
         // carry out implicit joins
-        selectBuilder.acceptVisitor(joinVisitor);
-        rootWherePredicate.predicate.accept(joinVisitor);
-        for (NodeInfo groupBy : groupByInfos) {
-            groupBy.getExpression().accept(joinVisitor);
-        }
-        rootHavingPredicate.predicate.accept(joinVisitor);
+        joinVisitor.setFromSelect(true);
+        selectManager.acceptVisitor(joinVisitor);
+        joinVisitor.setFromSelect(false);
+        
+        whereManager.acceptVisitor(joinVisitor);
+        groupByManager.acceptVisitor(joinVisitor);
+        
+        havingManager.acceptVisitor(joinVisitor);
         joinVisitor.setJoinWithObjectLeafAllowed(false);
-        for (OrderByInfo orderBy : orderByInfos) {
-            orderBy.getExpression().accept(joinVisitor);
-        }
+        orderByManager.acceptVisitor(joinVisitor);
         joinVisitor.setJoinWithObjectLeafAllowed(true);
+    }
+    
+    protected void applyArrayTransformations(){
+        // run through expressions
+        // for each arrayExpression, look up the alias in the joinManager's aliasMap
+        // do the transformation using the alias
+        // exchange old arrayExpression with new PathExpression
+        // introduce applyTransformer method in managers
+        // transformer has a method that returns the transformed Expression
+        // the applyTransformer method will replace the transformed expression with the original one
+        selectManager.applyTransformer(arrayTransformer);
     }
 
     @Override
@@ -823,33 +398,29 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         // join("a.b", "b").where("b.c")
         // in the first case
         applyImplicitJoins();
-        QueryGeneratorVisitor queryGenerator = new QueryGeneratorVisitor(selectBuilder.getSelectAbsolutePathToInfoMap(), sb, parameterManager);
-        sb.append(selectBuilder.buildSelect());
-        sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(rootAliasInfo.getAlias());
-        applyJoins(sb, rootAliasInfo, rootNode.getNodes());
-        applyWhere(queryGenerator, sb);
-        applyGroupBys(queryGenerator, sb, groupByInfos);
-        applyHavings(queryGenerator, sb);
-        applyOrderBys(queryGenerator, sb, orderByInfos);
+        
+        sb.append(selectManager.buildSelect());
+        sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(joinManager.getRootAlias());
+        sb.append(joinManager.buildJoins(true));
+        sb.append(whereManager.buildClause());
+        sb.append(groupByManager.buildGroupBy());        
+        sb.append(havingManager.buildClause());
+        sb.append(orderByManager.buildOrderBy());
         return sb.toString();
     }
 
     @Override
     public TypedQuery<T> getQuery(EntityManager em) {
         TypedQuery<T> query = (TypedQuery) em.createQuery(getQueryString(), Object[].class);
-        if (selectBuilder.getSelectObjectTransformer() != null) {
+        if (selectManager.getSelectObjectTransformer() != null) {
             // get hibernate query
             Query hQuery = query.unwrap(Query.class);
-            hQuery.setResultTransformer(selectBuilder.getSelectObjectTransformer());
+            hQuery.setResultTransformer(selectManager.getSelectObjectTransformer());
         }
         for (Map.Entry<String, Object> entry : parameterManager.getParameters().entrySet()) {
             query.setParameter(entry.getKey(), entry.getValue());
         }
         return query;
-    }
-
-    void addWherePredicate(Predicate predicate) {
-        rootWherePredicate.predicate.getChildren().add(predicate);
     }
 
 }

@@ -28,17 +28,11 @@ import javax.persistence.TypedQuery;
  *
  * @author ccbem
  */
-public interface QueryBuilder<T, X extends QueryBuilder<T, X>> extends Aggregateable<RestrictionBuilder<? extends X>>, Filterable<RestrictionBuilder<? extends X>> , SelectBuilder<T, X>{
+public interface QueryBuilder<T, X extends QueryBuilder<T, X>> extends Aggregateable<RestrictionBuilder<? extends X>>, Filterable<RestrictionBuilder<? extends X>> {
     
     public TypedQuery<T> getQuery(EntityManager em);
 
     public String getQueryString();
-    
-    public X setParameter(String name, Object value);
-
-    public X setParameter(String name, Calendar value, TemporalType temporalType);
-
-    public X setParameter(String name, Date value, TemporalType temporalType);
     
     public List<T> getResultList(EntityManager em);
 
@@ -89,7 +83,7 @@ public interface QueryBuilder<T, X extends QueryBuilder<T, X>> extends Aggregate
 
     public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Class<Y> clazz);
 
-    public SelectObjectBuilder<? extends X> selectNew(Constructor<?> constructor);
+    public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Constructor<Y> constructor);
 
     public SelectObjectBuilder<? extends X> selectNew(ObjectBuilder<? extends T> builder);
     

@@ -35,33 +35,7 @@ import static org.junit.Assert.*;
  *
  * @author ccbem
  */
-public class PaginationTest {
-    
-    private static EntityManager em;
-    
-    @BeforeClass
-    public static void init() {
-        Properties properties = new Properties();
-        properties.put("javax.persistence.provider", "org.hibernate.ejb.HibernatePersistence");
-        properties.put("javax.persistence.transactionType", "RESOURCE_LOCAL");
-        properties.put("hibernate.connection.url", "jdbc:h2:mem:test");
-        properties.put("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-        properties.put("hibernate.connection.driver_class", "org.h2.Driver");
-        properties.put("hibernate.connection.password", "admin");
-        properties.put("hibernate.connection.username", "admin");
-        properties.put("hibernate.hbm2ddl.auto", "create-drop");
-        properties.put("hibernate.show_sql", "true");
-        properties.put("hibernate.format_sql", "true");
-
-        Ejb3Configuration cfg = new Ejb3Configuration();
-        cfg.addProperties(properties);
-        cfg.addAnnotatedClass(Document.class);
-        cfg.addAnnotatedClass(Version.class);
-        cfg.addAnnotatedClass(Person.class);
-
-        EntityManagerFactory factory = cfg.buildEntityManagerFactory();
-        em = factory.createEntityManager();
-    }
+public class PaginationTest extends AbstractPersistenceTest {
 
     @Before
     public void setUp() {
@@ -108,7 +82,7 @@ public class PaginationTest {
     
     @Test
     public void simpleTest() {
-        CriteriaBuilder<DocumentViewModel> crit = CriteriaProvider.from(Document.class, "d")
+        CriteriaBuilder<DocumentViewModel> crit = CriteriaProvider.from(em, Document.class, "d")
                 .selectNew(DocumentViewModel.class)
                     .with("d.name")
                     .with("CONCAT(d.owner.name, ' user')")
@@ -121,10 +95,12 @@ public class PaginationTest {
         crit.orderByAsc("d.id");
         
         //TODO: introduce default ordering for pagination: by @id ASC NULLS LAST
+        //TODO: prevent redundant array transformations by first doing the implicit joining and afterwards applying the array transformer
+        //TODO: use metamodel for model-aware joining
         
         // do not include joins that are only needed for the select clause
         String expectedCountQuery = "SELECT COUNT(*) FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
-                + "WHERE UPPER(d.name) LIKE UPPER('doc%') AND owner.name LIKE '%arl%' AND KEY(localized) = 1 AND UPPER(VALUE(localized)) LIKE UPPER('a%')";
+                + "WHERE KEY(localized) = 1 AND UPPER(d.name) LIKE UPPER(:param_0) AND owner.name LIKE :param_1 AND UPPER(VALUE(localized)) LIKE UPPER(:param_2)";
         
         // limit this query using setFirstResult() and setMaxResult() according to the parameters passed to page()
         String expectedIdQuery = "SELECT d.id FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
@@ -136,8 +112,8 @@ public class PaginationTest {
                 + "WHERE KEY(localized) = 1 AND d.id IN (:ids) "
                 + "ORDER BY d.id ASC NULLS LAST";
         
-        System.out.println(crit.getQueryString());
         PaginatedCriteriaBuilder<DocumentViewModel> pcb = crit.page(1, 2);
+        System.out.println(pcb.getCountQueryString());
         
         assertEquals(expectedCountQuery, pcb.getCountQueryString());
         assertEquals(expectedIdQuery, pcb.getIdQueryString());

@@ -24,10 +24,10 @@ import org.junit.Test;
  *
  * @author ccbem
  */
-public class EqTest {
+public class EqTest extends AbstractPersistenceTest {
     @Test
     public void testEqualTo(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").eq(20);
         
         assertEquals("FROM Document d WHERE d.age = :param_0", criteria.getQueryString());
@@ -35,13 +35,13 @@ public class EqTest {
     
     @Test(expected = NullPointerException.class)
     public void testEqualToNull(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").eq(null);
     }
     
     @Test
     public void testEqualToExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").eqExpression("d.versions.date + 1");
         
         assertEquals("FROM Document d LEFT JOIN d.versions versions WHERE d.age = versions.date+1", criteria.getQueryString());
@@ -49,20 +49,20 @@ public class EqTest {
     
     @Test(expected = IllegalArgumentException.class)
     public void testEqualToEmptyExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").eqExpression("");        
     }
     
     @Test(expected = NullPointerException.class)
     public void testEqualToNullExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").eqExpression(null);        
     }
     
     // TODO: for subqueries
 //    @Test
 //    public void testEqualToAll(){
-//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
 //        criteria.where("d.age").eq().all().expression("d.partners.age");
 //        
 //        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age = ALL(partners.age)", criteria.getQueryString());
@@ -70,7 +70,7 @@ public class EqTest {
 //    
 //    @Test
 //    public void testEqualToAny(){
-//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
 //        criteria.where("d.age").eq().any().expression("d.partners.age");
 //        
 //        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age = ANY(partners.age)", criteria.getQueryString());
@@ -78,7 +78,7 @@ public class EqTest {
     
     @Test
     public void testNotEqualTo(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").notEq(20);
         
         assertEquals("FROM Document d WHERE NOT d.age = :param_0", criteria.getQueryString());
@@ -86,13 +86,13 @@ public class EqTest {
     
      @Test(expected = NullPointerException.class)
     public void testNotEqualToNull(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").notEq(null);
     }
     
     @Test
     public void testNotEqualToExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").notEqExpression("d.versions.date + 1");
         
         assertEquals("FROM Document d LEFT JOIN d.versions versions WHERE NOT d.age = versions.date+1", criteria.getQueryString());
@@ -100,20 +100,20 @@ public class EqTest {
     
     @Test(expected = IllegalArgumentException.class)
     public void testNotEqualToEmptyExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").notEqExpression("");        
     }
     
     @Test(expected = NullPointerException.class)
     public void testNotEqualToNullExpression(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").notEqExpression(null);        
     }
     
     // TODO: for subqueries
 //    @Test
 //    public void testNotEqualToAll(){
-//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
 //        criteria.where("d.age").notEq().all().expression("d.partners.age");
 //        
 //        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age != ALL(partners.age)", criteria.getQueryString());
@@ -121,7 +121,7 @@ public class EqTest {
 //    
 //    @Test
 //    public void testNotEqualToAny(){
-//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
 //        criteria.where("d.age").notEq().any().expression("d.partners.age");
 //        
 //        assertEquals("FROM Document d LEFT JOIN d.partners partners WHERE d.age != ANY(partners.age)", criteria.getQueryString());

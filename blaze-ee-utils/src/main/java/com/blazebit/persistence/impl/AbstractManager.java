@@ -13,15 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package com.blazebit.persistence;
-
-import java.lang.reflect.Constructor;
+package com.blazebit.persistence.impl;
 
 /**
  *
  * @author ccbem
  */
-public interface SelectBuilder<T, X extends QueryBuilder<T, X>> {
-    
+public class AbstractManager {
+
+    final QueryGenerator queryGenerator;
+    final ArrayExpressionTransformer transformer;
+
+    AbstractManager(QueryGenerator queryGenerator, ArrayExpressionTransformer transformer) {
+        this.queryGenerator = queryGenerator;
+        this.transformer = transformer;
+    }
 }

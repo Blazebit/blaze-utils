@@ -25,11 +25,11 @@ import org.junit.Test;
  *
  * @author ccbem
  */
-public class LikeTest {
+public class LikeTest extends AbstractPersistenceTest {
     @Test
     public void testLikeCaseInsensitive(){
         final String pattern = "te%t";
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").like(pattern, false, null);
         
         assertEquals("FROM Document d WHERE " + getCaseInsensitiveLike("d.name", ":param_0", null), criteria.getQueryString());
@@ -38,7 +38,7 @@ public class LikeTest {
     @Test
     public void testLikeCaseSensitive(){
         final String pattern = "te%t";
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").like(pattern, true, null);
         
         assertEquals("FROM Document d WHERE d.name LIKE :param_0", criteria.getQueryString());
@@ -47,7 +47,7 @@ public class LikeTest {
     @Test
     public void testLikeEscaped(){
         final String pattern = "t\\_e%t";
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").like(pattern, true, '\\');
         
         assertEquals("FROM Document d WHERE d.name LIKE :param_0 ESCAPE '\\'", criteria.getQueryString());
@@ -55,13 +55,13 @@ public class LikeTest {
     
     @Test(expected = NullPointerException.class)
     public void testLikeNull(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").like(null, true, null);
     }
     
     @Test
     public void testLikeExpressionCaseInsensitive(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").likeExpression("d.owner.name", false, null);
         
         assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE " + getCaseInsensitiveLike("d.name", "owner.name", null), criteria.getQueryString());
@@ -69,7 +69,7 @@ public class LikeTest {
     
     @Test
     public void testLikeExpressionCaseSensitive(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").likeExpression("d.owner.name", true, null);
         
         assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE d.name LIKE owner.name", criteria.getQueryString());
@@ -77,7 +77,7 @@ public class LikeTest {
     
     @Test
     public void testLikeExpressionEscaped(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").likeExpression("d.owner.name", true, '\\');
         
         assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE d.name LIKE owner.name ESCAPE '\\'", criteria.getQueryString());
@@ -85,7 +85,7 @@ public class LikeTest {
     
     @Test(expected = NullPointerException.class)
     public void testLikeExpressionNull(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").likeExpression(null, true, null);
     }
     
@@ -94,7 +94,7 @@ public class LikeTest {
     @Test
     public void testNotLikeCaseInsensitive() {
         final String pattern = "te%t";
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").notLike(pattern, false, null);
         
         assertEquals("FROM Document d WHERE " + getCaseInsensitiveNotLike("d.name", ":param_0", null), criteria.getQueryString());
@@ -103,7 +103,7 @@ public class LikeTest {
     @Test
     public void testNotLikeCaseSensitive(){
         final String pattern = "te%t";
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").notLike(pattern, true, null);
         
         assertEquals("FROM Document d WHERE NOT d.name LIKE :param_0", criteria.getQueryString());
@@ -112,7 +112,7 @@ public class LikeTest {
     @Test
     public void testNotLikeEscaped(){
         final String pattern = "t\\_e%t";
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").notLike(pattern, true, '\\');
         
         assertEquals("FROM Document d WHERE NOT d.name LIKE :param_0 ESCAPE '\\'", criteria.getQueryString());
@@ -120,13 +120,13 @@ public class LikeTest {
     
     @Test(expected = NullPointerException.class)
     public void testNotLikeNull(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").notLike(null, true, null);
     }
     
     @Test
     public void testNotLikeExpressionCaseInsensitive(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").notLikeExpression("d.owner.name", false, null);
         
         assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE " + getCaseInsensitiveNotLike("d.name", "owner.name", null), criteria.getQueryString());
@@ -134,7 +134,7 @@ public class LikeTest {
     
     @Test
     public void testLikeExpressionCaseInsensitiveEscaped(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").likeExpression("d.owner.name", false, '\\');
         
         assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE " + getCaseInsensitiveLike("d.name", "owner.name", '\\'), criteria.getQueryString());
@@ -142,7 +142,7 @@ public class LikeTest {
     
     @Test
     public void testNotLikeExpressionCaseInsensitiveEscaped(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").notLikeExpression("d.owner.name", false, '\\');
         
         assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE " + getCaseInsensitiveNotLike("d.name", "owner.name", '\\'), criteria.getQueryString());
@@ -150,7 +150,7 @@ public class LikeTest {
     
     @Test
     public void testNotLikeExpressionCaseSensitive(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").notLikeExpression("d.owner.name", true, null);
         
         assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE NOT d.name LIKE owner.name", criteria.getQueryString());
@@ -158,7 +158,7 @@ public class LikeTest {
     
     @Test
     public void testNotLikeExpressionEscaped(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").notLikeExpression("d.owner.name", true, '\\');
         
         assertEquals("FROM Document d LEFT JOIN d.owner owner WHERE NOT d.name LIKE owner.name ESCAPE '\\'", criteria.getQueryString());
@@ -166,7 +166,7 @@ public class LikeTest {
     
     @Test(expected = NullPointerException.class)
     public void testNotLikeExpressionNull(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").notLikeExpression(null, true, null);
     }
     

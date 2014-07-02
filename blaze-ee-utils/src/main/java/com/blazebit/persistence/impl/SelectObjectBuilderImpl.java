@@ -29,16 +29,16 @@ import java.util.TreeMap;
  */
 public class SelectObjectBuilderImpl<T> implements SelectObjectBuilder<T>{
 
-    private final AbstractCriteriaBuilder<?, ?> criteriaBuilder;
     private final T result;
     // maps positions to expressions
     private final SortedMap<Integer, Expression> expressions = new TreeMap<Integer, Expression>();
     private final SelectObjectBuilderEndedListener listener;
+    private final ArrayExpressionTransformer transformer;
     
-    public SelectObjectBuilderImpl(AbstractCriteriaBuilder<?, ?> criteriaBuilder, T result, SelectObjectBuilderEndedListener listener) {
-        this.criteriaBuilder = criteriaBuilder;
+    public SelectObjectBuilderImpl(ArrayExpressionTransformer transformer, T result, SelectObjectBuilderEndedListener listener) {
         this.result = result;
         this.listener = listener;
+        this.transformer = transformer;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class SelectObjectBuilderImpl<T> implements SelectObjectBuilder<T>{
             throw new IllegalStateException("Argument for position " + expressions.size() + " already specified");
         }
         
-        Expression exp = /*criteriaBuilder.implicitJoin(*/ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), criteriaBuilder)/*, false)*/;
+        Expression exp = /*criteriaBuilder.implicitJoin(*/transformer.transform(ExpressionUtils.parse(expression))/*, false)*/;
         expressions.put(expressions.size(), exp);
         return this;
     }
@@ -57,7 +57,7 @@ public class SelectObjectBuilderImpl<T> implements SelectObjectBuilder<T>{
         if(expressions.containsKey(position)){
             throw new IllegalStateException("Argument for position " + position + " already specified");
         }
-        Expression exp = /*criteriaBuilder.implicitJoin(*/ArrayExpressionTransformer.transform(ExpressionUtils.parse(expression), criteriaBuilder)/*, false)*/;
+        Expression exp = /*criteriaBuilder.implicitJoin(*/transformer.transform(ExpressionUtils.parse(expression))/*, false)*/;
         expressions.put(position, exp);
         return this;
     }

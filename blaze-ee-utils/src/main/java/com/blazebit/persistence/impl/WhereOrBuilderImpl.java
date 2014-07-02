@@ -33,13 +33,13 @@ public class WhereOrBuilderImpl<T> extends AbstractBuilderEndedListener implemen
     private final T result;
     private final BuilderEndedListener listener;
     private final OrPredicate predicate;
-    private final AbstractCriteriaBuilder<?, ?> criteriaBuilder;
+    private final ArrayExpressionTransformer transformer;
     
-    public WhereOrBuilderImpl(AbstractCriteriaBuilder<?, ?> criteriaBuilder, T result, BuilderEndedListener listener) {
+    public WhereOrBuilderImpl(ArrayExpressionTransformer transformer, T result, BuilderEndedListener listener) {
         this.result = result;
         this.listener = listener;
         this.predicate = new OrPredicate();
-        this.criteriaBuilder = criteriaBuilder;
+        this.transformer = transformer;
     }
     
     @Override
@@ -62,7 +62,7 @@ public class WhereOrBuilderImpl<T> extends AbstractBuilderEndedListener implemen
 
     @Override
     public WhereAndBuilder<WhereOrBuilderImpl<T>> whereAnd() {
-        return startBuilder(new WhereAndBuilderImpl<WhereOrBuilderImpl<T>>(criteriaBuilder, this, this));
+        return startBuilder(new WhereAndBuilderImpl<WhereOrBuilderImpl<T>>(transformer, this, this));
     }
 
     @Override

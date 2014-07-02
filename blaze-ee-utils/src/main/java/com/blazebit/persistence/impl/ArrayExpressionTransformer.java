@@ -22,7 +22,9 @@ import com.blazebit.persistence.expression.FooExpression;
 import com.blazebit.persistence.expression.PathElementExpression;
 import com.blazebit.persistence.expression.PathExpression;
 import com.blazebit.persistence.expression.PropertyExpression;
+import com.blazebit.persistence.impl.PredicateManager.RootPredicate;
 import com.blazebit.persistence.predicate.EqPredicate;
+import com.blazebit.persistence.predicate.Predicate;
 import java.util.ArrayList;
 
 /**
@@ -31,7 +33,21 @@ import java.util.ArrayList;
  */
 public class ArrayExpressionTransformer {
 
-    public static Expression transform(Expression original, AbstractCriteriaBuilder<?, ?> builder) {
+    // cyclic dependency
+    private RootPredicate rootWherePredicate;
+
+    ArrayExpressionTransformer(){
+    }
+            
+    ArrayExpressionTransformer(RootPredicate rootWherePredicate) {
+        this.rootWherePredicate = rootWherePredicate;
+    }
+
+    void setRootWherePredicate(RootPredicate rootWherePredicate) {
+        this.rootWherePredicate = rootWherePredicate;
+    }
+    
+    public Expression transform(Expression original) {
         // TODO: transform the original expression and apply changes in the criteria builder
         if(original instanceof FooExpression){
             return original;
@@ -41,7 +57,7 @@ public class ArrayExpressionTransformer {
             CompositeExpression composite = (CompositeExpression) original;
             CompositeExpression transformed = new CompositeExpression(new ArrayList<Expression>());
             for (Expression e : composite.getExpressions()) {
-                transformed.getExpressions().add(transform(e, builder));
+                transformed.getExpressions().add(transform(e));
             }
             return transformed;
         }
@@ -66,7 +82,7 @@ public class ArrayExpressionTransformer {
                 keyPath.getExpressions().add(arrayExp.getBase());
                 keyExpression.getExpressions().add(keyPath);
                 keyExpression.getExpressions().add(new FooExpression(")"));
-                builder.addWherePredicate(new EqPredicate(keyExpression, arrayExp.getIndex()));
+                addWherePredicate(new EqPredicate(keyExpression, arrayExp.getIndex()));
                 
                 transformedPath.getExpressions().add(arrayExp.getBase());
             }else{
@@ -85,5 +101,9 @@ public class ArrayExpressionTransformer {
         }
 
         return original;
+    }
+    
+    private void addWherePredicate(Predicate predicate) {
+        rootWherePredicate.predicate.getChildren().add(predicate);
     }
 }

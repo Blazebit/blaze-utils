@@ -27,10 +27,10 @@ import org.junit.Test;
  *
  * @author ccbem
  */
-public class IsEmptyTest {
+public class IsEmptyTest extends AbstractPersistenceTest {
     @Test
     public void testIsEmpty(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").isEmpty();
         
         assertEquals("FROM Document d WHERE d.name IS EMPTY", criteria.getQueryString());
@@ -38,7 +38,7 @@ public class IsEmptyTest {
     
     @Test
     public void testIsNotEmpty(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").isNotEmpty();
         
         assertEquals("FROM Document d WHERE NOT d.name IS EMPTY", criteria.getQueryString());

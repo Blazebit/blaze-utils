@@ -21,6 +21,7 @@ import com.blazebit.persistence.expression.FooExpression;
 import com.blazebit.persistence.expression.ParameterExpression;
 import com.blazebit.persistence.expression.PathExpression;
 import com.blazebit.persistence.expression.PropertyExpression;
+import com.blazebit.persistence.impl.SelectManager.SelectInfo;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.BetweenPredicate;
 import com.blazebit.persistence.predicate.EqPredicate;
@@ -38,24 +39,34 @@ import com.blazebit.persistence.predicate.OrPredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateQuantifier;
 import com.blazebit.persistence.predicate.QuantifiableBinaryExpressionPredicate;
-import java.util.Map;
 
 /**
  *
  * @author ccbem
  */
-public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visitor {
+public class QueryGenerator implements Predicate.Visitor, Expression.Visitor {
 
-    private final StringBuilder sb;
+    private StringBuilder sb;
     private final ParameterManager parameterManager;
     private boolean replaceSelectAliases = true;
-    private final Map<String, AbstractCriteriaBuilder.SelectInfo> selectAbsolutePathToInfoMap;
+    // cyclic dependency
+    private SelectManager<?> selectManager;
 
-    public QueryGeneratorVisitor(Map<String, AbstractCriteriaBuilder.SelectInfo> selectAbsolutePathToInfoMap, StringBuilder sb, ParameterManager parameterManager) {
-        this.sb = sb;
+    public QueryGenerator(ParameterManager parameterManager) {
         this.parameterManager = parameterManager;
-        this.selectAbsolutePathToInfoMap = selectAbsolutePathToInfoMap;
+    }
         
+    public QueryGenerator(SelectManager<?> selectManager, ParameterManager parameterManager) {
+        this(parameterManager);
+        this.selectManager = selectManager;
+    }
+
+    void setSelectManager(SelectManager<?> selectManager) {
+        this.selectManager = selectManager;
+    }
+    
+    void setQueryBuffer(StringBuilder sb){
+        this.sb = sb;
     }
 
     @Override
@@ -248,7 +259,7 @@ public class QueryGeneratorVisitor implements Predicate.Visitor, Expression.Visi
         if (replaceSelectAliases) {
             if (expression.getBaseNode() != null) {
                 String absPath = expression.getBaseNode().getAliasInfo().getAbsolutePath();
-                AbstractCriteriaBuilder.SelectInfo selectInfo = selectAbsolutePathToInfoMap.get(absPath);
+                SelectInfo selectInfo = selectManager.getSelectAbsolutePathToInfoMap().get(absPath);
                 if (selectInfo != null) {
                     sb.append(selectInfo.getAlias());
                     return;

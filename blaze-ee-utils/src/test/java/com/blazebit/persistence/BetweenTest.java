@@ -24,10 +24,10 @@ import org.junit.Test;
  *
  * @author ccbem
  */
-public class BetweenTest {
+public class BetweenTest extends AbstractPersistenceTest {
     @Test
     public void testBetween(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").between(1, 10);
         
         assertEquals("FROM Document d WHERE d.age BETWEEN :param_0 AND :param_1", criteria.getQueryString());
@@ -35,19 +35,19 @@ public class BetweenTest {
     
     @Test(expected = NullPointerException.class)
     public void testBetweenValueAndNull(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").between(1, null);        
     }
     
     @Test(expected = NullPointerException.class)
     public void testBetweenNullAndValue(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").between(null, 10);        
     }
     
     @Test
     public void testNotBetween(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").notBetween(1, 10);
         
         assertEquals("FROM Document d WHERE NOT d.age BETWEEN :param_0 AND :param_1", criteria.getQueryString());
@@ -55,13 +55,13 @@ public class BetweenTest {
     
     @Test(expected = NullPointerException.class)
     public void testNotBetweenValueAndNull(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").notBetween(1, null);        
     }
     
     @Test(expected = NullPointerException.class)
     public void testNotBetweenNullAndValue(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.age").notBetween(null, 10);        
     }
 }

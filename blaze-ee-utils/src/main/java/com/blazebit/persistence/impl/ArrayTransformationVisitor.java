@@ -48,10 +48,10 @@ import java.util.Map;
  */
 public class ArrayTransformationVisitor implements Predicate.Visitor, Expression.Visitor {
     
-    private final AbstractCriteriaBuilder<?, ?> builder;
+    private final ArrayExpressionTransformer transformer;
 
-    public ArrayTransformationVisitor(AbstractCriteriaBuilder<?, ?> builder) {
-        this.builder = builder;
+    public ArrayTransformationVisitor(ArrayExpressionTransformer transformer) {
+        this.transformer = transformer;
     }
 
     @Override
@@ -120,7 +120,7 @@ public class ArrayTransformationVisitor implements Predicate.Visitor, Expression
 
     @Override
     public void visit(CompositeExpression expression) {
-        ArrayExpressionTransformer.transform(expression, builder);
+        transformer.transform(expression);
     }
 
     @Override

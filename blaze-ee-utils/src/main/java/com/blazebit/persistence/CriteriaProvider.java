@@ -18,20 +18,21 @@ package com.blazebit.persistence;
 
 import com.blazebit.lang.StringUtils;
 import com.blazebit.persistence.impl.CriteriaBuilderImpl;
+import javax.persistence.EntityManager;
 
 /**
  *
  * @author ccbem
  */
 public class CriteriaProvider {
-    public static <T> CriteriaBuilder<T> from(Class<T> clazz) {
-        return new CriteriaBuilderImpl<T>(clazz, StringUtils.firstToLower(clazz.getSimpleName()));
+    public static <T> CriteriaBuilder<T> from(EntityManager em, Class<T> clazz) {
+        return new CriteriaBuilderImpl<T>(em, clazz, StringUtils.firstToLower(clazz.getSimpleName()));
     }
 
-    public static <T> CriteriaBuilder<T> from(Class<T> clazz, String alias) {
+    public static <T> CriteriaBuilder<T> from(EntityManager em, Class<T> clazz, String alias) {
         if (clazz == null || alias == null) {
             throw new NullPointerException();
         }
-        return new CriteriaBuilderImpl<T>(clazz, alias);
+        return new CriteriaBuilderImpl<T>(em, clazz, alias);
     }
 }

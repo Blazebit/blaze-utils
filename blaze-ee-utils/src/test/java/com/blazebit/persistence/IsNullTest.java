@@ -24,10 +24,10 @@ import org.junit.Test;
  *
  * @author ccbem
  */
-public class IsNullTest {
+public class IsNullTest extends AbstractPersistenceTest {
     @Test
     public void testIsNull(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").isNull();
         
         assertEquals("FROM Document d WHERE d.name IS NULL", criteria.getQueryString());
@@ -35,7 +35,7 @@ public class IsNullTest {
     
     @Test
     public void testIsNotNull(){
-        CriteriaBuilder<Document> criteria = CriteriaProvider.from(Document.class, "d");
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.where("d.name").isNotNull();
         
         assertEquals("FROM Document d WHERE NOT d.name IS NULL", criteria.getQueryString());

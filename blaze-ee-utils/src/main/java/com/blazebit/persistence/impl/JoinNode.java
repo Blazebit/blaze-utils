@@ -29,6 +29,9 @@ public class JoinNode {
     private AliasInfo aliasInfo;
     private JoinType type = JoinType.LEFT;
     private boolean fetch = false;
+    // This flag indicates if this join node is required from a select expression only
+    // We need this for count and id queries where we do not need all the joins
+    private boolean selectOnly = true;
     private Class<?> propertyClass;
     // Use TreeMap so that joins get applied alphabetically for easier testing
     private final Map<String, JoinNode> nodes = new TreeMap<String, JoinNode>();
@@ -38,6 +41,14 @@ public class JoinNode {
         this.type = type;
         this.fetch = fetch;
         this.propertyClass = propertyClass;
+    }
+
+    public boolean isSelectOnly() {
+        return selectOnly;
+    }
+
+    public void setSelectOnly(boolean selectOnly) {
+        this.selectOnly = selectOnly;
     }
 
     public AliasInfo getAliasInfo() {
