@@ -41,7 +41,7 @@ public class ClassResultTransformer implements ResultTransformer {
             if (paramTypes.length == tuple.length) {
                 boolean match = true;
                 for (int i = 0; i < paramTypes.length; i++) {
-                    if (!paramTypes[i].isAssignableFrom(tuple[i].getClass())) {
+                    if (tuple[i] != null && !paramTypes[i].isAssignableFrom(tuple[i].getClass())) {
                         match = false;
                         break;
                     }

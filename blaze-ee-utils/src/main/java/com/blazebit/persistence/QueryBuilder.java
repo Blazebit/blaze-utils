@@ -20,7 +20,9 @@ import java.lang.reflect.Constructor;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.EntityManager;
+import javax.persistence.Parameter;
 import javax.persistence.TemporalType;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
@@ -41,6 +43,10 @@ public interface QueryBuilder<T, X extends QueryBuilder<T, X>> extends Aggregate
     public X setParameter(String name, Calendar value, TemporalType temporalType);
 
     public X setParameter(String name, Date value, TemporalType temporalType);
+    
+    public boolean isParameterSet(String name);
+    
+    public Set<? extends Parameter<?>> getParameters();
     
     public List<T> getResultList(EntityManager em);
 

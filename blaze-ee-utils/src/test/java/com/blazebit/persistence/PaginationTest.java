@@ -130,7 +130,8 @@ public class PaginationTest extends AbstractPersistenceTest {
                 + "WHERE KEY(localized) = 1 AND d.id IN (:ids) "
                 + "ORDER BY d.id ASC NULLS LAST";
         
-        PaginatedCriteriaBuilder<DocumentViewModel> pcb = crit.page(1, 2);
+        crit.getResultList(em);
+        PaginatedCriteriaBuilder<DocumentViewModel> pcb = crit.page(0, 2);
         
         assertEquals(expectedCountQuery, pcb.getPageCountQueryString());
         assertEquals(expectedIdQuery, pcb.getPageIdQueryString());
@@ -140,9 +141,11 @@ public class PaginationTest extends AbstractPersistenceTest {
         
         PagedList<DocumentViewModel> result = pcb.getResultList(em);
         assertEquals(2, result.size());
-        assertEquals(3, result.totalSize());
+        assertEquals(5, result.totalSize());
         assertEquals("doc1", result.get(0).getName());
-        assertEquals("doc2", result.get(1).getName());
+        assertEquals("Doc2", result.get(1).getName());
+//        assertEquals("doC3", result.get(2).getName());
+//        assertEquals("dOc4", result.get(3).getName());
     }
     
     @Test

@@ -44,8 +44,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
+import javax.persistence.Parameter;
 import javax.persistence.TemporalType;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
@@ -448,4 +450,13 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         return query;
     }
 
+    @Override
+    public boolean isParameterSet(String name) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Set<? extends Parameter<?>> getParameters() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
