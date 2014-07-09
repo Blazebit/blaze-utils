@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.TemporalType;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import org.hibernate.Query;
 import org.hibernate.transform.ResultTransformer;
@@ -59,7 +60,8 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
 
     protected static final Logger log = Logger.getLogger(CriteriaBuilderImpl.class.getName());
 
-    protected final Class<T> clazz;
+    protected final Class<?> fromClazz;
+    protected Class<T> resultClazz;
     protected final EntityManager em;
 
     protected final ParameterManager parameterManager;
@@ -77,7 +79,8 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
      * @param builder
      */
     protected AbstractCriteriaBuilder(AbstractCriteriaBuilder<T, ? extends QueryBuilder<T, ?>> builder) {
-        this.clazz = builder.clazz;
+        this.fromClazz = builder.fromClazz;
+        this.resultClazz = builder.resultClazz;
         this.orderByManager = builder.orderByManager;
         this.parameterManager = builder.parameterManager;
         this.selectManager = builder.selectManager;
@@ -90,7 +93,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     }
 
     public AbstractCriteriaBuilder(EntityManager em, Class<T> clazz, String alias) {
-        this.clazz = clazz;
+        this.fromClazz = this.resultClazz = clazz;
         
         this.joinManager = new JoinManager(alias, clazz);
                 
@@ -113,7 +116,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     
     @Override
     public List<T> getResultList(EntityManager em) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getQuery(em).getResultList();
     }
 
     /*
@@ -144,20 +147,20 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     }
 
     @Override
-    public U select(String... expressions) {
+    public CriteriaBuilder<Tuple> select(String... expressions) {
         for (String expression : expressions) {
             select(expression);
         }
-        return (U) this;
+        return (CriteriaBuilder<Tuple>) this;
     }
 
     @Override
-    public U select(String expression) {
+    public CriteriaBuilder<Tuple> select(String expression) {
         return select(expression, null);
     }
 
     @Override
-    public U select(String expression, String selectAlias) {
+    public CriteriaBuilder<Tuple> select(String expression, String selectAlias) {
         if (expression == null) {
             throw new NullPointerException("expression");
         }
@@ -165,44 +168,46 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
             throw new IllegalArgumentException("selectAlias");
         }
         verifyBuilderEnded();
+        resultClazz = (Class<T>) Tuple.class;
         selectManager.select(this, expression, selectAlias);
-        return (U) this;
+        return (CriteriaBuilder<Tuple>) this;
     }
 
     @Override
-    public U select(Class<? extends T> clazz) {
-        throw new UnsupportedOperationException();
+    public U setParameter(String name, Object value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public U select(Constructor<? extends T> constructor) {
-        throw new UnsupportedOperationException();
+    public U setParameter(String name, Calendar value, TemporalType temporalType) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    // TODO: needed?
     @Override
-    public U select(ObjectBuilder<? extends T> builder) {
-        throw new UnsupportedOperationException();
+    public U setParameter(String name, Date value, TemporalType temporalType) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
     public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Class<Y> clazz) {
         verifyBuilderEnded();
+        resultClazz = (Class<T>) clazz;
         return selectManager.selectNew(this, clazz);
     }
 
     @Override
     public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Constructor<Y> constructor) {
         verifyBuilderEnded();
+        resultClazz = (Class<T>) constructor.getDeclaringClass();
         return selectManager.selectNew(this, constructor);
     }
 
     @Override
-    public SelectObjectBuilder<U> selectNew(ObjectBuilder<? extends T> builder) {
+    public <Y> QueryBuilder<Y, ?> selectNew(ObjectBuilder<Y> builder) {
         verifyBuilderEnded();
         return selectManager.selectNew(builder);
     }
-
+    
     /*
      * Where methods
      */
@@ -420,7 +425,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         if(sb.length() > 0){
             sb.append(' ');
         }
-        sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(joinManager.getRootAlias());
+        sb.append("FROM ").append(fromClazz.getSimpleName()).append(' ').append(joinManager.getRootAlias());
         sb.append(joinManager.buildJoins(true));
         sb.append(whereManager.buildClause());
         sb.append(groupByManager.buildGroupBy());        

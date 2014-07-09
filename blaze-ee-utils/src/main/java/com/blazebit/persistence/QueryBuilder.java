@@ -22,17 +22,25 @@ import java.util.Date;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TemporalType;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 
 /**
  *
  * @author ccbem
  */
+// TODO: implement clone for query builder (deep copy)
 public interface QueryBuilder<T, X extends QueryBuilder<T, X>> extends Aggregateable<RestrictionBuilder<? extends X>>, Filterable<RestrictionBuilder<? extends X>> {
     
     public TypedQuery<T> getQuery(EntityManager em);
 
     public String getQueryString();
+    
+    public X setParameter(String name, Object value);
+
+    public X setParameter(String name, Calendar value, TemporalType temporalType);
+
+    public X setParameter(String name, Date value, TemporalType temporalType);
     
     public List<T> getResultList(EntityManager em);
 
@@ -69,23 +77,23 @@ public interface QueryBuilder<T, X extends QueryBuilder<T, X>> extends Aggregate
     /* CASE caseOperand (WHEN scalarExpression THEN scalarExpression)+ ELSE scalarExpression END */
     public SimpleCaseWhenBuilder<? extends X> selectCase(String expression);
 
-    public X select(String... expressions);
+    public CriteriaBuilder<Tuple> select(String... expressions);
 
-    public X select(String expression);
+    public CriteriaBuilder<Tuple> select(String expression);
 
-    public X select(String expression, String alias);
-
-    public X select(Class<? extends T> clazz);
-
-    public X select(Constructor<? extends T> constructor);
-
-    public X select(ObjectBuilder<? extends T> builder);
+    public CriteriaBuilder<Tuple> select(String expression, String alias);
 
     public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Class<Y> clazz);
 
     public <Y> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(Constructor<Y> constructor);
 
-    public SelectObjectBuilder<? extends X> selectNew(ObjectBuilder<? extends T> builder);
+    /**
+     * On the model we might have constructors with annotated arguments that contain the entity path for the constructor arguments
+     * The
+     * @param builder
+     * @return 
+     */
+    public <Y> QueryBuilder<Y, ?> selectNew(ObjectBuilder<Y> builder);
     
     /*
      * Order by methods

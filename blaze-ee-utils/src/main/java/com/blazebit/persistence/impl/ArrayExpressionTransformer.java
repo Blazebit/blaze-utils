@@ -162,15 +162,18 @@ public class ArrayExpressionTransformer {
         if (farRightArrayExp != null) {
             // add value for last array expression
             CompositeExpression valueExpression = new CompositeExpression(new ArrayList<Expression>());
-            valueExpression.getExpressions().add(new FooExpression("VALUE("));
+            
             PathExpression valuePath = new PathExpression();
             valuePath.getExpressions().add(farRightArrayExp.getBase());
-            valueExpression.getExpressions().add(valuePath);
+            
+           
             if (farRightValuePath != null) {
-                valueExpression.getExpressions().add(new FooExpression(")."));
-                valueExpression.getExpressions().add(farRightValuePath);
+                valuePath.getExpressions().addAll(farRightValuePath.getExpressions());
+                valueExpression.getExpressions().add(valuePath);
             } else {
-                valueExpression.getExpressions().add(new FooExpression(")"));
+//                valueExpression.getExpressions().add(new FooExpression("VALUE("));
+                valueExpression.getExpressions().add(valuePath);
+//                valueExpression.getExpressions().add(new FooExpression(")"));
             }
             
             if(selectClause == true){

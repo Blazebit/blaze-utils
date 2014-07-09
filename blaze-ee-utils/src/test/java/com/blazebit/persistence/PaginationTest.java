@@ -16,15 +16,21 @@
 
 package com.blazebit.persistence;
 
+import static com.blazebit.persistence.AbstractPersistenceTest.em;
 import com.blazebit.persistence.entity.Document;
 import com.blazebit.persistence.entity.Person;
 import com.blazebit.persistence.entity.Version;
 import com.blazebit.persistence.model.DocumentViewModel;
+import java.util.List;
 import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -53,8 +59,8 @@ public class PaginationTest extends AbstractPersistenceTest {
             
             Person o1 = new Person("Karl1");
             Person o2 = new Person("Karl2");
-            o1.getLocalized().put(1, "Lol1");
-            o2.getLocalized().put(1, "Lol2");
+            o1.getLocalized().put(1, "abra kadabra");
+            o2.getLocalized().put(1, "ass");
             
             doc1.setOwner(o1);
             doc2.setOwner(o1);
@@ -101,19 +107,25 @@ public class PaginationTest extends AbstractPersistenceTest {
         crit.orderByAsc("d.id");
         
         //TODO: introduce default ordering for pagination: by @id ASC NULLS LAST
-        //TODO: prevent redundant array transformations by first doing the implicit joining and afterwards applying the array transformer
         //TODO: use metamodel for model-aware joining
         
         // do not include joins that are only needed for the select clause
         String expectedCountQuery = "SELECT COUNT(*) FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
-                + "WHERE UPPER(d.name) LIKE UPPER(:param_0) AND owner.name LIKE :param_1 AND UPPER(VALUE(localized)) LIKE UPPER(:param_2) AND KEY(localized) = 1";
+                + "WHERE UPPER(d.name) LIKE UPPER(:param_0) AND owner.name LIKE :param_1 AND UPPER(localized) LIKE UPPER(:param_2) AND KEY(localized) = 1";
+        
+        em.createQuery("SELECT COUNT(*) FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
+                + "WHERE UPPER(d.name) LIKE UPPER('doc%') AND owner.name LIKE '%arl%' AND UPPER(localized) LIKE UPPER('a%') AND KEY(localized) = 1").getResultList();
         
         // limit this query using setFirstResult() and setMaxResult() according to the parameters passed to page()
-        String expectedIdQuery = "SELECT DISTINCT id FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
-                + "WHERE UPPER(d.name) LIKE UPPER(:param_0) AND owner.name LIKE :param_1 AND UPPER(VALUE(localized)) LIKE UPPER(:param_2) AND KEY(localized) = 1 "
+        String expectedIdQuery = "SELECT DISTINCT d.id FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
+                + "WHERE UPPER(d.name) LIKE UPPER(:param_0) AND owner.name LIKE :param_1 AND UPPER(localized) LIKE UPPER(:param_2) AND KEY(localized) = 1 "
                 + "ORDER BY d.id ASC NULLS LAST";
         
-        String expectedObjectQuery = "SELECT d.name, CONCAT(owner.name,' user'), COALESCE(VALUE(localized),'no item'), partnerDocument.name FROM Document d "
+        em.createQuery("SELECT DISTINCT d.id FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
+                + "WHERE UPPER(d.name) LIKE UPPER('doc%') AND owner.name LIKE '%arl%' AND UPPER(localized) LIKE UPPER('a%') AND KEY(localized) = 1 "
+                + "ORDER BY d.id ASC NULLS LAST").getResultList();
+        
+        String expectedObjectQuery = "SELECT d.name, CONCAT(owner.name,' user'), COALESCE(localized,'no item'), partnerDocument.name FROM Document d "
                 + "LEFT JOIN d.owner owner LEFT JOIN owner.localized localized LEFT JOIN owner.partnerDocument partnerDocument "
                 + "WHERE KEY(localized) = 1 AND d.id IN (:ids) "
                 + "ORDER BY d.id ASC NULLS LAST";
@@ -133,4 +145,33 @@ public class PaginationTest extends AbstractPersistenceTest {
         assertEquals("doc2", result.get(1).getName());
     }
     
+    @Test
+    public void testGetResultList1() {
+//        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
+//        criteria.select("owner.localized[1]", "l").leftJoin("owner.localized", "localized").leftJoin("d.contacts", "contacts").where("contacts[1].name").like("%arl%");
+//        System.out.println(criteria.getQueryString());
+//        List<Document> results = criteria.getResultList(em);
+        javax.persistence.criteria.CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Tuple> cq = cb.createTupleQuery();
+        Root<Document> c = cq.from(Document.class);
+        cq.multiselect(c.get("contacts"));
+        TypedQuery<Tuple> tq = em.createQuery(cq);
+        List<Tuple> result = tq.getResultList();
+        
+        em.createQuery("SELECT VALUE(contacts) AS l FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.contacts contacts WHERE contacts.name LIKE '%arl%' AND KEY(contacts) = 1", Tuple.class).getResultList();
+//        System.out.println(results);
+    }
+    
+    @Test
+    public void testGetResultList() {
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
+        CriteriaBuilder<Tuple> tupleCrit = criteria.select("owner.localized[1]", "l").leftJoin("owner.localized", "localized").leftJoin("d.contacts", "contacts").where("contacts[1].name").like("%arl%");
+        System.out.println(tupleCrit.getQueryString());
+        List<Tuple> results = tupleCrit.getResultList(em);
+        for(Tuple t : results){
+            System.out.println(t.get("l"));
+        }
+        
+        em.createQuery("SELECT VALUE(contacts) AS l FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.contacts contacts WHERE contacts.name LIKE '%arl%' AND KEY(contacts) = 1", Tuple.class).getResultList();
+    }
 }

@@ -16,6 +16,7 @@
 package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.CriteriaBuilder;
+import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
 import javax.persistence.EntityManager;
 
@@ -34,6 +35,11 @@ public class CriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, CriteriaB
     @Override
     public <Y> SelectObjectBuilder<CriteriaBuilder<Y>> selectNew(Class<Y> clazz) {
         return (SelectObjectBuilder<CriteriaBuilder<Y>>) super.selectNew(clazz);
+    }
+    
+    @Override
+    public <Y> CriteriaBuilder<Y> selectNew(ObjectBuilder<Y> builder) {
+        return (CriteriaBuilder<Y>) super.selectNew(builder);
     }
 
 }

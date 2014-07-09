@@ -16,6 +16,11 @@
 package com.blazebit.persistence;
 
 import com.blazebit.persistence.entity.Document;
+import java.util.List;
+import javax.persistence.Tuple;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
@@ -96,14 +101,26 @@ public class ArrayExpressionTest extends AbstractPersistenceTest {
         CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.select("owner.partnerDocument", "x").leftJoin("owner.partnerDocument", "p").where("p.contacts[1].name").ge(0);
         
-        assertEquals("SELECT p AS x FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.partnerDocument p LEFT JOIN p.contacts contacts WHERE VALUE(contacts).name >= :param_0 AND KEY(contacts) = 1", criteria.getQueryString());
+        assertEquals("SELECT p AS x FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.partnerDocument p LEFT JOIN p.contacts contacts WHERE contacts.name >= :param_0 AND KEY(contacts) = 1", criteria.getQueryString());
     }
     
     @Test
-    public void debugTest3() {
+    public void testMore() {
         CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
         criteria.select("owner.partnerDocument", "x").leftJoin("owner.partnerDocument", "p").leftJoin("p.contacts", "c").where("c[1]").ge(0);
         
         assertEquals("SELECT p AS x FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.partnerDocument p LEFT JOIN p.contacts c WHERE VALUE(c) >= :param_0 AND KEY(c) = 1", criteria.getQueryString());
+    }
+    
+    @Test
+    public void testGetResultList() {
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d");
+        CriteriaBuilder<Tuple> tupleCrit = criteria.select("owner.localized[1]", "l").leftJoin("owner.localized", "localized").leftJoin("d.contacts", "contacts").where("contacts[1].name").like("%arl%");
+        System.out.println(tupleCrit.getQueryString());
+        List<Tuple> results = tupleCrit.getResultList(em);
+
+        
+        em.createQuery("SELECT VALUE(contacts) AS l FROM Document d LEFT JOIN d.owner owner LEFT JOIN d.contacts contacts WHERE contacts.name LIKE '%arl%' AND KEY(contacts) = 1", Tuple.class).getResultList();
+//        System.out.println(results);
     }
 }

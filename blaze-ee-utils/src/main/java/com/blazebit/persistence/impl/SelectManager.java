@@ -45,6 +45,8 @@ public class SelectManager<T> extends AbstractManager {
     private ResultTransformer selectObjectTransformer;
     // Maps alias to SelectInfo
     private final Map<String, SelectInfo> selectAliasToInfoMap = new HashMap<String, SelectInfo>();
+    // needed for tuple/alias matching
+    private final Map<String, Integer> selectAliasToPositionMap = new HashMap<String, Integer>();
     private final Map<String, SelectInfo> selectAbsolutePathToInfoMap = new HashMap<String, SelectInfo>();
     private final SelectObjectBuilderEndedListenerImpl selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
 
@@ -68,6 +70,10 @@ public class SelectManager<T> extends AbstractManager {
         return selectAliasToInfoMap;
     }
 
+    Map<String, Integer> getSelectAliasToPositionMap() {
+        return selectAliasToPositionMap;
+    }
+    
     void acceptVisitor(Visitor v) {
         //TODO: implement test for select new with joins!! - we might also have to do implicit joins for constructor arguments
         // carry out implicit joins
@@ -113,8 +119,10 @@ public class SelectManager<T> extends AbstractManager {
         SelectInfo selectInfo = new SelectInfo(expr, selectAlias);
         if (selectAlias != null) {
             selectAliasToInfoMap.put(selectAlias, selectInfo);
+            selectAliasToPositionMap.put(selectAlias, selectAliasToPositionMap.size());
         }
         selectInfos.add(selectInfo);
+        selectObjectTransformer = new TupleResultTransformer(this);
     }
 
 //    public U select(Class<? extends T> clazz) {
@@ -163,7 +171,7 @@ public class SelectManager<T> extends AbstractManager {
         return (SelectObjectBuilder) selectObjectBuilder;
     }
 
-    <U> SelectObjectBuilder<U> selectNew(ObjectBuilder<? extends T> builder) {
+    <Y> QueryBuilder<Y, ?> selectNew(ObjectBuilder<Y> builder) {
         if (selectObjectBuilder != null) {
             throw new IllegalStateException("Only one selectNew is allowed");
         }
