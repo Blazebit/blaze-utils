@@ -23,12 +23,12 @@ import com.blazebit.persistence.WhereOrBuilder;
  * @author ccbem
  */
 public class HavingManager<U> extends PredicateManager<U>{
-    HavingManager(QueryGenerator queryGenerator, ArrayExpressionTransformer transformer) {
-        super(queryGenerator, transformer);
+    HavingManager(QueryGenerator queryGenerator) {
+        super(queryGenerator);
     }
 
     @Override
-    String getClauseName() {
+    protected String getClauseName() {
         return "HAVING";
     }
     

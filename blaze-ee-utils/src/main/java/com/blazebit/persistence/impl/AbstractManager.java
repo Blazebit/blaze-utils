@@ -22,10 +22,8 @@ package com.blazebit.persistence.impl;
 public class AbstractManager {
 
     final QueryGenerator queryGenerator;
-    final ArrayExpressionTransformer transformer;
 
-    AbstractManager(QueryGenerator queryGenerator, ArrayExpressionTransformer transformer) {
+    AbstractManager(QueryGenerator queryGenerator) {
         this.queryGenerator = queryGenerator;
-        this.transformer = transformer;
     }
 }

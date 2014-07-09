@@ -30,13 +30,13 @@ import java.util.List;
 public class GroupByManager extends AbstractManager{
     private final List<NodeInfo> groupByInfos;
     
-    GroupByManager(QueryGenerator queryGenerator, ArrayExpressionTransformer transformer) {
-        super(queryGenerator, transformer);
+    GroupByManager(QueryGenerator queryGenerator) {
+        super(queryGenerator);
         groupByInfos = new ArrayList<NodeInfo>();
     }
     
     void groupBy(String expression){
-        Expression exp = transformer.transform(ExpressionUtils.parse(expression));
+        Expression exp = ExpressionUtils.parse(expression);
         groupByInfos.add(new NodeInfo(exp));
     }
     
@@ -57,6 +57,12 @@ public class GroupByManager extends AbstractManager{
         while (iter.hasNext()) {
             sb.append(", ");
             iter.next().getExpression().accept(queryGenerator);
+        }
+    }
+    
+    void applyTransformer(ArrayExpressionTransformer transformer){
+        for (NodeInfo groupBy : groupByInfos) {
+            groupBy.setExpression(transformer.transform(groupBy.getExpression()));
         }
     }
     

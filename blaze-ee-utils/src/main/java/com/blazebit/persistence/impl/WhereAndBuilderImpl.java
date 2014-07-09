@@ -33,13 +33,11 @@ public class WhereAndBuilderImpl<T> extends AbstractBuilderEndedListener impleme
     private final T result;
     private final BuilderEndedListener listener;
     private final AndPredicate predicate;
-    private final ArrayExpressionTransformer transformer;
     
-    public WhereAndBuilderImpl(ArrayExpressionTransformer transformer, T result, BuilderEndedListener listener) {
+    public WhereAndBuilderImpl(T result, BuilderEndedListener listener) {
         this.result = result;
         this.listener = listener;
         this.predicate = new AndPredicate();
-        this.transformer = transformer;
     }
     
     @Override
@@ -62,12 +60,12 @@ public class WhereAndBuilderImpl<T> extends AbstractBuilderEndedListener impleme
 
     @Override
     public WhereOrBuilder<WhereAndBuilderImpl<T>> whereOr() {
-        return startBuilder(new WhereOrBuilderImpl<WhereAndBuilderImpl<T>>(transformer, this, this));
+        return startBuilder(new WhereOrBuilderImpl<WhereAndBuilderImpl<T>>(this, this));
     }
  
     @Override
     public RestrictionBuilder<? extends WhereAndBuilder<T>> where(String expression) {
-        Expression exp = transformer.transform(ExpressionUtils.parse(expression));
+        Expression exp = ExpressionUtils.parse(expression);
         return startBuilder(new RestrictionBuilderImpl<WhereAndBuilderImpl<T>>(this, this, exp));
     }
 }

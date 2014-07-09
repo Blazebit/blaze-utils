@@ -41,7 +41,7 @@ public class SelectManager<T> extends AbstractManager {
 
     private final List<SelectInfo> selectInfos = new ArrayList<SelectInfo>();
     private boolean distinct = false;
-    private SelectObjectBuilder<?> selectObjectBuilder;
+    private SelectObjectBuilderImpl<?> selectObjectBuilder;
     private ResultTransformer selectObjectTransformer;
     // Maps alias to SelectInfo
     private final Map<String, SelectInfo> selectAliasToInfoMap = new HashMap<String, SelectInfo>();
@@ -49,10 +49,9 @@ public class SelectManager<T> extends AbstractManager {
     private final SelectObjectBuilderEndedListenerImpl selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
 
     public SelectManager(QueryGenerator queryGenerator) {
-        //TODO: adapt AbstractManager
-        super(queryGenerator, null);
+        super(queryGenerator);
     }
-    
+
     void verifyBuilderEnded() {
         selectObjectBuilderEndedListener.verifyBuilderEnded();
     }
@@ -96,18 +95,16 @@ public class SelectManager<T> extends AbstractManager {
             sb.append(", ");
             applySelect(queryGenerator, sb, iter.next());
         }
-        sb.append(" ");
         queryGenerator.setReplaceSelectAliases(true);
         return sb.toString();
+
     }
-    
-    void applyTransformer(ArrayExpressionTransformer transformer){
+
+    void applyTransformer(ArrayExpressionTransformer transformer) {
         // carry out transformations
         for (SelectInfo selectInfo : selectInfos) {
-            Expression transformed = transformer.transform(selectInfo.getExpression());
-            if(transformed != null){
-                selectInfo.setExpression(transformed);
-            }
+            Expression transformed = transformer.transform(selectInfo.getExpression(), true);
+            selectInfo.setExpression(transformed);
         }
     }
 
@@ -132,7 +129,6 @@ public class SelectManager<T> extends AbstractManager {
 //    public U select(ObjectBuilder<? extends T> builder) {
 //        throw new UnsupportedOperationException();
 //    }
-
 //    public CaseWhenBuilder<U> selectCase() {
 //        return new CaseWhenBuilderImpl<U>((U) this);
 //    }
@@ -141,7 +137,6 @@ public class SelectManager<T> extends AbstractManager {
 //    public SimpleCaseWhenBuilder<U> selectCase(String expression) {
 //        return new SimpleCaseWhenBuilderImpl<U>((U) this, expression);
 //    }
-
     <Y, T extends AbstractCriteriaBuilder<?, ?>> SelectObjectBuilder<? extends QueryBuilder<Y, ?>> selectNew(T builder, Class<Y> clazz) {
         if (selectObjectBuilder != null) {
             throw new IllegalStateException("Only one selectNew is allowed");
@@ -150,7 +145,7 @@ public class SelectManager<T> extends AbstractManager {
             throw new IllegalStateException("No mixture of select and selectNew is allowed");
         }
         //TODO: maybe unify with selectNew(ObjectBuilder)
-        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl(transformer, builder, selectObjectBuilderEndedListener));
+        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl(builder, selectObjectBuilderEndedListener));
         selectObjectTransformer = new ClassResultTransformer(clazz);
         return (SelectObjectBuilder) selectObjectBuilder;
     }
@@ -163,7 +158,7 @@ public class SelectManager<T> extends AbstractManager {
             throw new IllegalStateException("No mixture of select and selectNew is allowed");
         }
         //TODO: maybe unify with selectNew(ObjectBuilder)
-        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl(transformer, builder, selectObjectBuilderEndedListener));
+        selectObjectBuilder = selectObjectBuilderEndedListener.startBuilder(new SelectObjectBuilderImpl(builder, selectObjectBuilderEndedListener));
         selectObjectTransformer = new ConstructorResultTransformer(constructor);
         return (SelectObjectBuilder) selectObjectBuilder;
     }
@@ -255,7 +250,7 @@ public class SelectManager<T> extends AbstractManager {
         }
 
     }
-    
+
     static class SelectInfo extends NodeInfo {
 
         private String alias;

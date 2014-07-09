@@ -69,7 +69,6 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     protected final GroupByManager groupByManager;
     protected final OrderByManager orderByManager;
     protected final JoinManager joinManager;
-    private final ArrayExpressionTransformer arrayTransformer;
     private final QueryGenerator queryGenerator;
 
     /**
@@ -86,7 +85,6 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         this.havingManager = (HavingManager<U>) builder.havingManager;
         this.groupByManager = builder.groupByManager;
         this.joinManager = builder.joinManager;
-        this.arrayTransformer = builder.arrayTransformer;
         this.queryGenerator = builder.queryGenerator;
         this.em = builder.em;
     }
@@ -98,19 +96,17 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
                 
         this.parameterManager = new ParameterManager();
         
-        this.arrayTransformer = new ArrayExpressionTransformer();
         this.queryGenerator = new QueryGenerator(parameterManager);
         
         
-        this.whereManager = new WhereManager<U>(queryGenerator, arrayTransformer);
-        this.havingManager = new HavingManager<U>(queryGenerator, arrayTransformer);
-        this.groupByManager = new GroupByManager(queryGenerator, arrayTransformer);
+        this.whereManager = new WhereManager<U>(queryGenerator);
+        this.havingManager = new HavingManager<U>(queryGenerator);
+        this.groupByManager = new GroupByManager(queryGenerator);
                 
         this.selectManager = new SelectManager<T>(queryGenerator);
-        this.orderByManager = new OrderByManager(queryGenerator, arrayTransformer);
+        this.orderByManager = new OrderByManager(queryGenerator);
         
         //resolve cyclic dependencies
-        this.arrayTransformer.setRootWherePredicate(whereManager.getRootPredicate());
         this.queryGenerator.setSelectManager(selectManager);
         this.em = em;
     }
@@ -381,7 +377,27 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         // introduce applyTransformer method in managers
         // transformer has a method that returns the transformed Expression
         // the applyTransformer method will replace the transformed expression with the original one
+        
+        // Problem we must have the complete (i.e. including array indices) absolute path available during array transformation of a path expression
+        // since the path expression might not be based on the root node
+        // we must track absolute paths to detect redundancies
+        // However, the absolute path in the path expression's join node does not contain information about the indices so far but it would
+        // also be a wrong match to add the indices in this structure since there can be multiple indices for the same join path element
+        // consider d.contacts[l] and d.contacts[x], the absolute join path is d.contacts but this path occurs with two different indices
+        // So where should be store this information or from where should we retrieve it during arrayTransformation?
+        // i think the answer is: we can't
+        // d.contacts[1].localized[1]
+        // d.contacts contacts, contacts.localized localized
+        // or we remember the already transfomred path in a Set<(BaseNode, RelativePath)> - maybe this would be sufficient
+        // because access to the same array with two different indices has an empty result set anyway. so if we had basePaths with
+        // two different indices for the same array we would output the two accesses for the subpath and the access for the current path just once (and not once for each distinct subpath)
+
+        ArrayExpressionTransformer arrayTransformer = new ArrayExpressionTransformer(joinManager);
         selectManager.applyTransformer(arrayTransformer);
+        whereManager.applyTransformer(arrayTransformer);
+        groupByManager.applyTransformer(arrayTransformer);
+        orderByManager.applyTransformer(arrayTransformer);
+        whereManager.rootPredicate.predicate.getChildren().addAll(arrayTransformer.getAdditionalWherePredicates());
     }
 
     @Override
@@ -398,8 +414,12 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         // join("a.b", "b").where("b.c")
         // in the first case
         applyImplicitJoins();
+        applyArrayTransformations();
         
         sb.append(selectManager.buildSelect());
+        if(sb.length() > 0){
+            sb.append(' ');
+        }
         sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(joinManager.getRootAlias());
         sb.append(joinManager.buildJoins(true));
         sb.append(whereManager.buildClause());

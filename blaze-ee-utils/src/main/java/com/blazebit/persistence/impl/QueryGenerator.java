@@ -49,13 +49,14 @@ public class QueryGenerator implements Predicate.Visitor, Expression.Visitor {
     private StringBuilder sb;
     private final ParameterManager parameterManager;
     private boolean replaceSelectAliases = true;
+    private boolean generateRequiredMapKeyFiltersOnly = false;
     // cyclic dependency
     private SelectManager<?> selectManager;
 
     public QueryGenerator(ParameterManager parameterManager) {
         this.parameterManager = parameterManager;
     }
-        
+
     public QueryGenerator(SelectManager<?> selectManager, ParameterManager parameterManager) {
         this(parameterManager);
         this.selectManager = selectManager;
@@ -64,9 +65,13 @@ public class QueryGenerator implements Predicate.Visitor, Expression.Visitor {
     void setSelectManager(SelectManager<?> selectManager) {
         this.selectManager = selectManager;
     }
-    
-    void setQueryBuffer(StringBuilder sb){
+
+    void setQueryBuffer(StringBuilder sb) {
         this.sb = sb;
+    }
+
+    public void setGenerateRequiredMapKeyFiltersOnly(boolean generateRequiredMapKeyFiltersOnly) {
+        this.generateRequiredMapKeyFiltersOnly = generateRequiredMapKeyFiltersOnly;
     }
 
     @Override
@@ -79,13 +84,32 @@ public class QueryGenerator implements Predicate.Visitor, Expression.Visitor {
         for (Predicate child : predicate.getChildren()) {
             if (child instanceof OrPredicate) {
                 sb.append("(");
+                int len = sb.length();
                 child.accept(this);
-                sb.append(")");
-            } else {
+                if (len == sb.length()) {
+                    // delete "("
+                    sb.deleteCharAt(len - 1);
+                } else {
+                    sb.append(")");
+                    sb.append(and);
+                }
+
+            } else if (child instanceof EqPredicate || generateRequiredMapKeyFiltersOnly == false) {
+                int len = sb.length();
                 child.accept(this);
+                if (len < sb.length()) {
+                    sb.append(and);
+                }
             }
-            sb.append(and);
         }
+//        char[] currentPostfix = new char[and.length()];
+//        int len = sb.length();
+//        sb.getChars(len-and.length(), and.length(), currentPostfix, 0);
+//        if(and.equals(String.valueOf(currentPostfix))){
+//            //remove unused " AND " postfix
+//            sb.delete(len-and.length(), and.length());
+//        }   
+
         if (predicate.getChildren().size() > 1) {
             sb.delete(sb.length() - and.length(), sb.length());
         }
@@ -101,12 +125,23 @@ public class QueryGenerator implements Predicate.Visitor, Expression.Visitor {
         for (Predicate child : predicate.getChildren()) {
             if (child instanceof AndPredicate) {
                 sb.append("(");
+                int len = sb.length();
                 child.accept(this);
-                sb.append(")");
-            } else {
+                if (len == sb.length()) {
+                    // delete "("
+                    sb.deleteCharAt(len - 1);
+                } else {
+                    sb.append(")");
+                    sb.append(or);
+                }
+
+            } else if (child instanceof EqPredicate || generateRequiredMapKeyFiltersOnly == false) {
+                int len = sb.length();
                 child.accept(this);
+                if (len < sb.length()) {
+                    sb.append(or);
+                }
             }
-            sb.append(or);
         }
         if (predicate.getChildren().size() > 1) {
             sb.delete(sb.length() - or.length(), sb.length());
@@ -121,7 +156,9 @@ public class QueryGenerator implements Predicate.Visitor, Expression.Visitor {
 
     @Override
     public void visit(EqPredicate predicate) {
-        visitQuantifiableBinaryPredicate(predicate, " = ");
+        if (generateRequiredMapKeyFiltersOnly == false || predicate.isRequiredByMapValueSelect() == true) {
+            visitQuantifiableBinaryPredicate(predicate, " = ");
+        }
     }
 
     @Override

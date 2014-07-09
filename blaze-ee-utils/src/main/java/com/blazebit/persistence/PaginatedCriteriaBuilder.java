@@ -38,8 +38,10 @@ public interface PaginatedCriteriaBuilder<T> extends QueryBuilder<T, PaginatedCr
     @Override
     public PagedList<T> getResultList(EntityManager em);
 
-    public String getCountQueryString();
+    public String getPageCountQueryString();
 
-    public String getIdQueryString();
+    public String getPageIdQueryString();
+    
+    public String getPageObjectQueryString();
 
 }

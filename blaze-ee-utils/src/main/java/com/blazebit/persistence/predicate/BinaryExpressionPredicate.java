@@ -23,8 +23,8 @@ import com.blazebit.persistence.expression.Expression;
  */
 public abstract class BinaryExpressionPredicate implements Predicate {
     
-    private final Expression left;
-    private final Expression right;
+    private Expression left;
+    private Expression right;
 
     public BinaryExpressionPredicate(Expression left, Expression right) {
         this.left = left;
@@ -38,5 +38,12 @@ public abstract class BinaryExpressionPredicate implements Predicate {
     public Expression getRight() {
         return right;
     }
-    
+
+    public void setLeft(Expression left) {
+        this.left = left;
+    }
+
+    public void setRight(Expression right) {
+        this.right = right;
+    }
 }

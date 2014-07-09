@@ -16,10 +16,12 @@
 
 package com.blazebit.persistence.impl;
 
-import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
 import com.blazebit.persistence.expression.Expression;
+import com.blazebit.persistence.expression.Expression.Visitor;
 import com.blazebit.persistence.expression.ExpressionUtils;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -33,12 +35,10 @@ public class SelectObjectBuilderImpl<T> implements SelectObjectBuilder<T>{
     // maps positions to expressions
     private final SortedMap<Integer, Expression> expressions = new TreeMap<Integer, Expression>();
     private final SelectObjectBuilderEndedListener listener;
-    private final ArrayExpressionTransformer transformer;
     
-    public SelectObjectBuilderImpl(ArrayExpressionTransformer transformer, T result, SelectObjectBuilderEndedListener listener) {
+    public SelectObjectBuilderImpl(T result, SelectObjectBuilderEndedListener listener) {
         this.result = result;
         this.listener = listener;
-        this.transformer = transformer;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class SelectObjectBuilderImpl<T> implements SelectObjectBuilder<T>{
             throw new IllegalStateException("Argument for position " + expressions.size() + " already specified");
         }
         
-        Expression exp = /*criteriaBuilder.implicitJoin(*/transformer.transform(ExpressionUtils.parse(expression))/*, false)*/;
+        Expression exp = ExpressionUtils.parse(expression);
         expressions.put(expressions.size(), exp);
         return this;
     }
@@ -57,7 +57,7 @@ public class SelectObjectBuilderImpl<T> implements SelectObjectBuilder<T>{
         if(expressions.containsKey(position)){
             throw new IllegalStateException("Argument for position " + position + " already specified");
         }
-        Expression exp = /*criteriaBuilder.implicitJoin(*/transformer.transform(ExpressionUtils.parse(expression))/*, false)*/;
+        Expression exp = ExpressionUtils.parse(expression);
         expressions.put(position, exp);
         return this;
     }
@@ -67,4 +67,16 @@ public class SelectObjectBuilderImpl<T> implements SelectObjectBuilder<T>{
         listener.onBuilderEnded(expressions.values());
         return result;
     } 
+    
+//    void applyTransformer(ArrayExpressionTransformer transformer){
+//        for(Map.Entry<Integer, Expression> entry : expressions.entrySet()){
+//            entry.setValue(transformer.transform(entry.getValue()));
+//        }
+//    }
+//    
+//    void acceptVisitor(Visitor visitor){
+//        for(Expression e : expressions.values()){
+//            e.accept(visitor);
+//        }
+//    }
 }

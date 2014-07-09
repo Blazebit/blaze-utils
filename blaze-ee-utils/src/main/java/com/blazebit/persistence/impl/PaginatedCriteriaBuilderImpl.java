@@ -47,13 +47,15 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
     }
 
     @Override
-    public String getCountQueryString() {
+    public String getPageCountQueryString() {
+        verifyBuilderEnded();
         StringBuilder countQuery = new StringBuilder();
         
         applyImplicitJoins();
+        applyArrayTransformations();
         
-        countQuery.append("SELECT COUNT(*) ");
-        countQuery.append("FROM ").append(clazz.getSimpleName()).append(' ').append(joinManager.getRootAlias());
+        countQuery.append("SELECT COUNT(*)");
+        countQuery.append(" FROM ").append(clazz.getSimpleName()).append(' ').append(joinManager.getRootAlias());
         countQuery.append(joinManager.buildJoins(false));
         countQuery.append(whereManager.buildClause());
         countQuery.append(groupByManager.buildGroupBy());        
@@ -63,15 +65,52 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
 //        applyHavings(queryGenerator, sb);
         return countQuery.toString();
     }
+    
+    @Override
+    public String getPageObjectQueryString() {
+        return "";
+    }
 
     @Override
-    public String getIdQueryString() {
+    public String getQueryString() {
+        verifyBuilderEnded();
+        StringBuilder sb = new StringBuilder();
+        applyImplicitJoins();
+        applyArrayTransformations();
+        
+        Metamodel m = em.getMetamodel();
+        EntityType<T> entityType = m.entity(clazz);
+        String idName = entityType.getId(entityType.getIdType().getJavaType()).getName();
+        
+        
+        sb.append(selectManager.buildSelect());
+        if(sb.length() > 0){
+            sb.append(' ');
+        }
+        sb.append("FROM ").append(clazz.getSimpleName()).append(' ').append(joinManager.getRootAlias());
+        sb.append(joinManager.buildJoins(true));
+        
+        sb.append(whereManager.buildClause(true));
+        sb.append(" AND ").append(joinManager.getRootAlias()).append('.').append(idName).append(" IN (:ids)");
+        
+        sb.append(groupByManager.buildGroupBy());        
+        sb.append(havingManager.buildClause());
+        sb.append(orderByManager.buildOrderBy());
+        return sb.toString();
+    }
+    
+    @Override
+    public String getPageIdQueryString() {
+        verifyBuilderEnded();
         StringBuilder idQuery = new StringBuilder();
         Metamodel m = em.getMetamodel();
         EntityType<T> entityType = m.entity(clazz);
         String idName = entityType.getId(entityType.getIdType().getJavaType()).getName();
         
-        idQuery.append("SELECT ").append(idName);
+        applyImplicitJoins();
+        applyArrayTransformations();
+        
+        idQuery.append("SELECT DISTINCT ").append(idName);
         idQuery.append(" FROM ").append(clazz.getSimpleName()).append(' ').append(joinManager.getRootAlias());
         idQuery.append(joinManager.buildJoins(false));
         idQuery.append(whereManager.buildClause());

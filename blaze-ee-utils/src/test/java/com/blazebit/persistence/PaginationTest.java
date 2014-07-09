@@ -24,6 +24,7 @@ import java.util.Properties;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 import org.hibernate.ejb.Ejb3Configuration;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -52,6 +53,8 @@ public class PaginationTest extends AbstractPersistenceTest {
             
             Person o1 = new Person("Karl1");
             Person o2 = new Person("Karl2");
+            o1.getLocalized().put(1, "Lol1");
+            o2.getLocalized().put(1, "Lol2");
             
             doc1.setOwner(o1);
             doc2.setOwner(o1);
@@ -60,6 +63,9 @@ public class PaginationTest extends AbstractPersistenceTest {
             doc5.setOwner(o2);
             doc6.setOwner(o2);
             doc7.setOwner(o2);
+            
+            doc1.getContacts().put(1, o1);
+            doc1.getContacts().put(2, o2);
             
             em.persist(o1);
             em.persist(o2);
@@ -100,23 +106,22 @@ public class PaginationTest extends AbstractPersistenceTest {
         
         // do not include joins that are only needed for the select clause
         String expectedCountQuery = "SELECT COUNT(*) FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
-                + "WHERE KEY(localized) = 1 AND UPPER(d.name) LIKE UPPER(:param_0) AND owner.name LIKE :param_1 AND UPPER(VALUE(localized)) LIKE UPPER(:param_2)";
+                + "WHERE UPPER(d.name) LIKE UPPER(:param_0) AND owner.name LIKE :param_1 AND UPPER(VALUE(localized)) LIKE UPPER(:param_2) AND KEY(localized) = 1";
         
         // limit this query using setFirstResult() and setMaxResult() according to the parameters passed to page()
-        String expectedIdQuery = "SELECT d.id FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
-                + "WHERE UPPER(d.name) LIKE UPPER('doc%') AND owner.name LIKE '%arl%' AND KEY(localized) = 1 AND UPPER(VALUE(localized)) LIKE UPPER('a%') "
-                + "ORDER BY d.id ASC NULLS LAST GROUP BY d.id";
+        String expectedIdQuery = "SELECT DISTINCT id FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
+                + "WHERE UPPER(d.name) LIKE UPPER(:param_0) AND owner.name LIKE :param_1 AND UPPER(VALUE(localized)) LIKE UPPER(:param_2) AND KEY(localized) = 1 "
+                + "ORDER BY d.id ASC NULLS LAST";
         
-        String expectedObjectQuery = "SELECT d.name, CONCAT(owner.name, ' user'), COALESCE(VALUE(localized), 'no item'), partnerDocument.name FROM Document d "
+        String expectedObjectQuery = "SELECT d.name, CONCAT(owner.name,' user'), COALESCE(VALUE(localized),'no item'), partnerDocument.name FROM Document d "
                 + "LEFT JOIN d.owner owner LEFT JOIN owner.localized localized LEFT JOIN owner.partnerDocument partnerDocument "
                 + "WHERE KEY(localized) = 1 AND d.id IN (:ids) "
                 + "ORDER BY d.id ASC NULLS LAST";
         
         PaginatedCriteriaBuilder<DocumentViewModel> pcb = crit.page(1, 2);
-        System.out.println(pcb.getCountQueryString());
         
-        assertEquals(expectedCountQuery, pcb.getCountQueryString());
-        assertEquals(expectedIdQuery, pcb.getIdQueryString());
+        assertEquals(expectedCountQuery, pcb.getPageCountQueryString());
+        assertEquals(expectedIdQuery, pcb.getPageIdQueryString());
         assertEquals(expectedObjectQuery, pcb.getQueryString());
         
         // crit.setParameter
@@ -127,4 +132,5 @@ public class PaginationTest extends AbstractPersistenceTest {
         assertEquals("doc1", result.get(0).getName());
         assertEquals("doc2", result.get(1).getName());
     }
+    
 }

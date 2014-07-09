@@ -23,9 +23,9 @@ import com.blazebit.persistence.expression.Expression;
  */
 public class BetweenPredicate implements Predicate {
     
-    private final Expression left;
-    private final Expression start;
-    private final Expression end;
+    private Expression left;
+    private Expression start;
+    private Expression end;
 
     public BetweenPredicate(Expression left, Expression start, Expression end) {
         this.left = left;
@@ -43,6 +43,18 @@ public class BetweenPredicate implements Predicate {
 
     public Expression getEnd() {
         return end;
+    }
+
+    public void setLeft(Expression left) {
+        this.left = left;
+    }
+
+    public void setStart(Expression start) {
+        this.start = start;
+    }
+
+    public void setEnd(Expression end) {
+        this.end = end;
     }
 
     @Override

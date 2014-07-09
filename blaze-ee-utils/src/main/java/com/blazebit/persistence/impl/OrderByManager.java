@@ -29,18 +29,24 @@ import java.util.List;
 public class OrderByManager extends AbstractManager {
     private final List<OrderByInfo> orderByInfos = new ArrayList<OrderByInfo>();
     
-    OrderByManager(QueryGenerator queryGenerator, ArrayExpressionTransformer transformer) {
-        super(queryGenerator, transformer);
+    OrderByManager(QueryGenerator queryGenerator) {
+        super(queryGenerator);
     }
     
     void orderBy(String expression, boolean ascending, boolean nullFirst){
-        Expression exp = transformer.transform(ExpressionUtils.parse(expression));
+        Expression exp = ExpressionUtils.parse(expression);
         orderByInfos.add(new OrderByInfo(exp, ascending, nullFirst));
     }
     
     void acceptVisitor(Expression.Visitor v){
         for (OrderByInfo orderBy : orderByInfos) {
             orderBy.getExpression().accept(v);
+        }
+    }
+    
+    void applyTransformer(ArrayExpressionTransformer transformer){
+        for (OrderByInfo orderBy : orderByInfos) {
+            orderBy.setExpression(transformer.transform(orderBy.getExpression()));
         }
     }
     

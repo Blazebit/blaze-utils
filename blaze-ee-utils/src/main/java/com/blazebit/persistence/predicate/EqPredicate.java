@@ -25,7 +25,10 @@ import com.blazebit.persistence.impl.BuilderEndedListener;
  * @author cpbec
  */
 public class EqPredicate  extends QuantifiableBinaryExpressionPredicate {
-
+    // This field indicates whether it is necessary to include this KEY(x) = y clause in the
+    // where clause.
+    private boolean requiredByMapValueSelect = false;
+    
     public EqPredicate(Expression left, Expression right) {
         super(left, right, PredicateQuantifier.ONE);
     }
@@ -56,5 +59,12 @@ public class EqPredicate  extends QuantifiableBinaryExpressionPredicate {
         }
         
     }
-    
+
+    public boolean isRequiredByMapValueSelect() {
+        return requiredByMapValueSelect;
+    }
+
+    public void setRequiredByMapValueSelect(boolean requiredByMapValueSelect) {
+        this.requiredByMapValueSelect = requiredByMapValueSelect;
+    }
 }

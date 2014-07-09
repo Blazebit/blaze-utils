@@ -75,6 +75,8 @@ public class JPQLParseTreeListenerImpl implements JPQLSelectExpressionListener {
     public void enterState_field_path_expression(JPQLSelectExpressionParser.State_field_path_expressionContext ctx) {
         if (this.ctx != ContextType.ARRAY) {
             pathContext();
+        }else if(this.ctx == ContextType.ARRAY){
+            arrayExprIndex = new PathExpression();
         }
 
     }
@@ -129,14 +131,15 @@ public class JPQLParseTreeListenerImpl implements JPQLSelectExpressionListener {
                 fooBuilder.setLength(0);
             }
             ctx = ContextType.PATH;
-//        inFooContext = false;
             path = new PathExpression(new ArrayList<PathElementExpression>());
         } else if (ctx == ContextType.ARRAY) {
             ArrayExpression arrayExpr;
             if(arrayExprIndex != null){
+                // the current array expression has an expression index
                 arrayExpr = new ArrayExpression(arrayExprBase, arrayExprIndex);
                 arrayExprIndex = null;
             }else{
+                // the current array expression has an parameter index
                 arrayExpr = new ArrayExpression(arrayExprBase, arrayIndexParam);
                 arrayIndexParam = null;
             }
@@ -260,7 +263,7 @@ public class JPQLParseTreeListenerImpl implements JPQLSelectExpressionListener {
     }
 
     private void arrayContext() {
-        ctx = ContextType.ARRAY;
+        ctx = ContextType.ARRAY;        
     }
 
     @Override
@@ -389,7 +392,6 @@ public class JPQLParseTreeListenerImpl implements JPQLSelectExpressionListener {
 
     @Override
     public void exitFunctions_returning_datetime(JPQLSelectExpressionParser.Functions_returning_datetimeContext ctx) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

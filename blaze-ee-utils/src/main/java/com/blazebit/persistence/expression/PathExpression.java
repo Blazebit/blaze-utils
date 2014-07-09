@@ -16,6 +16,7 @@
 package com.blazebit.persistence.expression;
 
 import com.blazebit.persistence.impl.JoinNode;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -29,6 +30,10 @@ public class PathExpression implements Expression {
     private JoinNode baseNode;
     private String field;
 
+    public PathExpression() {
+        this.pathProperties = new ArrayList<PathElementExpression>();
+    }
+    
     public PathExpression(List<PathElementExpression> pathProperties) {
         this.pathProperties = pathProperties;
     }

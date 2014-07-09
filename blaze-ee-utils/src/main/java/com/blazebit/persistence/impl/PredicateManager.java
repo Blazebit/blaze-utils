@@ -18,8 +18,12 @@ package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.WhereOrBuilder;
+import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.predicate.AndPredicate;
+import com.blazebit.persistence.predicate.BetweenPredicate;
+import com.blazebit.persistence.predicate.GePredicate;
+import com.blazebit.persistence.predicate.LikePredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
 
@@ -30,9 +34,9 @@ import com.blazebit.persistence.predicate.PredicateBuilder;
 public abstract class PredicateManager<U> extends AbstractManager {
     final RootPredicate rootPredicate;
 
-    PredicateManager(QueryGenerator queryGenerator, ArrayExpressionTransformer transformer) {
-        super(queryGenerator, transformer);
-        this.rootPredicate = new RootPredicate(transformer);
+    PredicateManager(QueryGenerator queryGenerator) {
+        super(queryGenerator);
+        this.rootPredicate = new RootPredicate();
     }
 
     public RootPredicate getRootPredicate() {
@@ -40,7 +44,12 @@ public abstract class PredicateManager<U> extends AbstractManager {
     }
     
     RestrictionBuilder<U> restrict(AbstractCriteriaBuilder<?, ?> builder, String expression){
-        return rootPredicate.startBuilder(new RestrictionBuilderImpl<U>((U) builder, rootPredicate, transformer.transform(ExpressionUtils.parse(expression))));
+        return rootPredicate.startBuilder(new RestrictionBuilderImpl<U>((U) builder, rootPredicate, ExpressionUtils.parse(expression)));
+    }
+    
+    void applyTransformer(ArrayExpressionTransformer transformer){
+        // carry out transformations
+        rootPredicate.predicate.accept(new ArrayTransformationVisitor(transformer));
     }
     
     void verifyBuilderEnded(){
@@ -58,24 +67,22 @@ public abstract class PredicateManager<U> extends AbstractManager {
         return sb.toString();
     }
     
-    abstract String getClauseName();
+    protected abstract String getClauseName();
     
     void applyPredicate(QueryGenerator queryGenerator, StringBuilder sb){
         if (rootPredicate.predicate.getChildren().isEmpty()) {
             return;
         }
-        sb.append(" ").append(getClauseName()).append(" ");
+        sb.append(' ').append(getClauseName()).append(' ');
         rootPredicate.predicate.accept(queryGenerator);
     }
     
     static class RootPredicate extends AbstractBuilderEndedListener {
 
         final AndPredicate predicate;
-        private final ArrayTransformationVisitor transformationVisitor;
 
-        public RootPredicate(ArrayExpressionTransformer transformer) {
+        public RootPredicate() {
             this.predicate = new AndPredicate();
-            this.transformationVisitor = new ArrayTransformationVisitor(transformer);
         }
 
         @Override
@@ -83,10 +90,36 @@ public abstract class PredicateManager<U> extends AbstractManager {
             super.onBuilderEnded(builder);
             Predicate pred = builder.getPredicate();
 
-            pred.accept(transformationVisitor);
 
             predicate.getChildren()
                     .add(pred);
+        }
+    }
+    
+    private static class ArrayTransformationVisitor extends VisitorAdapter{
+        private ArrayExpressionTransformer transformer;
+
+        public ArrayTransformationVisitor(ArrayExpressionTransformer transformer) {
+            this.transformer = transformer;
+        }
+        
+        @Override
+        public void visit(BetweenPredicate predicate) {
+            predicate.setStart(transformer.transform(predicate.getStart()));
+            predicate.setLeft(transformer.transform(predicate.getLeft()));
+            predicate.setEnd(transformer.transform(predicate.getEnd()));
+        }
+
+        @Override
+        public void visit(GePredicate predicate) {
+            predicate.setLeft(transformer.transform(predicate.getLeft()));
+            predicate.setRight(transformer.transform(predicate.getRight()));
+        }
+
+        @Override
+        public void visit(LikePredicate predicate) {
+            predicate.setLeft(transformer.transform(predicate.getLeft()));
+            predicate.setRight(transformer.transform(predicate.getRight()));
         }
     }
 }

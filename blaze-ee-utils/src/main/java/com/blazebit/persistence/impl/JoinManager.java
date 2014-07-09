@@ -17,8 +17,10 @@ package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.JoinType;
 import com.blazebit.persistence.ModelUtils;
+import com.blazebit.persistence.expression.ArrayExpression;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
+import com.blazebit.persistence.expression.PathElementExpression;
 import com.blazebit.persistence.expression.PathExpression;
 import static com.blazebit.persistence.impl.AbstractCriteriaBuilder.log;
 import com.blazebit.reflection.ReflectionUtils;
@@ -59,6 +61,9 @@ public class JoinManager {
         return sb.toString();
     }
 
+    AliasInfo getAliasInfoByJoinPath(String joinPath){
+        return joinAliasInfos.get(joinPath);
+    }
     private void applyJoins(StringBuilder sb, AliasInfo joinBase, Map<String, JoinNode> nodes, boolean includeSelect) {
         for (Map.Entry<String, JoinNode> nodeEntry : nodes.entrySet()) {
             String relation = nodeEntry.getKey();
@@ -66,19 +71,19 @@ public class JoinManager {
             if (includeSelect == false && node.isSelectOnly() == true) {
                 continue;
             }
-            sb.append(' ');
+            
             switch (node.getType()) {
                 case INNER:
-                    sb.append("JOIN ");
+                    sb.append(" JOIN ");
                     break;
                 case LEFT:
-                    sb.append("LEFT JOIN ");
+                    sb.append(" LEFT JOIN ");
                     break;
                 case RIGHT:
-                    sb.append("RIGHT JOIN ");
+                    sb.append(" RIGHT JOIN ");
                     break;
                 case OUTER:
-                    sb.append("OUTER JOIN ");
+                    sb.append(" OUTER JOIN ");
                     break;
             }
             if (node.isFetch()) {
@@ -127,28 +132,35 @@ public class JoinManager {
         }
     }
 
-    Expression implicitJoin(Expression expression, boolean objectLeafAllowed, boolean fromSelect) {
+    void implicitJoin(Expression expression, boolean objectLeafAllowed, boolean fromSelect) {
         PathExpression pathExpression;
         if (expression instanceof PathExpression) {
             pathExpression = (PathExpression) expression;
+            // normalize the path, i.e. if it starts at the root alias, remove this part
+//            normalizePath(pathExpression);
             JoinResult result = implicitJoin(pathExpression.getPath(), objectLeafAllowed, fromSelect);
             pathExpression.setBaseNode(result.baseNode);
             pathExpression.setField(result.field);
-        } else {
-            // We know it can only be a composite expression
-            for (Expression exp : ((CompositeExpression) expression).getExpressions()) {
-                if (exp instanceof PathExpression) {
-                    pathExpression = (PathExpression) exp;
-                    JoinResult result = implicitJoin(pathExpression.getPath(), objectLeafAllowed, fromSelect);
-                    pathExpression.setBaseNode(result.baseNode);
-                    pathExpression.setField(result.field);
+            //also do implicit joins for array indices
+            for(PathElementExpression pathElem : pathExpression.getExpressions()){
+                if(pathElem instanceof ArrayExpression){
+                    implicitJoin(((ArrayExpression)pathElem).getIndex(), false, fromSelect);
                 }
             }
+        } else if(expression instanceof CompositeExpression){
+            for (Expression exp : ((CompositeExpression) expression).getExpressions()) {
+                implicitJoin(exp, objectLeafAllowed, fromSelect);
+            }
         }
-        return expression;
     }
 
-    protected String normalizePath(String path) {
+    private void normalizePath(PathExpression path) {
+        if(path.getExpressions().get(0).toString().equals(rootAliasInfo.getAlias())){
+            path.getExpressions().remove(0);
+        }
+    }
+        
+    private String normalizePath(String path) {
         String normalizedPath;
         if (startsAtRootAlias(path)) {
             // The given path is relative to the root
@@ -157,11 +169,13 @@ public class JoinManager {
             // The path is either already normalized or uses a specific alias as base
             normalizedPath = path;
         }
-        return normalizedPath;
+        // remove array indices
+        return normalizedPath.replaceAll("\\[[^\\]]+\\]", "");
     }
 
     JoinResult implicitJoin(String path, boolean objectLeafAllowed, boolean fromSelect) {
         String normalizedPath = normalizePath(path);
+        
         JoinNode baseNode;
         String field;
         int dotIndex;
@@ -275,6 +289,7 @@ public class JoinManager {
         // Iterate through all property names
         for (int j = 0; j < pathElements.length; j++) {
             String propertyName = pathElements[j];
+
             //            Field propertyField = ReflectionUtils.getField(currentClass, propertyName);
             Class<?> rawFieldClass = ReflectionUtils.getResolvedFieldType(currentClass, propertyName);
             Class<?> resolvedFieldClass = ModelUtils.resolveFieldClass(currentClass, propertyName);
@@ -290,7 +305,7 @@ public class JoinManager {
             if (j == pathElements.length - 1) {
                 // use parameters for joining the last path property
                 if (joinAlias == null) {
-                    joinAlias = pathElements[pathElements.length - 1];
+                    joinAlias = propertyName;
                 }
                 if (type == null) {
                     // TODO: Implement model aware joining

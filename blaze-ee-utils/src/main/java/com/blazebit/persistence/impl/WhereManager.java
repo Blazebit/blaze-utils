@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.RestrictionBuilder;
@@ -26,16 +25,25 @@ import com.blazebit.persistence.predicate.Predicate.Visitor;
  * @author ccbem
  */
 public class WhereManager<U> extends PredicateManager<U> {
-    WhereManager(QueryGenerator queryGenerator, ArrayExpressionTransformer transformer) {
-        super(queryGenerator, transformer);
+
+    WhereManager(QueryGenerator queryGenerator) {
+        super(queryGenerator);
     }
 
     @Override
-    String getClauseName() {
+    protected String getClauseName() {
         return "WHERE";
     }
-    
+
     WhereOrBuilder<U> whereOr(AbstractCriteriaBuilder<?, ?> builder) {
-        return rootPredicate.startBuilder(new WhereOrBuilderImpl<U>(transformer, (U) builder, rootPredicate));
+        return rootPredicate.startBuilder(new WhereOrBuilderImpl<U>((U) builder, rootPredicate));
     }
+
+    String buildClause(boolean generateRequiredMapKeyFiltersOnly) {
+        queryGenerator.setGenerateRequiredMapKeyFiltersOnly(generateRequiredMapKeyFiltersOnly);
+        String clause = super.buildClause();
+        queryGenerator.setGenerateRequiredMapKeyFiltersOnly(false);
+        return clause;
+    }
+
 }
