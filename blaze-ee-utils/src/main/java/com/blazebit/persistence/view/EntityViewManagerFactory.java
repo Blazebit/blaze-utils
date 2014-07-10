@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+
+package com.blazebit.persistence.view;
+
+import com.blazebit.persistence.view.metamodel.ViewMetamodel;
+import javax.persistence.EntityManager;
 
 /**
  *
  * @author cpbec
  */
-public interface CriteriaBuilder<T> extends QueryBuilder<T, CriteriaBuilder<T>> {
+public interface EntityViewManagerFactory {
     
-    @Override
-    public <Y> SelectObjectBuilder<CriteriaBuilder<Y>> selectNew(Class<Y> clazz);
+    public ViewMetamodel getMetamodel();
     
-    @Override
-    public <Y> CriteriaBuilder<Y> selectNew(ObjectBuilder<Y> builder);
+    public EntityViewManager createEntityViewManager(EntityManager em);
 }

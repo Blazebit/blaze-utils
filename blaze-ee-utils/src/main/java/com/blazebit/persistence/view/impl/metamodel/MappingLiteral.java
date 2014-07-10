@@ -13,17 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+package com.blazebit.persistence.view.impl.metamodel;
+
+import com.blazebit.persistence.view.Mapping;
+import java.lang.annotation.Annotation;
 
 /**
  *
  * @author cpbec
  */
-public interface CriteriaBuilder<T> extends QueryBuilder<T, CriteriaBuilder<T>> {
+public class MappingLiteral implements Mapping {
+    
+    private final String value;
+
+    public MappingLiteral(String value) {
+        this.value = value;
+    }
     
     @Override
-    public <Y> SelectObjectBuilder<CriteriaBuilder<Y>> selectNew(Class<Y> clazz);
-    
+    public String value() {
+        return value;
+    }
+
     @Override
-    public <Y> CriteriaBuilder<Y> selectNew(ObjectBuilder<Y> builder);
+    public Class<? extends Annotation> annotationType() {
+        return Mapping.class;
+    }
 }

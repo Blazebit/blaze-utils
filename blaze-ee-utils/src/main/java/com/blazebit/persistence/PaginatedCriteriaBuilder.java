@@ -16,15 +16,7 @@
 
 package com.blazebit.persistence;
 
-import com.blazebit.lang.StringUtils;
-import com.blazebit.persistence.impl.CriteriaBuilderImpl;
-import java.lang.reflect.Constructor;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import javax.persistence.EntityManager;
-import javax.persistence.TemporalType;
-import javax.persistence.TypedQuery;
 
 /**
  *
@@ -34,6 +26,9 @@ public interface PaginatedCriteriaBuilder<T> extends QueryBuilder<T, PaginatedCr
     
     @Override
     public <Y> SelectObjectBuilder<PaginatedCriteriaBuilder<Y>> selectNew(Class<Y> clazz);
+    
+    @Override
+    public <Y> PaginatedCriteriaBuilder<Y> selectNew(ObjectBuilder<Y> builder) ;
     
     @Override
     public PagedList<T> getResultList(EntityManager em);

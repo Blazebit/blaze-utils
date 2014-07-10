@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+
+package com.blazebit.persistence.view;
+
+import com.blazebit.persistence.ObjectBuilder;
 
 /**
  *
  * @author cpbec
  */
-public interface CriteriaBuilder<T> extends QueryBuilder<T, CriteriaBuilder<T>> {
+public interface EntityViewManager {
     
-    @Override
-    public <Y> SelectObjectBuilder<CriteriaBuilder<Y>> selectNew(Class<Y> clazz);
-    
-    @Override
-    public <Y> CriteriaBuilder<Y> selectNew(ObjectBuilder<Y> builder);
+    public EntityViewManagerFactory getEntityViewManagerFactory();
+
+    public <T> ObjectBuilder<T> createObjectBuilder(Class<T> clazz);
 }
