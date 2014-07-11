@@ -565,7 +565,7 @@ public final class ReflectionUtils {
 				}
 			}
 
-			if ((modifiers & Modifier.STATIC) != 0) {
+			if ((modifiers & Modifier.STATIC) == 0) {
 				classArray = traverseClass.getInterfaces();
 
 				for (int i = 0; i < classArray.length; i++) {
