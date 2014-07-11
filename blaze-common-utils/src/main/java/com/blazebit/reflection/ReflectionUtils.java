@@ -967,16 +967,21 @@ public final class ReflectionUtils {
 			m = getMethod(clazz, sb.toString());
 		}
 
-		if (!isGetter(m)) {
+		if (!isGetter0(m)) {
 			return null;
 		}
 
 		return m;
 	}
 
-	private static boolean isGetter(Method m) {
+	private static boolean isGetter0(Method m) {
 		return m != null && !void.class.equals(m.getReturnType())
 				&& m.getParameterTypes().length == 0;
+	}
+
+	public static boolean isGetter(Method m) {
+		return m != null && (m.getName().startsWith("get") || m.getName().startsWith("is"))
+                        && !void.class.equals(m.getReturnType()) && m.getParameterTypes().length == 0;
 	}
 
 	/**
@@ -1026,7 +1031,7 @@ public final class ReflectionUtils {
 	private static Method findSetter(String methodName, Class<?>... classes) {
 		for (Class<?> clazz : classes) {
 			for (Method m : clazz.getDeclaredMethods()) {
-				if (m.getName().equals(methodName) && isSetter(m)) {
+				if (m.getName().equals(methodName) && isSetter0(m)) {
 					return m;
 				}
 			}
@@ -1035,8 +1040,13 @@ public final class ReflectionUtils {
 		return null;
 	}
 
-	private static boolean isSetter(Method m) {
+	private static boolean isSetter0(Method m) {
 		return m != null && m.getReturnType().equals(void.class)
+				&& m.getParameterTypes().length == 1;
+	}
+
+	public static boolean isSetter(Method m) {
+		return m != null && m.getName().startsWith("set") && m.getReturnType().equals(void.class)
 				&& m.getParameterTypes().length == 1;
 	}
 }
