@@ -43,6 +43,7 @@ public class ViewTypeImpl<X> implements ViewType<X> {
     private final Class<?> entityClass;
     private final Map<String, MethodAttribute<? super X, ?>> attributes;
     private final Map<Class<?>[], MappingConstructor<X>> constructors;
+    private final Map<String, MappingConstructor<X>> constructorIndex;
     
     public ViewTypeImpl(Class<? extends X> clazz) {
         this.javaType = (Class<X>) clazz;
@@ -72,7 +73,7 @@ public class ViewTypeImpl<X> implements ViewType<X> {
                 String attributeName = MethodAttributeImpl.validate(this, method);
                 
                 if (attributeName != null && !attributes.containsKey(attributeName)) {
-                    MethodAttribute<? super X, ?> attribute = MethodAttributeImpl.createMappingAttribute(this, method);
+                    MethodAttribute<? super X, ?> attribute = MethodAttributeImpl.createMethodAttribute(this, method);
                     if (attribute != null) {
                         attributes.put(attribute.getName(), attribute);
                     }
@@ -81,9 +82,16 @@ public class ViewTypeImpl<X> implements ViewType<X> {
         }
         
         this.constructors = new HashMap<Class<?>[], MappingConstructor<X>>();
+        this.constructorIndex = new HashMap<String, MappingConstructor<X>>();
         
         for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
-            constructors.put(constructor.getParameterTypes(), new MappingConstructorImpl<X>(this, (Constructor<X>) constructor));
+            String constructorName = MappingConstructorImpl.validate(this, constructor);
+            if (constructorIndex.containsKey(constructorName)) {
+                constructorName += constructorIndex.size();
+            }
+            MappingConstructor<X> mappingConstructor = new MappingConstructorImpl<X>(this, constructorName, (Constructor<X>) constructor);
+            constructors.put(constructor.getParameterTypes(), mappingConstructor);
+            constructorIndex.put(constructorName, mappingConstructor);
         }
     }
 
@@ -120,6 +128,17 @@ public class ViewTypeImpl<X> implements ViewType<X> {
     @Override
     public MappingConstructor<X> getConstructor(Class<?>... parameterTypes) {
         return constructors.get(parameterTypes);
+    }
+    
+    @Override
+    public Set<String> getConstructorNames() {
+        return constructorIndex.keySet();
+    }
+    
+    
+    @Override
+    public MappingConstructor<X> getConstructor(String name) {
+        return constructorIndex.get(name);
     }
     
 }

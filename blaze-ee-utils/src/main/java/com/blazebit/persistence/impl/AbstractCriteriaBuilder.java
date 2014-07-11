@@ -208,7 +208,8 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     @Override
     public <Y> QueryBuilder<Y, ?> selectNew(ObjectBuilder<Y> builder) {
         verifyBuilderEnded();
-        return selectManager.selectNew(builder);
+        selectManager.selectNew(builder);
+        return (QueryBuilder<Y, ?>) this;
     }
     
     /*

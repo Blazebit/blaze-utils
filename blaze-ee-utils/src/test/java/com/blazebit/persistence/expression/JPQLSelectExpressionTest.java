@@ -114,6 +114,17 @@ public class JPQLSelectExpressionTest {
     }
 
     @Test
+    public void testParserArithmetic2() {
+        CompositeExpression result = parse("age + 1");
+        List<Expression> expressions = result.getExpressions();
+
+        assertTrue(expressions.size() == 2);
+
+        assertTrue(expressions.get(0).equals(path("age")));
+        assertTrue(expressions.get(1).equals(new FooExpression("+ 1")));
+    }
+
+    @Test
     public void testArrayExpression() {
         CompositeExpression result = parse("versions[test]");
         List<Expression> expressions = result.getExpressions();

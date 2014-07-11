@@ -44,6 +44,11 @@ public class TupleResultTransformer implements ObjectBuilder<Tuple> {
         return list;
     }
 
+    @Override
+    public String[] getExpressions() {
+        return null;
+    }
+
     class TupleImpl implements Tuple {
 
         private final Object[] tuple;

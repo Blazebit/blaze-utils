@@ -14,24 +14,20 @@
  * limitations under the License.
  */
 
-package com.blazebit.persistence.view.metamodel;
+package com.blazebit.persistence.view;
 
-import java.lang.reflect.Constructor;
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  *
  * @author cpbec
  */
-public interface MappingConstructor<X> {
+@Target({ElementType.CONSTRUCTOR})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ViewConstructor {
     
-    public String getName();
-    
-    public ViewType<X> getDeclaringType();
-    
-    public Constructor<X> getJavaConstructor();
-    
-    public List<ParameterAttribute<X, ?>> getParameterAttributes();
-    
-    public ParameterAttribute<X, ?> getParameterAttribute(int index);
+    String value();
 }

@@ -33,7 +33,7 @@ public class AbstractEntityViewPersistenceTest extends AbstractPersistenceTest {
     protected static EntityViewManager evm;
     
     @BeforeClass
-    public static void init() {
+    public static void initEvm() {
         EntityViewConfiguration cfg = new EntityViewConfiguration();
         cfg.addEntityView(DocumentView1.class);
         cfg.addEntityView(DocumentView2.class);

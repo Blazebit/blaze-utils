@@ -23,6 +23,8 @@ import java.util.List;
  */
 public interface ObjectBuilder<T> {
     
+    public String[] getExpressions();
+    
     public T build(Object[] tuple, String[] aliases);
     
     public List<T> buildList(List<T> list);

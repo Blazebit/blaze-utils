@@ -40,7 +40,6 @@ import javassist.bytecode.AccessFlag;
 import javassist.bytecode.Bytecode;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.Descriptor;
-import javassist.bytecode.FieldInfo;
 import javassist.bytecode.MethodInfo;
 
 /**
@@ -155,7 +154,6 @@ public class ProxyFactory {
                 cc.addConstructor(createConstructor(cc, attributeFields, constructorAttributeTypes));
             }
             
-            cc.writeFile("D:/generated");
             return cc.toClass();
         } catch (Exception ex) {
             throw new RuntimeException("Probably we did something wrong, please contact us if you see this message.", ex);

@@ -70,7 +70,7 @@ public class MethodAttributeImpl<X, Y> implements MethodAttribute<X, Y> {
         return mapping;
     }
     
-    public static <X> MethodAttribute<? super X, ?> createMappingAttribute(ViewType<X> viewType, Method method) {
+    public static <X> MethodAttribute<? super X, ?> createMethodAttribute(ViewType<X> viewType, Method method) {
         Mapping mapping = getMapping(viewType, method);
         if (mapping == null) {
             return null;

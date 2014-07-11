@@ -16,9 +16,13 @@
 
 package com.blazebit.persistence.view.impl;
 
-import com.blazebit.persistence.ObjectBuilder;
+import com.blazebit.persistence.CriteriaBuilder;
+import com.blazebit.persistence.PaginatedCriteriaBuilder;
+import com.blazebit.persistence.QueryBuilder;
 import com.blazebit.persistence.view.EntityViewManager;
 import com.blazebit.persistence.view.EntityViewManagerFactory;
+import com.blazebit.persistence.view.metamodel.MappingConstructor;
+import com.blazebit.persistence.view.metamodel.ViewType;
 import javax.persistence.EntityManager;
 
 /**
@@ -41,7 +45,32 @@ public class EntityViewManagerImpl implements EntityViewManager {
     }
     
     @Override
-    public <T> ObjectBuilder<T> createObjectBuilder(Class<T> clazz) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public <T> PaginatedCriteriaBuilder<T> applyObjectBuilder(Class<T> clazz, PaginatedCriteriaBuilder<?> criteriaBuilder) {
+        return applyObjectBuilder(clazz, null, criteriaBuilder);
+    }
+    
+    @Override
+    public <T> CriteriaBuilder<T> applyObjectBuilder(Class<T> clazz, CriteriaBuilder<?> criteriaBuilder) {
+        return applyObjectBuilder(clazz, null, criteriaBuilder);
+    }
+    
+    @Override
+    public <T> PaginatedCriteriaBuilder<T> applyObjectBuilder(Class<T> clazz, String mappingConstructorName, PaginatedCriteriaBuilder<?> criteriaBuilder) {
+        ViewType<T> viewType = entityViewManagerFactory.getMetamodel().view(clazz);
+        MappingConstructor<T> mappingConstructor = viewType.getConstructor(mappingConstructorName);
+        applyObjectBuilder(viewType, mappingConstructor, (QueryBuilder<?, ?>) criteriaBuilder);
+        return (PaginatedCriteriaBuilder<T>) criteriaBuilder;
+    }
+    
+    @Override
+    public <T> CriteriaBuilder<T> applyObjectBuilder(Class<T> clazz, String mappingConstructorName, CriteriaBuilder<?> criteriaBuilder) {
+        ViewType<T> viewType = entityViewManagerFactory.getMetamodel().view(clazz);
+        MappingConstructor<T> mappingConstructor = viewType.getConstructor(mappingConstructorName);
+        applyObjectBuilder(viewType, mappingConstructor, (QueryBuilder<?, ?>) criteriaBuilder);
+        return (CriteriaBuilder<T>) criteriaBuilder;
+    }
+    
+    private <T> void applyObjectBuilder(ViewType<T> viewType, MappingConstructor<T> mappingConstructor, QueryBuilder<?, ?> criteriaBuilder) {
+        criteriaBuilder.selectNew(new ViewTypeObjectBuilderImpl<T>(viewType, mappingConstructor));
     }
 }

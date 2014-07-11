@@ -71,4 +71,9 @@ public class ClassResultTransformer<T> implements ObjectBuilder<T> {
         return list;
     }
 
+    @Override
+    public String[] getExpressions() {
+        return null;
+    }
+
 }

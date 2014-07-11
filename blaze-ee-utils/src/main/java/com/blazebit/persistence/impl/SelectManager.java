@@ -174,14 +174,18 @@ public class SelectManager<T> extends AbstractManager {
         return (SelectObjectBuilder) selectObjectBuilder;
     }
 
-    <Y> QueryBuilder<Y, ?> selectNew(ObjectBuilder<Y> builder) {
+    void selectNew(ObjectBuilder<?> builder) {
         if (selectObjectBuilder != null) {
             throw new IllegalStateException("Only one selectNew is allowed");
         }
         if (!selectInfos.isEmpty()) {
             throw new IllegalStateException("No mixture of select and selectNew is allowed");
         }
-        throw new UnsupportedOperationException();
+        for (String expression : builder.getExpressions()) {
+            SelectInfo selectInfo = new SelectInfo(ExpressionUtils.parse(expression), null);
+            selectInfos.add(selectInfo);
+        }
+        selectObjectTransformer = (ObjectBuilder<T>) builder;
     }
 
     void distinct() {

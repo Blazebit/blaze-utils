@@ -48,5 +48,10 @@ public class ConstructorResultTransformer<T> implements ObjectBuilder<T> {
     public List<T> buildList(List<T> list) {
         return list;
     }
+
+    @Override
+    public String[] getExpressions() {
+        return null;
+    }
     
 }
