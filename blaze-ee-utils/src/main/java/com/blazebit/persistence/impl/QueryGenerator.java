@@ -15,6 +15,7 @@
  */
 package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.expression.ArrayExpression;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.FooExpression;
@@ -270,8 +271,8 @@ public class QueryGenerator implements Predicate.Visitor, Expression.Visitor {
     public void visit(ParameterExpression expression) {
         String paramName;
         if (expression.getName() == null) {
-            paramName = parameterManager.getParamNameForObject(expression.getValue());
-
+//            paramName = parameterManager.getParamNameForObject(expression.getValue());
+            throw new IllegalStateException("Unsatisfied parameter " + expression.getName());
         } else {
             paramName = expression.getName();
         }
@@ -320,6 +321,10 @@ public class QueryGenerator implements Predicate.Visitor, Expression.Visitor {
 
     public void setReplaceSelectAliases(boolean replaceSelectAliases) {
         this.replaceSelectAliases = replaceSelectAliases;
+    }
+
+    @Override
+    public void visit(ArrayExpression expression) {
     }
 
 }

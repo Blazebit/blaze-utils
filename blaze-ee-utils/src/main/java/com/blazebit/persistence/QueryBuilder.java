@@ -50,7 +50,7 @@ public interface QueryBuilder<T, X extends QueryBuilder<T, X>> extends Aggregate
     
     public List<T> getResultList(EntityManager em);
 
-    public PaginatedCriteriaBuilder<T> page(int page, int objectsPerPage);
+    public PaginatedCriteriaBuilder<T> page(int firstRow, int pageSize);
 
     /*
      * Join methods

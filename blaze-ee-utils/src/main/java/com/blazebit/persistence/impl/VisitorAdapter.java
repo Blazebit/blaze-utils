@@ -16,11 +16,13 @@
 
 package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.expression.ArrayExpression;
 import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.FooExpression;
 import com.blazebit.persistence.expression.ParameterExpression;
+import com.blazebit.persistence.expression.PathElementExpression;
 import com.blazebit.persistence.expression.PathExpression;
 import com.blazebit.persistence.expression.PropertyExpression;
 import com.blazebit.persistence.predicate.AndPredicate;
@@ -128,6 +130,15 @@ public abstract class VisitorAdapter implements Predicate.Visitor, Expression.Vi
 
     @Override
     public void visit(PathExpression expression) {
+        for(PathElementExpression pathElementExpression : expression.getExpressions()){
+            pathElementExpression.accept(this);
+        }
+    }
+
+    @Override
+    public void visit(ArrayExpression expression) {
+        expression.getBase().accept(this);
+        expression.getIndex().accept(this);
     }
 
     @Override

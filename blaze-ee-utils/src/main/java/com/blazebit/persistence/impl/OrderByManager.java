@@ -29,13 +29,15 @@ import java.util.List;
 public class OrderByManager extends AbstractManager {
     private final List<OrderByInfo> orderByInfos = new ArrayList<OrderByInfo>();
     
-    OrderByManager(QueryGenerator queryGenerator) {
-        super(queryGenerator);
+    OrderByManager(QueryGenerator queryGenerator, ParameterManager parameterManager) {
+        super(queryGenerator, parameterManager);
     }
     
     void orderBy(String expression, boolean ascending, boolean nullFirst){
         Expression exp = ExpressionUtils.parse(expression);
         orderByInfos.add(new OrderByInfo(exp, ascending, nullFirst));
+        
+        registerParameterExpressions(exp);
     }
     
     void acceptVisitor(Expression.Visitor v){

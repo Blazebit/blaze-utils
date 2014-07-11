@@ -26,8 +26,8 @@ import com.blazebit.persistence.predicate.Predicate.Visitor;
  */
 public class WhereManager<U> extends PredicateManager<U> {
 
-    WhereManager(QueryGenerator queryGenerator) {
-        super(queryGenerator);
+    WhereManager(QueryGenerator queryGenerator, ParameterManager parameterManager) {
+        super(queryGenerator, parameterManager);
     }
 
     @Override

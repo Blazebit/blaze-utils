@@ -23,8 +23,8 @@ import com.blazebit.persistence.WhereOrBuilder;
  * @author ccbem
  */
 public class HavingManager<U> extends PredicateManager<U>{
-    HavingManager(QueryGenerator queryGenerator) {
-        super(queryGenerator);
+    HavingManager(QueryGenerator queryGenerator, ParameterManager parameterManager) {
+        super(queryGenerator, parameterManager);
     }
 
     @Override

@@ -15,6 +15,10 @@
  */
 package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.expression.Expression;
+import com.blazebit.persistence.expression.ParameterExpression;
+import com.blazebit.persistence.predicate.Predicate;
+
 /**
  *
  * @author ccbem
@@ -22,8 +26,30 @@ package com.blazebit.persistence.impl;
 public class AbstractManager {
 
     final QueryGenerator queryGenerator;
+    protected final ParameterManager parameterManager;
+    private final VisitorAdapter parameterRegistrationVisitor = new VisitorAdapter() {
+        @Override
+            public void visit(ParameterExpression expression) {
+                if (expression.getValue() != null) {
+                    // ParameterExpression was created with an object but no name is set
+                    expression.setName(parameterManager.getParamNameForObject(expression.getValue()));
+                } else {
+                    // Value was not set so we only have an unsatisfied parameter name which we register
+                    parameterManager.registerParameterName(expression.getName());
+                }
+            }
+};
 
-    AbstractManager(QueryGenerator queryGenerator) {
+    AbstractManager(QueryGenerator queryGenerator, ParameterManager parameterManager) {
         this.queryGenerator = queryGenerator;
+        this.parameterManager = parameterManager;
+    }
+
+    protected void registerParameterExpressions(Expression expression) {
+        expression.accept(parameterRegistrationVisitor);
+    }
+
+    protected void registerParameterExpressions(Predicate predicate) {
+        predicate.accept(parameterRegistrationVisitor);
     }
 }

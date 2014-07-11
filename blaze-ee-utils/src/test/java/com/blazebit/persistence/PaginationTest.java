@@ -113,17 +113,10 @@ public class PaginationTest extends AbstractPersistenceTest {
         String expectedCountQuery = "SELECT COUNT(*) FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
                 + "WHERE UPPER(d.name) LIKE UPPER(:param_0) AND owner.name LIKE :param_1 AND UPPER(localized) LIKE UPPER(:param_2) AND KEY(localized) = 1";
         
-        em.createQuery("SELECT COUNT(*) FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
-                + "WHERE UPPER(d.name) LIKE UPPER('doc%') AND owner.name LIKE '%arl%' AND UPPER(localized) LIKE UPPER('a%') AND KEY(localized) = 1").getResultList();
-        
         // limit this query using setFirstResult() and setMaxResult() according to the parameters passed to page()
         String expectedIdQuery = "SELECT DISTINCT d.id FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
                 + "WHERE UPPER(d.name) LIKE UPPER(:param_0) AND owner.name LIKE :param_1 AND UPPER(localized) LIKE UPPER(:param_2) AND KEY(localized) = 1 "
                 + "ORDER BY d.id ASC NULLS LAST";
-        
-        em.createQuery("SELECT DISTINCT d.id FROM Document d LEFT JOIN d.owner owner LEFT JOIN owner.localized localized "
-                + "WHERE UPPER(d.name) LIKE UPPER('doc%') AND owner.name LIKE '%arl%' AND UPPER(localized) LIKE UPPER('a%') AND KEY(localized) = 1 "
-                + "ORDER BY d.id ASC NULLS LAST").getResultList();
         
         String expectedObjectQuery = "SELECT d.name, CONCAT(owner.name,' user'), COALESCE(localized,'no item'), partnerDocument.name FROM Document d "
                 + "LEFT JOIN d.owner owner LEFT JOIN owner.localized localized LEFT JOIN owner.partnerDocument partnerDocument "
@@ -137,15 +130,19 @@ public class PaginationTest extends AbstractPersistenceTest {
         assertEquals(expectedIdQuery, pcb.getPageIdQueryString());
         assertEquals(expectedObjectQuery, pcb.getQueryString());
         
-        // crit.setParameter
-        
         PagedList<DocumentViewModel> result = pcb.getResultList(em);
         assertEquals(2, result.size());
         assertEquals(5, result.totalSize());
         assertEquals("doc1", result.get(0).getName());
         assertEquals("Doc2", result.get(1).getName());
-//        assertEquals("doC3", result.get(2).getName());
-//        assertEquals("dOc4", result.get(3).getName());
+        
+        result = crit.page(2, 2).getResultList(em);
+        assertEquals("doC3", result.get(0).getName());
+        assertEquals("dOc4", result.get(1).getName());
+        
+        result = crit.page(4, 2).getResultList(em);
+        assertEquals(result.size(), 1);
+        assertEquals("DOC5", result.get(0).getName());
     }
     
     @Test

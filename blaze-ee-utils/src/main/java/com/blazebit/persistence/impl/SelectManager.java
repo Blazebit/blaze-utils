@@ -50,8 +50,8 @@ public class SelectManager<T> extends AbstractManager {
     private final Map<String, SelectInfo> selectAbsolutePathToInfoMap = new HashMap<String, SelectInfo>();
     private final SelectObjectBuilderEndedListenerImpl selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
 
-    public SelectManager(QueryGenerator queryGenerator) {
-        super(queryGenerator);
+    public SelectManager(QueryGenerator queryGenerator, ParameterManager parameterManager) {
+        super(queryGenerator, parameterManager);
     }
 
     void verifyBuilderEnded() {
@@ -123,6 +123,8 @@ public class SelectManager<T> extends AbstractManager {
         }
         selectInfos.add(selectInfo);
         selectObjectTransformer = new TupleResultTransformer(this);
+        
+        registerParameterExpressions(expr);
     }
 
 //    public U select(Class<? extends T> clazz) {

@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.blazebit.persistence.impl;
 
 import com.blazebit.persistence.RestrictionBuilder;
-import com.blazebit.persistence.WhereOrBuilder;
-import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
+import com.blazebit.persistence.expression.ParameterExpression;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.BetweenPredicate;
 import com.blazebit.persistence.predicate.GePredicate;
@@ -32,52 +30,53 @@ import com.blazebit.persistence.predicate.PredicateBuilder;
  * @author ccbem
  */
 public abstract class PredicateManager<U> extends AbstractManager {
+
     final RootPredicate rootPredicate;
 
-    PredicateManager(QueryGenerator queryGenerator) {
-        super(queryGenerator);
+    PredicateManager(QueryGenerator queryGenerator, ParameterManager parameterManager) {
+        super(queryGenerator, parameterManager);
         this.rootPredicate = new RootPredicate();
     }
 
-    public RootPredicate getRootPredicate() {
+    RootPredicate getRootPredicate() {
         return rootPredicate;
     }
-    
-    RestrictionBuilder<U> restrict(AbstractCriteriaBuilder<?, ?> builder, String expression){
+
+    RestrictionBuilder<U> restrict(AbstractCriteriaBuilder<?, ?> builder, String expression) {
         return rootPredicate.startBuilder(new RestrictionBuilderImpl<U>((U) builder, rootPredicate, ExpressionUtils.parse(expression)));
     }
-    
-    void applyTransformer(ArrayExpressionTransformer transformer){
+
+    void applyTransformer(ArrayExpressionTransformer transformer) {
         // carry out transformations
         rootPredicate.predicate.accept(new ArrayTransformationVisitor(transformer));
     }
-    
-    void verifyBuilderEnded(){
+
+    void verifyBuilderEnded() {
         rootPredicate.verifyBuilderEnded();
     }
-    
-    void acceptVisitor(Predicate.Visitor v){
+
+    void acceptVisitor(Predicate.Visitor v) {
         rootPredicate.predicate.accept(v);
     }
-    
+
     String buildClause() {
         StringBuilder sb = new StringBuilder();
         queryGenerator.setQueryBuffer(sb);
         applyPredicate(queryGenerator, sb);
         return sb.toString();
     }
-    
+
     protected abstract String getClauseName();
-    
-    void applyPredicate(QueryGenerator queryGenerator, StringBuilder sb){
+
+    void applyPredicate(QueryGenerator queryGenerator, StringBuilder sb) {
         if (rootPredicate.predicate.getChildren().isEmpty()) {
             return;
         }
         sb.append(' ').append(getClauseName()).append(' ');
         rootPredicate.predicate.accept(queryGenerator);
     }
-    
-    static class RootPredicate extends AbstractBuilderEndedListener {
+
+    class RootPredicate extends AbstractBuilderEndedListener {
 
         final AndPredicate predicate;
 
@@ -90,19 +89,22 @@ public abstract class PredicateManager<U> extends AbstractManager {
             super.onBuilderEnded(builder);
             Predicate pred = builder.getPredicate();
 
-
+            // register parameter expressions
+            registerParameterExpressions(predicate);
+            
             predicate.getChildren()
                     .add(pred);
         }
     }
-    
-    private static class ArrayTransformationVisitor extends VisitorAdapter{
-        private ArrayExpressionTransformer transformer;
+
+    private static class ArrayTransformationVisitor extends VisitorAdapter {
+
+        private final ArrayExpressionTransformer transformer;
 
         public ArrayTransformationVisitor(ArrayExpressionTransformer transformer) {
             this.transformer = transformer;
         }
-        
+
         @Override
         public void visit(BetweenPredicate predicate) {
             predicate.setStart(transformer.transform(predicate.getStart()));

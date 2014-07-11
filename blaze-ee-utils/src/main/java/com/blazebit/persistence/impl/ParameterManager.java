@@ -47,6 +47,11 @@ public class ParameterManager {
         return existingName;
     }
     
-    
+    public void registerParameterName(String name){
+        if(parameters.containsKey(name)){
+            throw new IllegalArgumentException("Parameter name already registered");
+        }
+        parameters.put(name, null);
+    }
     
 }

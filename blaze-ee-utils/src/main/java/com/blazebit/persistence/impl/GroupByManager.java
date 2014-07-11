@@ -30,14 +30,16 @@ import java.util.List;
 public class GroupByManager extends AbstractManager{
     private final List<NodeInfo> groupByInfos;
     
-    GroupByManager(QueryGenerator queryGenerator) {
-        super(queryGenerator);
+    GroupByManager(QueryGenerator queryGenerator, ParameterManager parameterManager) {
+        super(queryGenerator, parameterManager);
         groupByInfos = new ArrayList<NodeInfo>();
     }
     
     void groupBy(String expression){
         Expression exp = ExpressionUtils.parse(expression);
         groupByInfos.add(new NodeInfo(exp));
+        
+        registerParameterExpressions(exp);
     }
     
     String buildGroupBy(){

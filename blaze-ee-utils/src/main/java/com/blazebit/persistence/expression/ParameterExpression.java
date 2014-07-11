@@ -23,17 +23,14 @@ public class ParameterExpression implements Expression {
 
     private String name;
     private final Object value;
-    private final boolean valueSet;
 
     public ParameterExpression(String name) {
         this.name = name;
         this.value = null;
-        this.valueSet = false;
     }
 
     public ParameterExpression(Object value) {
         this.value = value;
-        this.valueSet = true;
     }
     
     @Override
@@ -51,10 +48,6 @@ public class ParameterExpression implements Expression {
 
     public Object getValue() {
         return value;
-    }
-
-    public boolean isValueSet() {
-        return valueSet;
     }
     
     @Override

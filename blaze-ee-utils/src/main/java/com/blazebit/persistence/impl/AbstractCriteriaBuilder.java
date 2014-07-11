@@ -104,12 +104,12 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         this.queryGenerator = new QueryGenerator(parameterManager);
         
         
-        this.whereManager = new WhereManager<U>(queryGenerator);
-        this.havingManager = new HavingManager<U>(queryGenerator);
-        this.groupByManager = new GroupByManager(queryGenerator);
+        this.whereManager = new WhereManager<U>(queryGenerator, parameterManager);
+        this.havingManager = new HavingManager<U>(queryGenerator, parameterManager);
+        this.groupByManager = new GroupByManager(queryGenerator, parameterManager);
                 
-        this.selectManager = new SelectManager<T>(queryGenerator);
-        this.orderByManager = new OrderByManager(queryGenerator);
+        this.selectManager = new SelectManager<T>(queryGenerator, parameterManager);
+        this.orderByManager = new OrderByManager(queryGenerator, parameterManager);
         
         //resolve cyclic dependencies
         this.queryGenerator.setSelectManager(selectManager);
@@ -143,9 +143,8 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     }
 
     @Override
-    public PaginatedCriteriaBuilder<T> page(int page, int objectsPerPage) {
-        return new PaginatedCriteriaBuilderImpl<T>(this, page, objectsPerPage);
-
+    public PaginatedCriteriaBuilder<T> page(int firstRow, int pageSize) {
+        return new PaginatedCriteriaBuilderImpl<T>(this, firstRow, pageSize);
     }
 
     @Override
@@ -452,11 +451,35 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
 
     @Override
     public boolean isParameterSet(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Map<String,Object> parameters = parameterManager.getParameters();
+        if(!parameters.containsKey(name)){
+            return false;
+        }
+        return parameters.get(name) != null;
     }
 
     @Override
     public Set<? extends Parameter<?>> getParameters() {
+        
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    private class ParameterImpl<T> implements Parameter<T>{
+        
+        @Override
+        public String getName() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public Integer getPosition() {
+            return null;
+        }
+
+        @Override
+        public Class<T> getParameterType() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
     }
 }

@@ -29,6 +29,8 @@ public interface Expression {
         
         public void visit(ParameterExpression expression);
         
+        public void visit(ArrayExpression expression);
+        
         public void visit(CompositeExpression expression);
                 
         public void visit(FooExpression expression);
