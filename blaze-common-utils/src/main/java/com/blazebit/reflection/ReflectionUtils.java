@@ -17,8 +17,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
@@ -715,6 +717,8 @@ public final class ReflectionUtils {
 			if (genericParameterTypes[i] instanceof TypeVariable<?>) {
 				parameterTypes[i] = resolveTypeVariable(clazz,
 						(TypeVariable<?>) genericParameterTypes[i]);
+			} else if (genericParameterTypes[i] instanceof ParameterizedType) {
+				parameterTypes[i] = (Class<?>) ((ParameterizedType) genericParameterTypes[i]).getRawType();
 			} else {
 				parameterTypes[i] = (Class<?>) genericParameterTypes[i];
 			}
@@ -722,6 +726,22 @@ public final class ReflectionUtils {
 
 		return parameterTypes;
 	}
+
+        public static Class<?>[][] getResolvedMethodParameterTypesArguments(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+            return getResolvedMethodParameterTypesArguments(clazz, getMethod(clazz, methodName, parameterTypes));
+        }
+
+        public static Class<?>[][] getResolvedMethodParameterTypesArguments(Class<?> clazz, Method method) {
+            int parameterCount = method.getParameterTypes().length;
+            Class<?>[][] parameterTypeArguments = new Class<?>[parameterCount][];
+            Type[] genericParameterTypes = method.getGenericParameterTypes();
+            
+            for (int i = 0; i < parameterCount; i++) {
+                parameterTypeArguments[i] = resolveTypeArguments(clazz, genericParameterTypes[i]);
+            }
+            
+            return parameterTypeArguments;
+        }
 
 	public static Class<?>[] getResolvedMethodExceptionTypes(Class<?> clazz,
 			String methodName, Class<?>... parameterTypes) {
@@ -811,24 +831,24 @@ public final class ReflectionUtils {
 	 */
 	public static Method getMethod(Class<?> clazz, String methodName,
 			Class<?>... parameterTypes) {
-		Class<?> traverseClass = clazz;
-
-		while (traverseClass != null) {
+            Queue<Class<?>> classQueue = new LinkedList<Class<?>>();
+            Class<?> traverseClass;
+            classQueue.add(clazz);
+            
+		while (!classQueue.isEmpty()) {
+                    traverseClass = classQueue.remove();
 			try {
 				return traverseClass.getDeclaredMethod(methodName,
 						parameterTypes);
 			} catch (NoSuchMethodException ex1) {
+                                if (traverseClass.getSuperclass() != null) {
+                                    classQueue.add(traverseClass.getSuperclass());
+                                }
 
 				// Look for the method in all interfaces of the traverse class
 				for (Class<?> interfaceClass : traverseClass.getInterfaces()) {
-					try {
-						return interfaceClass.getDeclaredMethod(methodName,
-								parameterTypes);
-					} catch (NoSuchMethodException ex2) {
-					}
+                                    classQueue.add(interfaceClass);
 				}
-
-				traverseClass = traverseClass.getSuperclass();
 			}
 		}
 
@@ -1031,7 +1051,7 @@ public final class ReflectionUtils {
 	private static Method findSetter(String methodName, Class<?>... classes) {
 		for (Class<?> clazz : classes) {
 			for (Method m : clazz.getDeclaredMethods()) {
-				if (m.getName().equals(methodName) && isSetter0(m)) {
+				if (m.getName().equals(methodName) && isSetter0(m) && !m.isBridge()) {
 					return m;
 				}
 			}
