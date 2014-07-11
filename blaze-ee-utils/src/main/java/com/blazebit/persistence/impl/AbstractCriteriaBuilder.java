@@ -31,6 +31,7 @@ import com.blazebit.persistence.expression.CompositeExpression;
 import com.blazebit.persistence.expression.Expression;
 import com.blazebit.persistence.expression.ExpressionUtils;
 import com.blazebit.persistence.expression.PathExpression;
+import com.blazebit.persistence.impl.hibernate.ObjectBuilderResultTransformerAdapter;
 import com.blazebit.persistence.predicate.AndPredicate;
 import com.blazebit.persistence.predicate.Predicate;
 import com.blazebit.persistence.predicate.PredicateBuilder;
@@ -442,7 +443,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         if (selectManager.getSelectObjectTransformer() != null) {
             // get hibernate query
             Query hQuery = query.unwrap(Query.class);
-            hQuery.setResultTransformer(selectManager.getSelectObjectTransformer());
+            hQuery.setResultTransformer(new ObjectBuilderResultTransformerAdapter(selectManager.getSelectObjectTransformer()));
         }
         for (Map.Entry<String, Object> entry : parameterManager.getParameters().entrySet()) {
             query.setParameter(entry.getKey(), entry.getValue());

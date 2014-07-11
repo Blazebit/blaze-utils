@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package com.blazebit.persistence.view.impl;
+package com.blazebit.persistence.view.impl.proxy.model;
 
-import com.blazebit.persistence.ObjectBuilder;
+import com.blazebit.persistence.entity.Document;
+import com.blazebit.persistence.entity.Person;
+import com.blazebit.persistence.view.EntityView;
+import com.blazebit.persistence.view.Mapping;
 
 /**
  *
  * @author cpbec
  */
-public class ObjectBuilderImpl<T> implements ObjectBuilder<T> {
-
-    @Override
-    public T build() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+@EntityView(Document.class)
+public interface DocumentInterfaceView extends IdHolderView<Long>, ContactHolderView<Integer> {
     
+    public String getName();
+    
+    @Mapping("contacts[1]")
+    public Person getFirstContactPerson();
 }

@@ -22,7 +22,6 @@ import com.blazebit.persistence.view.Mapping;
 import com.blazebit.persistence.view.metamodel.MethodAttribute;
 import com.blazebit.persistence.view.metamodel.ViewType;
 import com.blazebit.reflection.ReflectionUtils;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -80,12 +79,34 @@ public class MethodAttributeImpl<X, Y> implements MethodAttribute<X, Y> {
         return new MethodAttributeImpl<X, Object>(viewType, method, mapping);
     }
     
-    private static Mapping getMapping(ViewType<?> viewType, Method m) {
-        // We only support bean style getters
-        if (!m.getName().startsWith("get") || m.getParameterTypes().length != 0 || !Modifier.isAbstract(m.getModifiers())) {
+    public static String validate(ViewType<?> viewType, Method m) {
+        // Concrete methods are not mapped
+        if (!Modifier.isAbstract(m.getModifiers()) || m.isBridge()) {
             return null;
         }
         
+        // We only support bean style getters
+        if (ReflectionUtils.isSetter(m)) {
+            String attributeName = StringUtils.firstToLower(m.getName().substring(3));
+            Method getter = ReflectionUtils.getGetter(viewType.getJavaType(), attributeName);
+            
+            if (getter == null) {
+                throw new RuntimeException("The setter '" + m.getName() + "' from the entity view '" + viewType.getJavaType().getName() + "' has no corresponding getter!");
+            }
+            
+            return null;
+        } else if (!ReflectionUtils.isGetter(m)) {
+            throw new IllegalArgumentException("The given method '" + m.getName() + "' from the entity view '" + viewType.getJavaType().getName() + "' is no bean style getter or setter!");
+        }
+        
+        if (m.getExceptionTypes().length > 0) {
+            throw new IllegalArgumentException("The given method '" + m.getName() + "' from the entity view '" + viewType.getJavaType().getName() + "' must not throw an exception!");
+        }
+        
+        return StringUtils.firstToLower(m.getName().substring(3));
+    }
+    
+    private static Mapping getMapping(ViewType<?> viewType, Method m) {        
         Class<?> entityClass = viewType.getEntityClass();
         Mapping mapping = AnnotationUtils.findAnnotation(m, Mapping.class);
         

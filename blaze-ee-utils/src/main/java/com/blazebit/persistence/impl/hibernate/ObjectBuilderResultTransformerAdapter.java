@@ -13,17 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
 
+package com.blazebit.persistence.impl.hibernate;
+
+import com.blazebit.persistence.ObjectBuilder;
 import java.util.List;
+import org.hibernate.transform.ResultTransformer;
 
 /**
  *
  * @author cpbec
  */
-public interface ObjectBuilder<T> {
+public class ObjectBuilderResultTransformerAdapter implements ResultTransformer {
     
-    public T build(Object[] tuple, String[] aliases);
-    
-    public List<T> buildList(List<T> list);
+    private final ObjectBuilder<?> builder;
+
+    public ObjectBuilderResultTransformerAdapter(ObjectBuilder<?> builder) {
+        this.builder = builder;
+    }
+
+    @Override
+    public Object transformTuple(Object[] tuple, String[] aliases) {
+        return builder.build(tuple, aliases);
+    }
+
+    @Override
+    public List transformList(List list) {
+        return builder.buildList(list);
+    }
 }

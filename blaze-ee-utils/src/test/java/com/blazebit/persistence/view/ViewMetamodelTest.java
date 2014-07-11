@@ -208,6 +208,8 @@ public class ViewMetamodelTest extends AbstractEntityViewPersistenceTest {
         ViewType<?> viewType = viewMetamodel.view(DocumentView2.class);
         Set<MappingConstructor<?>> constructors = (Set<MappingConstructor<?>>) viewType.getConstructors();
         assertEquals(1, constructors.size());
+        assertNotNull(viewType.getConstructor(long.class));
+        assertTrue(constructors.contains(viewType.getConstructor(long.class)));
     }
     
     @Test

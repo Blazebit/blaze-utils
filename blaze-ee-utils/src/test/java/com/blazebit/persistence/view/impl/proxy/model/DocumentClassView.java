@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package com.blazebit.persistence.view.metamodel;
+package com.blazebit.persistence.view.impl.proxy.model;
 
-import java.lang.reflect.Type;
+import com.blazebit.persistence.view.Mapping;
 
 /**
  *
  * @author cpbec
  */
-public interface MappingAttribute<X, Y> {
+public abstract class DocumentClassView implements DocumentInterfaceView {
     
-    public ViewType<X> getDeclaringType();
+    private final long age;
     
-    public Class<Y> getJavaType();
+    public DocumentClassView(
+            @Mapping("age + 1") long age
+    ) {
+        this.age = age;
+    }
     
-    public String getMapping();
+    public long getAge() {
+        return age;
+    }
 }

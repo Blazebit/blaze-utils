@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.blazebit.persistence.view.metamodel;
+package com.blazebit.persistence.view.impl.proxy.model;
 
-import java.lang.reflect.Type;
+import com.blazebit.persistence.entity.Person;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  *
  * @author cpbec
  */
-public interface MappingAttribute<X, Y> {
+interface ContactHolderView<T> extends Serializable {
     
-    public ViewType<X> getDeclaringType();
-    
-    public Class<Y> getJavaType();
-    
-    public String getMapping();
+    public Map<T, Person> getContacts();
+
+    public void setContacts(Map<T, Person> localized);
 }

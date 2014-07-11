@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package com.blazebit.persistence.view.metamodel;
+package com.blazebit.persistence.view.impl.proxy.model;
 
-import java.lang.reflect.Type;
+import java.io.Serializable;
 
 /**
  *
  * @author cpbec
  */
-public interface MappingAttribute<X, Y> {
+interface IdHolderView<T> extends Serializable {
     
-    public ViewType<X> getDeclaringType();
+    public T getId();
     
-    public Class<Y> getJavaType();
-    
-    public String getMapping();
+    public void setId(T id);
 }

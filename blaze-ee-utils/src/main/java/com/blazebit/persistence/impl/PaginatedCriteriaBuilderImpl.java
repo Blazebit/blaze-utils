@@ -21,6 +21,7 @@ import com.blazebit.persistence.PagedList;
 import com.blazebit.persistence.PaginatedCriteriaBuilder;
 import com.blazebit.persistence.QueryBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
+import com.blazebit.persistence.impl.hibernate.ObjectBuilderResultTransformerAdapter;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
@@ -72,7 +73,7 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
         if (selectManager.getSelectObjectTransformer() != null) {
             // get hibernate query
             org.hibernate.Query hQuery = mainQuery.unwrap(org.hibernate.Query.class);
-            hQuery.setResultTransformer(selectManager.getSelectObjectTransformer());
+            hQuery.setResultTransformer(new ObjectBuilderResultTransformerAdapter(selectManager.getSelectObjectTransformer()));
         }
         parameterizeQuery(mainQuery, mainQueryString);
         mainQuery.setParameter("ids", ids);

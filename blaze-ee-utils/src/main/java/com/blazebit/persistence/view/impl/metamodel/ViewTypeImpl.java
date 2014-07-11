@@ -22,13 +22,15 @@ import com.blazebit.persistence.view.metamodel.MappingConstructor;
 import com.blazebit.persistence.view.metamodel.MethodAttribute;
 import com.blazebit.persistence.view.metamodel.ViewType;
 import com.blazebit.reflection.ReflectionUtils;
-import edu.emory.mathcs.backport.java.util.Collections;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  *
@@ -40,10 +42,14 @@ public class ViewTypeImpl<X> implements ViewType<X> {
     private final String name;
     private final Class<?> entityClass;
     private final Map<String, MethodAttribute<? super X, ?>> attributes;
-    private final Set<MappingConstructor<X>> constructors;
+    private final Map<Class<?>[], MappingConstructor<X>> constructors;
     
     public ViewTypeImpl(Class<? extends X> clazz) {
         this.javaType = (Class<X>) clazz;
+        
+        if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
+            throw new IllegalArgumentException("Only interfaces or abstract classes are allowed as entity views. '" + clazz.getName() + "' is neither of those.");
+        }
         
         EntityView entityViewAnnot = AnnotationUtils.findAnnotation(clazz, EntityView.class);
         
@@ -58,24 +64,27 @@ public class ViewTypeImpl<X> implements ViewType<X> {
         }
         
         this.entityClass = entityViewAnnot.value();
-        this.attributes = new HashMap<String, MethodAttribute<? super X, ?>>();
+        // We use a tree map to get a deterministic attribute order
+        this.attributes = new TreeMap<String, MethodAttribute<? super X, ?>>();
         
         for (Class<?> type : ReflectionUtils.getSuperTypes(clazz)) {
             for (Method method : type.getDeclaredMethods()) {
-                MethodAttribute<? super X, ?> attribute = MethodAttributeImpl.createMappingAttribute(this, method);
-                if (attribute != null) {
-                    attributes.put(attribute.getName(), attribute);
+                String attributeName = MethodAttributeImpl.validate(this, method);
+                
+                if (attributeName != null && !attributes.containsKey(attributeName)) {
+                    MethodAttribute<? super X, ?> attribute = MethodAttributeImpl.createMappingAttribute(this, method);
+                    if (attribute != null) {
+                        attributes.put(attribute.getName(), attribute);
+                    }
                 }
             }
         }
         
-        Set<MappingConstructor<X>> constructors = new HashSet<MappingConstructor<X>>();
+        this.constructors = new HashMap<Class<?>[], MappingConstructor<X>>();
         
         for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
-            constructors.add(new MappingConstructorImpl<X>(this, (Constructor<X>) constructor));
+            constructors.put(constructor.getParameterTypes(), new MappingConstructorImpl<X>(this, (Constructor<X>) constructor));
         }
-        
-        this.constructors = Collections.unmodifiableSet(constructors);
     }
 
     @Override
@@ -95,7 +104,7 @@ public class ViewTypeImpl<X> implements ViewType<X> {
     
     @Override
     public Set<MethodAttribute<? super X, ?>> getAttributes() {
-        return new HashSet<MethodAttribute<? super X, ?>>(attributes.values());
+        return new LinkedHashSet<MethodAttribute<? super X, ?>>(attributes.values());
     }
 
     @Override
@@ -105,7 +114,12 @@ public class ViewTypeImpl<X> implements ViewType<X> {
 
     @Override
     public Set<MappingConstructor<X>> getConstructors() {
-        return constructors;
+        return new HashSet<MappingConstructor<X>>(constructors.values());
+    }
+    
+    @Override
+    public MappingConstructor<X> getConstructor(Class<?>... parameterTypes) {
+        return constructors.get(parameterTypes);
     }
     
 }
