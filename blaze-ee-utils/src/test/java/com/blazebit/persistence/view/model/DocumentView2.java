@@ -13,17 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+
+package com.blazebit.persistence.view.model;
+
+import com.blazebit.persistence.entity.Document;
+import com.blazebit.persistence.view.EntityView;
+import com.blazebit.persistence.view.Mapping;
 
 /**
  *
- * @author cpbec
+ * @author Christian Beikov
  */
-public interface CriteriaBuilder<T> extends QueryBuilder<T, CriteriaBuilder<T>> {
+// Not necessary because DocumentView1 already provides this information
+//@EntityView(Document.class)
+public abstract class DocumentView2 implements DocumentView1 {
     
-    @Override
-    public <Y> SelectObjectBuilder<CriteriaBuilder<Y>> selectNew(Class<Y> clazz);
+    private final long age;
     
-    @Override
-    public <Y> CriteriaBuilder<Y> selectNew(ObjectBuilder<Y> builder);
+    public DocumentView2(
+            @Mapping("age + 1") long age
+    ) {
+        this.age = age;
+    }
+    
+    public long getAge() {
+        return age;
+    }
 }

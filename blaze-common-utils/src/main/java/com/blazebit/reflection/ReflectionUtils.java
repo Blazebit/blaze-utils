@@ -101,51 +101,19 @@ public final class ReflectionUtils {
 
 	/**
 	 * Checks if the target class is a subtype of the supertype or not.
-	 * Basically this method gathers all interfaces and super classes of the
-	 * superType and checks if the targetClazz, interfaces that are implemented
-	 * by targetClazz or super classes of the targetClazz are within the list of
-	 * the superType classes.
-	 * 
-	 * Example:
-	 * 
-	 * <code>
-	 * public interface A{}
-	 * public interface B extends A{}
-	 * public class ClassA implements A{}
-	 * public class ClassB extends ClassA implements B{}
-	 * 
-	 * ReflectionUtil.isSubtype(ClassB.class, ClassB.class) == true
-	 * ReflectionUtil.isSubtype(ClassB.class, ClassA.class) == true
-	 * ReflectionUtil.isSubtype(ClassB.class, B.class) == true
-	 * ReflectionUtil.isSubtype(ClassB.class, A.class) == true
-	 * </code>
+	 * Basically this method calls @link{java.lang.Class#isAssignableFrom(Class)}
+         * and therefore only acts as an alias.
 	 * 
 	 * @param targetClazz
 	 *            the class to check wether it is a subtype of the supertype or
 	 *            not
 	 * @param superType
-	 *            the supertype class to search on targetClazz
+	 *            the supertype class
 	 * @return true if targetClazz is subtype of superType or targetClazz equals
 	 *         superType, otherwise false
 	 */
 	public static boolean isSubtype(Class<?> targetClazz, Class<?> superType) {
-		Class<?> traverseClass = targetClazz;
-
-		do {
-			if (traverseClass.equals(superType)) {
-				return true;
-			}
-
-			for (Class<?> c : traverseClass.getInterfaces()) {
-				if (superType.equals(c)) {
-					return true;
-				}
-			}
-
-			traverseClass = traverseClass.getSuperclass();
-		} while (traverseClass != null);
-
-		return false;
+            return superType.isAssignableFrom(targetClazz);
 	}
 
 	/**
@@ -159,16 +127,34 @@ public final class ReflectionUtils {
 	 * @return The super types of the given class
 	 */
 	public static Set<Class<?>> getSuperTypes(Class<?> clazz) {
+		return getSuperTypes(clazz, Object.class);
+	}
+        
+        public static Set<Class<?>> getSuperTypes(Class<?> clazz, Class<?> commonSuperType) {
 		Set<Class<?>> list = new LinkedHashSet<Class<?>>();
+		addSuperTypes(list, clazz, commonSuperType);
+		return list;
+	}
+        
+        private static void addSuperTypes(Set<Class<?>> superTypes, Class<?> clazz, Class<?> commonSuperType) {
 		Class<?> traverseClass = clazz;
 
 		do {
-			list.add(traverseClass);
-			Collections.addAll(list, traverseClass.getInterfaces());
+                    if (isSubtype(traverseClass, commonSuperType)) {
+			superTypes.add(traverseClass);
+                    }
+                        for (Class<?> interfaceClass : traverseClass.getInterfaces()) {
+                            if (isSubtype(interfaceClass, commonSuperType)) {
+                                superTypes.add(interfaceClass);
+                            }
+                        }
+                        for (Class<?> interfaceClass : traverseClass.getInterfaces()) {
+                            if (isSubtype(interfaceClass, commonSuperType)) {
+                                addSuperTypes(superTypes, interfaceClass, commonSuperType);
+                            }
+                        }
 			traverseClass = traverseClass.getSuperclass();
 		} while (traverseClass != null);
-
-		return list;
 	}
 
 	/**
@@ -258,6 +244,24 @@ public final class ReflectionUtils {
 
 		return resolvedClasses;
 	}
+        
+        private static Class<?> getClassThatContainsTypeVariable(TypeVariable<?> typeVariable) {
+            if (isSubtype(typeVariable.getGenericDeclaration().getClass(),
+                            Class.class)) {
+                    return (Class<?>) typeVariable
+                                    .getGenericDeclaration();
+            } else if (isSubtype(typeVariable.getGenericDeclaration().getClass(),
+                            Method.class)) {
+                    return ((Method) typeVariable
+                                    .getGenericDeclaration()).getDeclaringClass();
+            } else if (isSubtype(typeVariable.getGenericDeclaration().getClass(),
+                            Constructor.class)) {
+                    return ((Constructor<?>) typeVariable
+                                    .getGenericDeclaration()).getDeclaringClass();
+            }
+            
+            return null;
+        }
 
 	/**
 	 * Tries to resolve the type variable againts the concrete class. The
@@ -280,21 +284,7 @@ public final class ReflectionUtils {
 	 */
 	public static Class<?> resolveTypeVariable(Class<?> concreteClass,
 			TypeVariable<?> typeVariable) {
-		Class<?> classThatContainsTypeVariable = null;
-
-		if (isSubtype(typeVariable.getGenericDeclaration().getClass(),
-				Class.class)) {
-			classThatContainsTypeVariable = (Class<?>) typeVariable
-					.getGenericDeclaration();
-		} else if (isSubtype(typeVariable.getGenericDeclaration().getClass(),
-				Method.class)) {
-			classThatContainsTypeVariable = ((Method) typeVariable
-					.getGenericDeclaration()).getDeclaringClass();
-		} else if (isSubtype(typeVariable.getGenericDeclaration().getClass(),
-				Constructor.class)) {
-			classThatContainsTypeVariable = ((Constructor<?>) typeVariable
-					.getGenericDeclaration()).getDeclaringClass();
-		}
+		Class<?> classThatContainsTypeVariable = getClassThatContainsTypeVariable(typeVariable);
 
 		if (!isSubtype(concreteClass, classThatContainsTypeVariable)) {
 			throw new IllegalArgumentException(
@@ -309,19 +299,16 @@ public final class ReflectionUtils {
 					"Type variable not found in its container class!");
 		}
 
+                Set<Class<?>> superTypes = getSuperTypes(concreteClass, classThatContainsTypeVariable);
 		Stack<Class<?>> classStack = new Stack<Class<?>>();
-		Class<?> currentClass = concreteClass;
 		Type resolvedType = typeVariable;
-
-		classStack.push(currentClass);
-
-		// Build a stack of the class hierarchy to be able to resolve the type
-		while (!Object.class.equals(currentClass.getSuperclass())
-				&& !currentClass.getSuperclass().equals(
-						typeVariable.getGenericDeclaration())) {
-			currentClass = currentClass.getSuperclass();
-			classStack.push(currentClass);
-		}
+                
+                // The class that contains the type variable mustn't be considered
+                superTypes.remove(classThatContainsTypeVariable);
+                // Build a stack of the class hierarchy to be able to resolve the type
+                for (Class<?> superType : superTypes) {
+                    classStack.push(superType);
+                }
 
 		// Resolve every type variable in every class level
 		// We need to do this here because the type variables of subclasses
@@ -333,41 +320,57 @@ public final class ReflectionUtils {
 			// to every level of the hierarchy and stop as soon as the
 			// type is instance of java.lang.Class
 			Class<?> classToInspect = classStack.pop();
-			Type classToInspectType = classToInspect.getGenericSuperclass();
+                        Type[] genericInterfaces = classToInspect.getGenericInterfaces();
+                        List<Type> typesToInspect = new ArrayList<Type>(genericInterfaces.length + 1);
+                        typesToInspect.add(classToInspect.getGenericSuperclass());
+                        Collections.addAll(typesToInspect, genericInterfaces);
+                        
+                        for (Type classToInspectType : typesToInspect) {
+                            // Since the resolvedType is not yet instance of class, the
+                            // classToInspectType has to be a ParameterizedType
+                            // otherwise we can not resolve the type variable
+                            if (!(classToInspectType instanceof ParameterizedType)) {
+                                    continue;
+                            }
 
-			// Since the resolvedType is not yet instance of class, the
-			// classToInspectType has to be a ParameterizedType
-			// otherwise we can not resolve the type variable
-			if (!(classToInspectType instanceof ParameterizedType)) {
-				return null;
-			}
+                            ParameterizedType parameterizedClassToInspect = (ParameterizedType) classToInspectType;
+                            
+                            // The found parameterized type is not the one we are looking for
+                            if (!classThatContainsTypeVariable.equals(parameterizedClassToInspect.getRawType())) {
+                                continue;
+                            }
+                            
+                            // This should be fulfilled, anyway we check it
+                            if (parameterizedClassToInspect.getActualTypeArguments().length < position + 1) {
+                                    throw new IllegalArgumentException("Could not resolve type");
+                            }
 
-			ParameterizedType parameterizedClassToInspect = (ParameterizedType) classToInspectType;
+                            // Set the type of the type arguments at the needed position
+                            // as the resolvedType
+                            resolvedType = parameterizedClassToInspect.getActualTypeArguments()[position];
 
-			// This should be fulfilled, anyway we check it
-			if (parameterizedClassToInspect.getActualTypeArguments().length < position + 1) {
-				throw new IllegalArgumentException("Could not resolve type");
-			}
-
-			// Set the type of the type arguments at the needed position
-			// as the resolvedType
-			resolvedType = parameterizedClassToInspect.getActualTypeArguments()[position];
-
-			if (resolvedType instanceof TypeVariable<?>) {
-				// If the currently available resolvedType is still a type
-				// variable
-				// retrieve the position of the type variable within the type
-				// variables of the current class, so we can look in the next
-				// subclass for the concrete type
-				position = getTypeVariablePosition(classToInspect,
-						(TypeVariable<?>) resolvedType);
-			} else if (resolvedType instanceof ParameterizedType) {
-				// Since we can only want a class object, we don't
-				// care about type arguments of the parameterized type
-				// and just set the raw type of it as the resolved
-				// type
-				resolvedType = ((ParameterizedType) resolvedType).getRawType();
-			}
+                            if (resolvedType instanceof TypeVariable<?>) {
+                                    // If the currently available resolvedType is still a type
+                                    // variable
+                                    // retrieve the position of the type variable within the type
+                                    // variables of the current class, so we can look in the next
+                                    // subclass for the concrete type
+                                    
+                                    position = getTypeVariablePosition(classToInspect,
+                                                    (TypeVariable<?>) resolvedType);
+                                    classThatContainsTypeVariable = getClassThatContainsTypeVariable((TypeVariable<?>) resolvedType);
+                                break;
+                            } else if (resolvedType instanceof ParameterizedType) {
+                                    // Since we only want a class object, we don't
+                                    // care about type arguments of the parameterized type
+                                    // and just set the raw type of it as the resolved
+                                    // type
+                                    resolvedType = ((ParameterizedType) resolvedType).getRawType();
+                                break;
+                            } else if (resolvedType instanceof Class<?>) {
+                                break;
+                            }
+                        }
 		}
 
 		if (!(resolvedType instanceof Class<?>)) {

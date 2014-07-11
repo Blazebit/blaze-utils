@@ -13,17 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+
+package com.blazebit.persistence.view.impl;
+
+import com.blazebit.persistence.view.EntityViewManagerFactory;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  * @author cpbec
  */
-public interface CriteriaBuilder<T> extends QueryBuilder<T, CriteriaBuilder<T>> {
+public class EntityViewConfiguration {
     
-    @Override
-    public <Y> SelectObjectBuilder<CriteriaBuilder<Y>> selectNew(Class<Y> clazz);
+    private final Set<Class<?>> entityViewClasses = new HashSet<Class<?>>();
+
+    public void addEntityView(Class<?> clazz) {
+        entityViewClasses.add(clazz);
+    }
     
-    @Override
-    public <Y> CriteriaBuilder<Y> selectNew(ObjectBuilder<Y> builder);
+    public Set<Class<?>> getEntityViews() {
+        return entityViewClasses;
+    }
+
+    public EntityViewManagerFactory createEntityViewManagerFactory() {
+        return new EntityViewManagerFactoryImpl(this);
+    }
 }

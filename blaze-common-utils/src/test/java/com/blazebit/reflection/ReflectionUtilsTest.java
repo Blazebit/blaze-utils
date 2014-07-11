@@ -117,6 +117,28 @@ public class ReflectionUtilsTest {
 	private class ConcreteClassA extends GenericClassA<Integer, Exception> {
 
 	}
+        
+
+	private interface GenericInterfaceA<T, E extends Exception> {
+
+		public T getField();
+
+		public void setField(T field);
+
+		public Collection<T> getFieldCollection();
+
+		public void setFieldCollection(Collection<T> fieldCollection);
+
+		public Map<T, T> getFieldMap();
+
+		public void setFieldMap(Map<T, T> fieldMap);
+
+		public void throwsException() throws E;
+	}
+
+	private interface ConcreteInterfaceA extends GenericInterfaceA<Integer, Exception> {
+
+	}
 
 	/**
 	 * Test of resolveTypeVariable method, of class ReflectionUtil.
@@ -299,6 +321,72 @@ public class ReflectionUtilsTest {
 	}
 
 	/**
+	 * Test of getResolvedMethodReturnType method, of class ReflectionUtil.
+	 */
+	@Test
+	public void testGetResolvedInterfaceMethodReturnType() throws Exception {
+		assertEquals(Integer.class,
+				ReflectionUtils.getResolvedMethodReturnType(
+						ConcreteInterfaceA.class, ReflectionUtils.getGetter(
+								ConcreteInterfaceA.class, "field")));
+		assertNull(ReflectionUtils.getResolvedMethodReturnType(
+				ConcreteInterfaceA.class, ""));
+	}
+
+	/**
+	 * Test of getResolvedMethodReturnTypeArguments method, of class
+	 * ReflectionUtil.
+	 */
+	@Test
+	public void testGetResolvedInterfaceMethodReturnTypeArguments() throws Exception {
+		assertEquals(Integer.class,
+				ReflectionUtils.getResolvedMethodReturnTypeArguments(
+						ConcreteInterfaceA.class, ReflectionUtils.getGetter(
+								ConcreteInterfaceA.class, "fieldCollection"))[0]);
+		assertEquals(Integer.class,
+				ReflectionUtils.getResolvedMethodReturnTypeArguments(
+						ConcreteInterfaceA.class, ReflectionUtils.getGetter(
+								ConcreteInterfaceA.class, "fieldMap"))[0]);
+		assertArrayEquals(new Class<?>[0],
+				ReflectionUtils.getResolvedMethodReturnTypeArguments(
+						ConcreteInterfaceA.class, "throwsException"));
+		assertNull(ReflectionUtils.getResolvedMethodReturnTypeArguments(
+				ConcreteInterfaceA.class, ""));
+	}
+
+	/**
+	 * Test of getResolvedMethodParameterTypes method, of class ReflectionUtil.
+	 */
+	@Test
+	public void testGetResolvedInterfaceMethodParameterTypes() throws Exception {
+		assertEquals(Integer.class,
+				ReflectionUtils.getResolvedMethodParameterTypes(
+						ConcreteInterfaceA.class, ReflectionUtils.getSetter(
+								ConcreteInterfaceA.class, "field"))[0]);
+		assertArrayEquals(new Class<?>[0],
+				ReflectionUtils.getResolvedMethodParameterTypes(
+						ConcreteInterfaceA.class, "throwsException"));
+		assertNull(ReflectionUtils.getResolvedMethodParameterTypes(
+				ConcreteInterfaceA.class, ""));
+	}
+
+	/**
+	 * Test of getResolvedMethodExceptionTypes method, of class ReflectionUtil.
+	 */
+	@Test
+	public void testGetResolvedInterfaceMethodExceptionTypes() throws Exception {
+		assertEquals(Exception.class,
+				ReflectionUtils.getResolvedMethodExceptionTypes(
+						ConcreteInterfaceA.class, ReflectionUtils.getMethod(
+								ConcreteInterfaceA.class, "throwsException"))[0]);
+		assertArrayEquals(new Class<?>[0],
+				ReflectionUtils.getResolvedMethodExceptionTypes(
+						ConcreteInterfaceA.class, "getField"));
+		assertNull(ReflectionUtils.getResolvedMethodExceptionTypes(
+				ConcreteInterfaceA.class, ""));
+	}
+
+	/**
 	 * Test of getClass method, of class ReflectionUtil.
 	 */
 	@Test
@@ -400,7 +488,7 @@ public class ReflectionUtilsTest {
 	 * Test of getMethodType method, of class ReflectionUtil.
 	 */
 	@Test
-	public void testGetMethodType() {
+	public void testGetMethodReturnType() {
 		assertEquals(ReflectionUtils.getMethodReturnType(ClassB.class, "getA"),
 				String.class);
 		assertEquals(ReflectionUtils.getMethodReturnType(ClassA.class, "getA"),

@@ -13,17 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.blazebit.persistence;
+
+package com.blazebit.persistence.view.metamodel;
+
+import java.util.Set;
 
 /**
  *
  * @author cpbec
  */
-public interface CriteriaBuilder<T> extends QueryBuilder<T, CriteriaBuilder<T>> {
+public interface ViewType<X> {
     
-    @Override
-    public <Y> SelectObjectBuilder<CriteriaBuilder<Y>> selectNew(Class<Y> clazz);
+    public String getName();
     
-    @Override
-    public <Y> CriteriaBuilder<Y> selectNew(ObjectBuilder<Y> builder);
+    public Class<X> getJavaType();
+    
+    public Class<?> getEntityClass();
+    
+    public Set<MethodAttribute<? super X, ?>> getAttributes();
+    
+    public MethodAttribute<? super X, ?> getAttribute(String name);
+    
+    public Set<MappingConstructor<X>> getConstructors();
 }
