@@ -90,7 +90,7 @@ public abstract class PredicateManager<U> extends AbstractManager {
             Predicate pred = builder.getPredicate();
 
             // register parameter expressions
-            registerParameterExpressions(predicate);
+            registerParameterExpressions(pred);
             
             predicate.getChildren()
                     .add(pred);

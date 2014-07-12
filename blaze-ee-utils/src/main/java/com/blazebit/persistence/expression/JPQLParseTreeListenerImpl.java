@@ -236,14 +236,6 @@ public class JPQLParseTreeListenerImpl implements JPQLSelectExpressionListener {
     }
 
     @Override
-    public void enterComparison_operator(JPQLSelectExpressionParser.Comparison_operatorContext ctx) {
-    }
-
-    @Override
-    public void exitComparison_operator(JPQLSelectExpressionParser.Comparison_operatorContext ctx) {
-    }
-
-    @Override
     public void enterString_expression(JPQLSelectExpressionParser.String_expressionContext ctx) {
     }
 
@@ -522,6 +514,6 @@ public class JPQLParseTreeListenerImpl implements JPQLSelectExpressionListener {
 
     @Override
     public void exitEveryRule(ParserRuleContext ctx) {
-        System.out.println("enter" + ctx.getClass().getSimpleName());
+        System.out.println("exit" + ctx.getClass().getSimpleName());
     }
 }

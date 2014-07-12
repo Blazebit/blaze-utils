@@ -17,17 +17,20 @@
 package com.blazebit.persistence.entity;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 /**
@@ -45,6 +48,8 @@ public class Document {
     private long age;
     private String nonJoinable;
     private Map<Integer, Person> contacts = new HashMap<Integer, Person>();
+    private Calendar creationDate;
+    private Date lastModified;
     
     public Document(){}
     
@@ -135,4 +140,24 @@ public class Document {
     public void setContacts(Map<Integer, Person> localized) {
         this.contacts = localized;
     }
+
+    @Temporal(TemporalType.DATE)
+    public Calendar getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Calendar creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    public Date getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(Date lastModified) {
+        this.lastModified = lastModified;
+    }
+    
+    
 }

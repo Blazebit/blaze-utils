@@ -19,7 +19,6 @@ import com.blazebit.persistence.CaseWhenBuilder;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.HavingOrBuilder;
 import com.blazebit.persistence.JoinType;
-import com.blazebit.persistence.ModelUtils;
 import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.PaginatedCriteriaBuilder;
 import com.blazebit.persistence.QueryBuilder;
@@ -27,21 +26,10 @@ import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
 import com.blazebit.persistence.SimpleCaseWhenBuilder;
 import com.blazebit.persistence.WhereOrBuilder;
-import com.blazebit.persistence.expression.CompositeExpression;
-import com.blazebit.persistence.expression.Expression;
-import com.blazebit.persistence.expression.ExpressionUtils;
-import com.blazebit.persistence.expression.PathExpression;
-import com.blazebit.persistence.predicate.AndPredicate;
-import com.blazebit.persistence.predicate.Predicate;
-import com.blazebit.persistence.predicate.PredicateBuilder;
-import com.blazebit.reflection.ReflectionUtils;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,7 +40,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import org.hibernate.Query;
-import org.hibernate.transform.ResultTransformer;
 
 /**
  *
@@ -176,17 +163,20 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
 
     @Override
     public U setParameter(String name, Object value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        parameterManager.satisfyParameter(name, value);
+        return (U) this;
     }
 
     @Override
     public U setParameter(String name, Calendar value, TemporalType temporalType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        parameterManager.satisfyParameter(name, new ParameterManager.TemporalCalendarParameterWrapper(value, temporalType));
+        return (U) this;
     }
 
     @Override
     public U setParameter(String name, Date value, TemporalType temporalType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        parameterManager.satisfyParameter(name, new ParameterManager.TemporalDateParameterWrapper(value, temporalType));
+        return (U) this;
     }
 
     @Override
@@ -443,12 +433,30 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
             Query hQuery = query.unwrap(Query.class);
             hQuery.setResultTransformer(selectManager.getSelectObjectTransformer());
         }
-        for (Map.Entry<String, Object> entry : parameterManager.getParameters().entrySet()) {
-            query.setParameter(entry.getKey(), entry.getValue());
-        }
+        
+        parameterizeQuery(query);
         return query;
     }
 
+    void parameterizeQuery(javax.persistence.Query q){
+        Map<String, Object> parameters = parameterManager.getParameters();
+        for(Parameter<?> p : q.getParameters()){
+            if(!isParameterSet(p.getName())){
+                throw new IllegalStateException("Unsatisfied parameter " + p.getName());
+            }
+            Object paramValue = parameters.get(p.getName());
+            if(paramValue instanceof ParameterManager.TemporalCalendarParameterWrapper){
+                ParameterManager.TemporalCalendarParameterWrapper wrappedValue = (ParameterManager.TemporalCalendarParameterWrapper) paramValue;
+                q.setParameter(p.getName(), wrappedValue.getValue(), wrappedValue.getType());
+            }else if(paramValue instanceof ParameterManager.TemporalDateParameterWrapper){
+                ParameterManager.TemporalDateParameterWrapper wrappedValue = (ParameterManager.TemporalDateParameterWrapper) paramValue;
+                q.setParameter(p.getName(), wrappedValue.getValue(), wrappedValue.getType());
+            }else{
+                q.setParameter(p.getName(), paramValue);
+            }
+        }
+    }
+    
     @Override
     public boolean isParameterSet(String name) {
         Map<String,Object> parameters = parameterManager.getParameters();
@@ -460,15 +468,27 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
 
     @Override
     public Set<? extends Parameter<?>> getParameters() {
+        Map<String,Object> parameters = parameterManager.getParameters();
+        Set<Parameter<?>> result = new HashSet<Parameter<?>>();
         
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        for(Map.Entry<String, Object> paramEntry : parameters.entrySet()){
+            result.add(new ParameterImpl(paramEntry.getValue() == null ? null : paramEntry.getValue().getClass(), paramEntry.getKey()));
+        }
+        return result;
     }
     
     private class ParameterImpl<T> implements Parameter<T>{
+        private final Class<T> paramClass;
+        private final String paramName;
+
+        public ParameterImpl(Class<T> paramClass, String paramName) {
+            this.paramClass = paramClass;
+            this.paramName = paramName;
+        }
         
         @Override
         public String getName() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return paramName;
         }
 
         @Override
@@ -478,7 +498,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
 
         @Override
         public Class<T> getParameterType() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return paramClass;
         }
         
     }

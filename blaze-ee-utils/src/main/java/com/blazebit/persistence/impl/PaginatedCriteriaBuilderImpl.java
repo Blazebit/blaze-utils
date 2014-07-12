@@ -50,14 +50,14 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
     public PagedList<T> getResultList(EntityManager em) {
         String countQueryString = getPageCountQueryString();
         Query countQuery = em.createQuery(countQueryString);
-        parameterizeQuery(countQuery, countQueryString);
+        parameterizeQuery(countQuery);
         
         
         long totalSize = (Long) countQuery.getSingleResult();
         
         String idQueryString = getPageIdQueryString();
         Query idQuery = em.createQuery(idQueryString);
-        parameterizeQuery(idQuery, idQueryString);
+        parameterizeQuery(idQuery);
         
         // Lossy conversion since JPQL COUNT returns a long
         List ids = idQuery.setFirstResult((int)firstRow).setMaxResults((int)pageSize).getResultList();
@@ -69,21 +69,12 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
             org.hibernate.Query hQuery = mainQuery.unwrap(org.hibernate.Query.class);
             hQuery.setResultTransformer(selectManager.getSelectObjectTransformer());
         }
-        parameterizeQuery(mainQuery, mainQueryString);
+        parameterizeQuery(mainQuery);
         mainQuery.setParameter("ids", ids);
         
         PagedList<T> pagedResultList = new PagedListImpl<T>(totalSize);
         pagedResultList.addAll(mainQuery.getResultList());
         return pagedResultList;
-    }
-
-    void parameterizeQuery(Query q, String qString){
-        //TODO: try to use q.getParameters
-        for (Map.Entry<String, Object> entry : parameterManager.getParameters().entrySet()) {
-            if(qString.contains(":" + entry.getKey())){
-                q.setParameter(entry.getKey(), entry.getValue());
-            }
-        }
     }
     
     @Override

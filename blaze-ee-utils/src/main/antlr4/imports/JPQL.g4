@@ -15,6 +15,11 @@
  */
 grammar JPQL;
 
+ simple_expression : single_valued_path_expression |
+                       scalar_expression |
+                       aggregate_expression |
+                   ;
+ 
  qualified_identification_variable : composable_qualified_identification_variable |
                                        'ENTRY('Identification_variable')';
 
@@ -63,13 +68,6 @@ grammar JPQL;
  
  single_element_path_expression : general_path_start
                               ;
- 
-
-
- simple_expression : single_valued_path_expression |
-                       scalar_expression |
-                       aggregate_expression |
-                   ;
 
  aggregate_expression : ( 'AVG' | 'MAX' | 'MIN' | 'SUM' ) '('('DISTINCT')? state_field_path_expression')' 
                         | 'COUNT' (('DISTINCT')? Identification_variable | state_field_path_expression  | single_valued_object_path_expression) ;
@@ -87,8 +85,6 @@ grammar JPQL;
                        coalesce_expression |
                        nullif_expression |
                        entity_type_expression;
-
- comparison_operator : '=' | '>' | '>=' | '<' | '<=' | '<>';
 
  arithmetic_expression : arithmetic_term | arithmetic_expression ( '+' | '-' ) arithmetic_term;
 

@@ -16,10 +16,13 @@
 
 package com.blazebit.persistence.impl;
 
-import com.blazebit.persistence.expression.Expression;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import javax.persistence.TemporalType;
 
 /**
  *
@@ -32,7 +35,7 @@ public class ParameterManager {
     private final Map<String, Object> parameters = new HashMap<String, Object>();
 
     public Map<String, Object> getParameters() {
-        return parameters;
+        return Collections.unmodifiableMap(parameters);
     }
     
     public String getParamNameForObject(Object o) {
@@ -54,4 +57,46 @@ public class ParameterManager {
         parameters.put(name, null);
     }
     
+    public void satisfyParameter(String parameterName, Object parameterValue){
+        if(!parameters.containsKey(parameterName)){
+            throw new IllegalArgumentException("Parameter name does not exist");
+        }
+        parameters.put(parameterName, parameterValue);
+    }
+    
+    static class TemporalCalendarParameterWrapper {
+        private final Calendar value;
+        private final TemporalType type;
+
+        public TemporalCalendarParameterWrapper(Calendar value, TemporalType type) {
+            this.value = value;
+            this.type = type;
+        }
+
+        public Calendar getValue() {
+            return value;
+        }
+
+        public TemporalType getType() {
+            return type;
+        }
+    }
+    
+    static class TemporalDateParameterWrapper {
+        private final Date value;
+        private final TemporalType type;
+
+        public TemporalDateParameterWrapper(Date value, TemporalType type) {
+            this.value = value;
+            this.type = type;
+        }
+
+        public Date getValue() {
+            return value;
+        }
+
+        public TemporalType getType() {
+            return type;
+        }
+    }
 }

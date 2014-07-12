@@ -31,6 +31,7 @@ public class ArrayExpression extends PathElementExpression {
     
     @Override
     public void accept(Visitor visitor) {
+        visitor.visit(this);
     }
 
     public PropertyExpression getBase() {
