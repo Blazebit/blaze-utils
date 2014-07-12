@@ -22,6 +22,7 @@ import com.blazebit.persistence.PaginatedCriteriaBuilder;
 import com.blazebit.persistence.QueryBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
 import com.blazebit.persistence.impl.hibernate.ObjectBuilderResultTransformerAdapter;
+
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
@@ -36,13 +37,13 @@ import javax.persistence.metamodel.Metamodel;
  */
 // TODO: maybe unify PaginatedCriterBuilder and CriteriaBuilder? We could view the CriteriaBuilder as the standard case with 1 single page containing all entries
 public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, PaginatedCriteriaBuilder<T>> implements PaginatedCriteriaBuilder<T> {
-    private final int page;
-    private final int objectsPerPage;
+    private final int firstRow;
+    private final int pageSize;
     
-    public PaginatedCriteriaBuilderImpl(AbstractCriteriaBuilder<T, ? extends QueryBuilder<T, ?>> baseBuilder, int page, int objectsPerPage) {
+    public PaginatedCriteriaBuilderImpl(AbstractCriteriaBuilder<T, ? extends QueryBuilder<T, ?>> baseBuilder, int firstRow, int pageSize) {
         super(baseBuilder);
-        this.page = page;
-        this.objectsPerPage = objectsPerPage;
+        this.firstRow = firstRow;
+        this.pageSize = pageSize;
 //        this.parameters = baseBuilder.parameters;
 //        super.paramNameGenerator = baseBuilder.paramNameGenerator;
     }
@@ -51,22 +52,22 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
     public PagedList<T> getResultList(EntityManager em) {
         String countQueryString = getPageCountQueryString();
         Query countQuery = em.createQuery(countQueryString);
-        parameterizeQuery(countQuery, countQueryString);
+        parameterizeQuery(countQuery);
         
         
         long totalSize = (Long) countQuery.getSingleResult();
-        long maxResult = page * objectsPerPage;
-        if(maxResult < totalSize){
-            maxResult = totalSize;
-        }
-        long firstResult = maxResult - objectsPerPage;
+
+
+
+
+
         
         String idQueryString = getPageIdQueryString();
         Query idQuery = em.createQuery(idQueryString);
-        parameterizeQuery(idQuery, idQueryString);
+        parameterizeQuery(idQuery);
         
         // Lossy conversion since JPQL COUNT returns a long
-        List ids = idQuery.setFirstResult((int)firstResult).setMaxResults((int)maxResult).getResultList();
+        List ids = idQuery.setFirstResult((int)firstRow).setMaxResults((int)pageSize).getResultList();
         
         String mainQueryString = getQueryString();
         Query mainQuery = em.createQuery(mainQueryString);
@@ -75,7 +76,7 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
             org.hibernate.Query hQuery = mainQuery.unwrap(org.hibernate.Query.class);
             hQuery.setResultTransformer(new ObjectBuilderResultTransformerAdapter(selectManager.getSelectObjectTransformer()));
         }
-        parameterizeQuery(mainQuery, mainQueryString);
+        parameterizeQuery(mainQuery);
         mainQuery.setParameter("ids", ids);
         
         PagedList<T> pagedResultList = new PagedListImpl<T>(totalSize);
@@ -83,14 +84,14 @@ public class PaginatedCriteriaBuilderImpl<T> extends AbstractCriteriaBuilder<T, 
         return pagedResultList;
     }
 
-    void parameterizeQuery(Query q, String qString){
-        //TODO: try to use q.getParameters
-        for (Map.Entry<String, Object> entry : parameterManager.getParameters().entrySet()) {
-            if(qString.contains(":" + entry.getKey())){
-                q.setParameter(entry.getKey(), entry.getValue());
-            }
-        }
-    }
+
+
+
+
+
+
+
+
     
     @Override
     public String getPageCountQueryString() {

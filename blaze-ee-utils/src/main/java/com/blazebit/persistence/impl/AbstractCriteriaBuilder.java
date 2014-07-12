@@ -26,6 +26,7 @@ import com.blazebit.persistence.RestrictionBuilder;
 import com.blazebit.persistence.SelectObjectBuilder;
 import com.blazebit.persistence.SimpleCaseWhenBuilder;
 import com.blazebit.persistence.WhereOrBuilder;
+import com.blazebit.persistence.impl.hibernate.ObjectBuilderResultTransformerAdapter;
 import java.lang.reflect.Constructor;
 import java.util.Calendar;
 import java.util.Date;

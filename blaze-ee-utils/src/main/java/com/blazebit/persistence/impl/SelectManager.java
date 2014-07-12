@@ -53,8 +53,8 @@ public class SelectManager<T> extends AbstractManager {
     private final Map<String, SelectInfo> selectAbsolutePathToInfoMap = new HashMap<String, SelectInfo>();
     private final SelectObjectBuilderEndedListenerImpl selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
 
-    public SelectManager(QueryGenerator queryGenerator) {
-        super(queryGenerator);
+    public SelectManager(QueryGenerator queryGenerator, ParameterManager parameterManager) {
+        super(queryGenerator, parameterManager);
     }
 
     void verifyBuilderEnded() {
@@ -126,6 +126,8 @@ public class SelectManager<T> extends AbstractManager {
         }
         selectInfos.add(selectInfo);
         selectObjectTransformer = (ObjectBuilder<T>) new TupleResultTransformer(this);
+
+		registerParameterExpressions(expr);
     }
 
 //    public U select(Class<? extends T> clazz) {
@@ -181,6 +183,7 @@ public class SelectManager<T> extends AbstractManager {
         if (!selectInfos.isEmpty()) {
             throw new IllegalStateException("No mixture of select and selectNew is allowed");
         }
+
         for (String expression : builder.getExpressions()) {
             SelectInfo selectInfo = new SelectInfo(ExpressionUtils.parse(expression), null);
             selectInfos.add(selectInfo);
