@@ -3,17 +3,16 @@
  */
 package com.blazebit.cdi.cleanup.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import com.blazebit.apt.validation.constraint.ConstraintScope;
 import com.blazebit.apt.validation.constraint.ExceptionConstraint;
 import com.blazebit.apt.validation.constraint.ParameterConstraint;
 import com.blazebit.apt.validation.constraint.ReturnTypeConstraint;
 import com.blazebit.apt.validation.constraint.UniqueValueConstraint;
 import com.blazebit.cdi.cleanup.CleanupHandlerInterceptor;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * This annotation is a marker for methods that may do cleanup work.

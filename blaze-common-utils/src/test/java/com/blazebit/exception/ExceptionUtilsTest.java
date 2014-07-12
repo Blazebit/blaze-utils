@@ -3,11 +3,9 @@
  */
 package com.blazebit.exception;
 
-import static org.junit.Assert.*;
-
 import java.lang.reflect.InvocationTargetException;
-import javax.management.RuntimeErrorException;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 /**

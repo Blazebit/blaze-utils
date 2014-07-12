@@ -1,16 +1,8 @@
 package com.blazebit.ai.decisiontree.impl;
 
-import com.blazebit.ai.decisiontree.Attribute;
-import com.blazebit.ai.decisiontree.AttributeSelector;
-import com.blazebit.ai.decisiontree.DecisionNode;
-import com.blazebit.ai.decisiontree.DecisionNodeFactory;
 import com.blazebit.ai.decisiontree.DecisionTree;
-import com.blazebit.ai.decisiontree.Example;
 import com.blazebit.ai.decisiontree.Item;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**

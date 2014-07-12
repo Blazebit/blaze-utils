@@ -4,7 +4,6 @@
 package com.blazebit.cdi.exception.annotation;
 
 import java.util.Arrays;
-
 import javax.enterprise.util.AnnotationLiteral;
 
 /**

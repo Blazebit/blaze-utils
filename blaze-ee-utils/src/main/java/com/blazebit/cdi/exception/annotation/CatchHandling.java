@@ -3,18 +3,15 @@
  */
 package com.blazebit.cdi.exception.annotation;
 
+import com.blazebit.apt.validation.constraint.ConstraintScope;
+import com.blazebit.apt.validation.constraint.ReferenceValueConstraint;
+import com.blazebit.cdi.cleanup.annotation.Cleanup;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import javax.enterprise.util.Nonbinding;
-
 import org.apache.deltaspike.core.api.exception.control.ExceptionHandler;
-
-import com.blazebit.apt.validation.constraint.ConstraintScope;
-import com.blazebit.apt.validation.constraint.ReferenceValueConstraint;
-import com.blazebit.cdi.cleanup.annotation.Cleanup;
 
 /**
  * This annotation is used within ExceptionHandler annotation and declares the

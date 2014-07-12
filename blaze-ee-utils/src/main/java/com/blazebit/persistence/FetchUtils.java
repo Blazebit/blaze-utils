@@ -3,6 +3,8 @@
  */
 package com.blazebit.persistence;
 
+import com.blazebit.reflection.ReflectionUtils;
+import com.blazebit.text.FormatUtils;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.util.Collection;
@@ -11,15 +13,11 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.FetchParent;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
-
-import com.blazebit.reflection.ReflectionUtils;
-import com.blazebit.text.FormatUtils;
 
 /**
  * 

@@ -18,8 +18,9 @@ package com.blazebit.comparator;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *

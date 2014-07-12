@@ -15,6 +15,7 @@
  */
 package com.blazebit.message.apt;
 
+import com.blazebit.i18n.LocaleUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,7 +36,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
@@ -50,10 +50,7 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
-
 import org.apache.deltaspike.core.api.message.MessageBundle;
-
-import com.blazebit.i18n.LocaleUtils;
 
 /**
  * 

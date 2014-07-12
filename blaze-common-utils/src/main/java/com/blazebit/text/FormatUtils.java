@@ -3,6 +3,7 @@
  */
 package com.blazebit.text;
 
+import com.blazebit.reflection.ReflectionUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -15,8 +16,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
-import com.blazebit.reflection.ReflectionUtils;
 
 /**
  * 

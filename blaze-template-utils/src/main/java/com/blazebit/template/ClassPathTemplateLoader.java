@@ -1,5 +1,6 @@
 package com.blazebit.template;
 
+import freemarker.cache.TemplateLoader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,8 +8,6 @@ import java.io.Reader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-
-import freemarker.cache.TemplateLoader;
 
 public class ClassPathTemplateLoader implements TemplateLoader {
 

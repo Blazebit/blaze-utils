@@ -1,9 +1,10 @@
 package com.blazebit.validation.constraint.validator;
 
+import com.blazebit.validation.constraint.CheckEither;
+import com.blazebit.validation.constraint.PopulationMode;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
@@ -12,9 +13,6 @@ import javax.validation.Path.Node;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-
-import com.blazebit.validation.constraint.CheckEither;
-import com.blazebit.validation.constraint.PopulationMode;
 
 public class CheckEitherValidator implements
 		ConstraintValidator<CheckEither, Object> {

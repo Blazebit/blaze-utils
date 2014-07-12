@@ -7,10 +7,8 @@ import com.blazebit.ai.decisiontree.DecisionNodeFactory;
 import com.blazebit.ai.decisiontree.DecisionTree;
 import com.blazebit.ai.decisiontree.Example;
 import com.blazebit.ai.decisiontree.Item;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**

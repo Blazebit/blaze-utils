@@ -3,15 +3,13 @@
  */
 package com.blazebit.web.mail.bean;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Named;
-
 import com.blazebit.mail.Mail;
 import com.blazebit.mail.MailTransport;
 import com.blazebit.mail.impl.SimpleMailSender;
+import java.io.File;
+import java.io.IOException;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Named;
 
 /**
  * 

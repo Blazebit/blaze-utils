@@ -1,28 +1,20 @@
 package com.blazebit.ai.decisiontree;
 
-import com.blazebit.ai.decisiontree.impl.ID3AttributeSelector;
+import com.blazebit.ai.decisiontree.impl.NoopDecisionTree;
 import com.blazebit.ai.decisiontree.impl.SimpleAttributeSelector;
 import com.blazebit.ai.decisiontree.impl.SimpleAttributeValue;
-import static org.junit.Assert.*;
-
-import com.blazebit.ai.decisiontree.impl.NoopDecisionTree;
-import com.blazebit.ai.decisiontree.impl.SimpleDiscreteAttribute;
 import com.blazebit.ai.decisiontree.impl.SimpleDecisionTree;
+import com.blazebit.ai.decisiontree.impl.SimpleDiscreteAttribute;
 import com.blazebit.ai.decisiontree.impl.SimpleExample;
 import com.blazebit.ai.decisiontree.impl.SimpleItem;
 import com.blazebit.collection.PatternTrie;
 import com.blazebit.collection.PatternTrie.ParameterizedValue;
-import com.blazebit.lang.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 

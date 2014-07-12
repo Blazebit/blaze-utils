@@ -5,7 +5,6 @@ package com.blazebit.quartz.plugin;
 
 import java.io.Serializable;
 import java.util.Date;
-
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
 import org.quartz.Trigger;

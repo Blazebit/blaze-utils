@@ -1,14 +1,12 @@
 package com.blazebit.validation;
 
+import com.blazebit.lang.StringUtils;
+import com.blazebit.lang.ValueRetriever;
 import java.util.Set;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Path.Node;
 import javax.validation.Validation;
 import javax.validation.Validator;
-
-import com.blazebit.lang.StringUtils;
-import com.blazebit.lang.ValueRetriever;
 
 public final class ConstraintValidatorUtils {
 

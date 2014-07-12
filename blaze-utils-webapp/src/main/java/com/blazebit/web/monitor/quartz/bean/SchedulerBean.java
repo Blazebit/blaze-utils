@@ -3,20 +3,17 @@
  */
 package com.blazebit.web.monitor.quartz.bean;
 
+import com.blazebit.monitor.quartz.model.SchedulerConfiguration;
+import com.blazebit.monitor.quartz.service.SchedulerConfigurationService;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.enterprise.context.SessionScoped;
 import javax.faces.event.ActionEvent;
 import javax.inject.Inject;
 import javax.inject.Named;
-
 import org.quartz.SchedulerException;
 import org.quartz.impl.SchedulerRepository;
-
-import com.blazebit.monitor.quartz.model.SchedulerConfiguration;
-import com.blazebit.monitor.quartz.service.SchedulerConfigurationService;
 
 /**
  * 

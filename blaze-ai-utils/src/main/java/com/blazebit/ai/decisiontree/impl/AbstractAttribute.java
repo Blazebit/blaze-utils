@@ -1,6 +1,6 @@
 package com.blazebit.ai.decisiontree.impl;
 
-import com.blazebit.ai.decisiontree.*;
+import com.blazebit.ai.decisiontree.Attribute;
 
 /**
  *

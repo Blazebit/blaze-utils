@@ -3,25 +3,22 @@
  */
 package com.blazebit.cdi.exception;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
-
-import org.apache.deltaspike.core.api.exception.control.event.ExceptionToCatchEvent;
-
 import com.blazebit.annotation.AnnotationUtils;
 import com.blazebit.cdi.cleanup.annotation.Cleanup;
 import com.blazebit.cdi.exception.annotation.CatchHandler;
 import com.blazebit.cdi.exception.annotation.CatchHandling;
 import com.blazebit.exception.ExceptionUtils;
 import com.blazebit.reflection.ReflectionUtils;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.Interceptor;
+import javax.interceptor.InvocationContext;
+import org.apache.deltaspike.core.api.exception.control.event.ExceptionToCatchEvent;
 
 /**
  * 

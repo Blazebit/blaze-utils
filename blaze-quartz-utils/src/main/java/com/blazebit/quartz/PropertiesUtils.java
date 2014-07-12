@@ -9,7 +9,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
-
 import org.quartz.SchedulerConfigException;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;

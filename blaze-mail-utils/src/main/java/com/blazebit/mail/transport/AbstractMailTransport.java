@@ -3,11 +3,10 @@
  */
 package com.blazebit.mail.transport;
 
+import com.blazebit.mail.MailTransport;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
-
-import com.blazebit.mail.MailTransport;
 
 /**
  * 

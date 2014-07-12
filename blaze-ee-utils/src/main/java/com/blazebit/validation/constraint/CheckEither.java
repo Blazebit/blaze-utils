@@ -1,17 +1,15 @@
 package com.blazebit.validation.constraint;
 
+import com.blazebit.validation.constraint.validator.CheckEitherValidator;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.Payload;
-
-import com.blazebit.validation.constraint.validator.CheckEitherValidator;
 
 /**
  * This constraint tries to validate the object of the class which is annotated

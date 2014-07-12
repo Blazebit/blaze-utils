@@ -3,10 +3,11 @@
  */
 package com.blazebit.quartz;
 
+import com.blazebit.cdi.CdiUtils;
+import com.blazebit.quartz.job.CdiAwareJob;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
 import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -15,9 +16,6 @@ import org.quartz.spi.JobFactory;
 import org.quartz.spi.TriggerFiredBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.blazebit.cdi.CdiUtils;
-import com.blazebit.quartz.job.CdiAwareJob;
 
 /**
  * 

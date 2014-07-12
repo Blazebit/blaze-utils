@@ -3,9 +3,8 @@
  */
 package com.blazebit.monitor.quartz.service;
 
-import java.util.List;
-
 import com.blazebit.monitor.quartz.model.SchedulerConfiguration;
+import java.util.List;
 
 /**
  * 

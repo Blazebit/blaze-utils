@@ -3,6 +3,7 @@
  */
 package com.blazebit.apt.service;
 
+import com.blazebit.apt.AnnotationProcessingUtils;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -11,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
@@ -23,8 +23,6 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-
-import com.blazebit.apt.AnnotationProcessingUtils;
 
 /**
  * Constraint Validator classes must be available in compiled form!

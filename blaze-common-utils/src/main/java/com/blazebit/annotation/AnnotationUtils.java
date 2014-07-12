@@ -3,6 +3,7 @@
  */
 package com.blazebit.annotation;
 
+import com.blazebit.reflection.ReflectionUtils;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
@@ -10,8 +11,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import com.blazebit.reflection.ReflectionUtils;
 
 /**
  * Utillity class for annotation handling. Basically this class only uses

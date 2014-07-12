@@ -3,22 +3,19 @@
  */
 package com.blazebit.quartz.job.mail;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.mail.MessagingException;
-
-import org.quartz.JobDataMap;
-import org.quartz.JobExecutionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.blazebit.mail.Mail;
 import com.blazebit.mail.util.MailUtils;
 import com.blazebit.quartz.job.AbstractJob;
 import com.blazebit.quartz.job.JobParameter;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import javax.mail.MessagingException;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 

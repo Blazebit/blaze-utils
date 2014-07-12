@@ -5,7 +5,6 @@ package com.blazebit.quartz.job;
 
 import java.io.Serializable;
 import java.util.List;
-
 import org.quartz.Job;
 
 /**

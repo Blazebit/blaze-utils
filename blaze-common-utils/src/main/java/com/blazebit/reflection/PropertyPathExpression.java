@@ -3,12 +3,11 @@
  */
 package com.blazebit.reflection;
 
+import com.blazebit.lang.ValueAccessor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.blazebit.lang.ValueAccessor;
 
 /**
  * This class can be used to predefine a getter chain invocation but to be

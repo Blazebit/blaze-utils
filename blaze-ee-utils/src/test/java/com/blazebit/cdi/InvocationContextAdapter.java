@@ -2,7 +2,6 @@ package com.blazebit.cdi;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-
 import javax.interceptor.InvocationContext;
 
 public abstract class InvocationContextAdapter implements InvocationContext {

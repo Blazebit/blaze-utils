@@ -3,17 +3,15 @@
  */
 package com.blazebit.monitor.quartz.service.impl;
 
+import com.blazebit.monitor.quartz.model.SchedulerConfiguration;
+import com.blazebit.monitor.quartz.service.SchedulerConfigurationService;
 import java.io.Serializable;
 import java.util.List;
-
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
-import com.blazebit.monitor.quartz.model.SchedulerConfiguration;
-import com.blazebit.monitor.quartz.service.SchedulerConfigurationService;
 
 /**
  * 

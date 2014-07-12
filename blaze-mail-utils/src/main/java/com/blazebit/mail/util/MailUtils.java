@@ -3,18 +3,16 @@
  */
 package com.blazebit.mail.util;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-
 import com.blazebit.mail.Mail;
 import com.blazebit.mail.MailException;
 import com.blazebit.mail.MailSender;
 import com.blazebit.mail.MailTransport;
 import com.blazebit.mail.impl.SimpleMailSender;
+import java.io.File;
+import java.io.IOException;
+import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 
 /**
  * 

@@ -4,6 +4,8 @@
  */
 package com.blazebit.quartz.job.http;
 
+import com.blazebit.quartz.job.AbstractJob;
+import com.blazebit.quartz.job.JobParameter;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,13 +17,9 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-
-import com.blazebit.quartz.job.AbstractJob;
-import com.blazebit.quartz.job.JobParameter;
 
 /**
  * 

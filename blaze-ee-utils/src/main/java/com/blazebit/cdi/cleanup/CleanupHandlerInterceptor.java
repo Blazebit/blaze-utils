@@ -3,20 +3,18 @@
  */
 package com.blazebit.cdi.cleanup;
 
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InvocationContext;
-
 import com.blazebit.annotation.AnnotationUtils;
 import com.blazebit.cdi.cleanup.annotation.Cleanup;
 import com.blazebit.cdi.cleanup.annotation.CleanupHandler;
 import com.blazebit.cdi.cleanup.annotation.CleanupHandling;
 import com.blazebit.exception.ExceptionUtils;
 import com.blazebit.reflection.ReflectionUtils;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.Interceptor;
+import javax.interceptor.InvocationContext;
 
 /**
  * Invokes cleanup methods after the invocation of a method. The specified

@@ -3,17 +3,15 @@
  */
 package com.blazebit.cdi.logging;
 
+import com.blazebit.cdi.logging.annotation.Logging;
+import com.blazebit.exception.ExceptionUtils;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
-
-import com.blazebit.cdi.logging.annotation.Logging;
-import com.blazebit.exception.ExceptionUtils;
 
 /**
  * This interceptor logs invocations of methods, class name, method name,

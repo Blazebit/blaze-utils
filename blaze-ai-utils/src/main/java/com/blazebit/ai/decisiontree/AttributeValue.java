@@ -1,7 +1,5 @@
 package com.blazebit.ai.decisiontree;
 
-import java.util.List;
-
 /**
  * Discrete Attribute.
  *

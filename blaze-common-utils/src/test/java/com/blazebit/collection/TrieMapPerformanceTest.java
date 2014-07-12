@@ -1,7 +1,6 @@
 package com.blazebit.collection;
 
 import java.util.Map;
-
 import org.junit.Test;
 
 /**

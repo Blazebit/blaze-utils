@@ -3,16 +3,14 @@
  */
 package com.blazebit.cdi.cleanup.annotation;
 
+import com.blazebit.apt.validation.constraint.ConstraintScope;
+import com.blazebit.apt.validation.constraint.ReferenceValueConstraint;
+import com.blazebit.cdi.cleanup.CleanupHandlerInterceptor;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import javax.enterprise.util.Nonbinding;
-
-import com.blazebit.apt.validation.constraint.ConstraintScope;
-import com.blazebit.apt.validation.constraint.ReferenceValueConstraint;
-import com.blazebit.cdi.cleanup.CleanupHandlerInterceptor;
 
 /**
  * This is annotation is used within #{@link CleanupHandler} and declares

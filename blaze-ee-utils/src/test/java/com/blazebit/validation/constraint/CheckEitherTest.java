@@ -2,17 +2,14 @@ package com.blazebit.validation.constraint;
 
 import static com.blazebit.validation.ConstraintValidatorUtils.containsViolation;
 import static com.blazebit.validation.ConstraintValidatorUtils.getValidator;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Set;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
-
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 

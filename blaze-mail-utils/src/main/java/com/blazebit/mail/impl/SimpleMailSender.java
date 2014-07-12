@@ -3,13 +3,18 @@
  */
 package com.blazebit.mail.impl;
 
+import com.blazebit.mail.Mail;
+import com.blazebit.mail.MailException;
+import com.blazebit.mail.MailResource;
+import com.blazebit.mail.MailSender;
+import com.blazebit.mail.MailTransport;
+import com.blazebit.mail.util.MailUtils;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.Address;
@@ -25,13 +30,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
-
-import com.blazebit.mail.Mail;
-import com.blazebit.mail.MailException;
-import com.blazebit.mail.MailResource;
-import com.blazebit.mail.MailSender;
-import com.blazebit.mail.MailTransport;
-import com.blazebit.mail.util.MailUtils;
 
 /**
  * 

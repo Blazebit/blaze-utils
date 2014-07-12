@@ -6,7 +6,6 @@ package com.blazebit.apt;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;

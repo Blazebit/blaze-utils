@@ -3,14 +3,12 @@
  */
 package com.blazebit.quartz.job.mail;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-
 import com.blazebit.quartz.job.CdiAwareJob;
 import com.blazebit.quartz.job.JobParameter;
+import java.util.ArrayList;
+import java.util.List;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 /**
  * 

@@ -6,7 +6,6 @@ import com.blazebit.ai.decisiontree.impl.SimpleDecisionTree;
 import com.blazebit.ai.decisiontree.impl.SimpleDiscreteAttribute;
 import com.blazebit.ai.decisiontree.impl.SimpleExample;
 import com.blazebit.ai.decisiontree.impl.SimpleItem;
-import static org.junit.Assert.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;

@@ -3,15 +3,13 @@
  */
 package com.blazebit.cdi.exception.annotation;
 
+import com.blazebit.cdi.exception.ExceptionWrappingInterceptor;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import javax.enterprise.util.Nonbinding;
 import javax.interceptor.InterceptorBinding;
-
-import com.blazebit.cdi.exception.ExceptionWrappingInterceptor;
 
 /**
  * This is a basic container annotation for ExceptionWrap annotations and the

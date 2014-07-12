@@ -1,16 +1,14 @@
 package com.blazebit.validation.constraint;
 
+import com.blazebit.validation.constraint.validator.CheckCompareValidator;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Comparator;
-
 import javax.validation.Constraint;
 import javax.validation.Payload;
-
-import com.blazebit.validation.constraint.validator.CheckCompareValidator;
 
 /**
  * 

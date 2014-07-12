@@ -3,9 +3,6 @@
  */
 package com.blazebit.comparator;
 
-import com.blazebit.lang.StringUtils;
-import java.util.Comparator;
-
 import com.blazebit.reflection.ExpressionUtils;
 
 /**

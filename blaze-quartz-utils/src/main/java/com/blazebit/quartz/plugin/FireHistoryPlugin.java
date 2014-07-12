@@ -3,6 +3,7 @@
  */
 package com.blazebit.quartz.plugin;
 
+import com.blazebit.quartz.PropertiesUtils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,7 +19,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
-
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
@@ -39,8 +39,6 @@ import org.quartz.utils.Key;
 import org.quartz.utils.PropertiesParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.blazebit.quartz.PropertiesUtils;
 
 /**
  * 

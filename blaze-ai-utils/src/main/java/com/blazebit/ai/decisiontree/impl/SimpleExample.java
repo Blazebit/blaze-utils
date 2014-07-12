@@ -1,8 +1,8 @@
 package com.blazebit.ai.decisiontree.impl;
 
-import com.blazebit.ai.decisiontree.*;
-import java.util.Collections;
-import java.util.HashMap;
+import com.blazebit.ai.decisiontree.Attribute;
+import com.blazebit.ai.decisiontree.AttributeValue;
+import com.blazebit.ai.decisiontree.Example;
 import java.util.Map;
 
 /**

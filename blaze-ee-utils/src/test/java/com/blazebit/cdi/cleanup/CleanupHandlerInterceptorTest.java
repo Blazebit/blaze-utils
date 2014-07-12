@@ -1,20 +1,14 @@
 package com.blazebit.cdi.cleanup;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import javax.interceptor.InvocationContext;
-
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
-import com.blazebit.cdi.InvocationContextAdapter;
 import com.blazebit.cdi.SimpleInvocationContext;
 import com.blazebit.cdi.cleanup.annotation.Cleanup;
 import com.blazebit.cdi.cleanup.annotation.CleanupHandler;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import org.junit.Test;
 
 
 public class CleanupHandlerInterceptorTest {

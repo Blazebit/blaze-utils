@@ -1,16 +1,14 @@
 package com.blazebit.validation.constraint.validator;
 
-import java.util.Comparator;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
-import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderDefinedContext;
-
 import com.blazebit.lang.StringUtils;
 import com.blazebit.reflection.ExpressionUtils;
 import com.blazebit.validation.constraint.CheckCompare;
 import com.blazebit.validation.constraint.ComparisonMode;
+import java.util.Comparator;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
+import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder.NodeBuilderDefinedContext;
 
 public class CheckCompareValidator implements
 		ConstraintValidator<CheckCompare, Object> {

@@ -3,14 +3,12 @@
  */
 package com.blazebit.cdi.logging.annotation;
 
+import com.blazebit.cdi.logging.LoggingInterceptor;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
 import javax.interceptor.InterceptorBinding;
-
-import com.blazebit.cdi.logging.LoggingInterceptor;
 
 /**
  * This is a marker annotation for logging method invocation information and the
