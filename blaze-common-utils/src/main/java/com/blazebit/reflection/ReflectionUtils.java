@@ -17,8 +17,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
@@ -485,41 +487,24 @@ public final class ReflectionUtils {
 	 * @return The array of fields that match the modifiers and are within the
 	 *         type hierarchy of the given class
 	 */
-	public static Field[] getMatchingFields(Class<?> clazz, int modifiers) {
-		Set<Field> fields = new TreeSet<Field>(
-				FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR);
-		Stack<Class<?>> classStack = new Stack<Class<?>>();
-		Class<?> traverseClass;
-		Field[] fieldArray;
-		Class<?>[] classArray;
+	public static Field[] getMatchingFields(Class<?> clazz, final int modifiers) {
+            final Set<Field> fields = new TreeSet<Field>(
+                            FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR);
+            traverseHierarchy(clazz, new TraverseTask<Field>() {
 
-		classStack.push(clazz);
+                @Override
+                public Field run(Class<?> clazz) {
+                    Field[] fieldArray = clazz.getDeclaredFields();
+                    for (int i = 0; i < fieldArray.length; i++) {
+                        if ((modifiers & fieldArray[i].getModifiers()) != 0) {
+                                fields.add(fieldArray[i]);
+                        }
+                    }
+                    return null;
+                }
+            });
 
-		while (!classStack.isEmpty()) {
-			traverseClass = classStack.pop();
-
-			if (traverseClass.getSuperclass() != null) {
-				classStack.add(traverseClass.getSuperclass());
-			}
-
-			fieldArray = traverseClass.getDeclaredFields();
-
-			for (int i = 0; i < fieldArray.length; i++) {
-				if ((modifiers & fieldArray[i].getModifiers()) != 0) {
-					fields.add(fieldArray[i]);
-				}
-			}
-
-			if ((modifiers & Modifier.STATIC) != 0) {
-				classArray = traverseClass.getInterfaces();
-
-				for (int i = 0; i < classArray.length; i++) {
-					classStack.add(classArray[i]);
-				}
-			}
-		}
-
-		return fields.toArray(new Field[fields.size()]);
+            return fields.toArray(new Field[fields.size()]);
 	}
 
 	/**
@@ -538,41 +523,24 @@ public final class ReflectionUtils {
 	 * @return The array of fields that do not match the modifiers and are
 	 *         within the type hierarchy of the given class
 	 */
-	public static Field[] getNonMatchingFields(Class<?> clazz, int modifiers) {
-		Set<Field> fields = new TreeSet<Field>(
-				FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR);
-		Stack<Class<?>> classStack = new Stack<Class<?>>();
-		Class<?> traverseClass;
-		Field[] fieldArray;
-		Class<?>[] classArray;
+	public static Field[] getNonMatchingFields(Class<?> clazz, final int modifiers) {
+            final Set<Field> fields = new TreeSet<Field>(
+                            FIELD_NAME_AND_DECLARING_CLASS_COMPARATOR);
+            traverseHierarchy(clazz, new TraverseTask<Field>() {
 
-		classStack.push(clazz);
+                @Override
+                public Field run(Class<?> clazz) {
+                    Field[] fieldArray = clazz.getDeclaredFields();
+                    for (int i = 0; i < fieldArray.length; i++) {
+                        if ((modifiers & fieldArray[i].getModifiers()) == 0) {
+                                fields.add(fieldArray[i]);
+                        }
+                    }
+                    return null;
+                }
+            });
 
-		while (!classStack.isEmpty()) {
-			traverseClass = classStack.pop();
-
-			if (traverseClass.getSuperclass() != null) {
-				classStack.add(traverseClass.getSuperclass());
-			}
-
-			fieldArray = traverseClass.getDeclaredFields();
-
-			for (int i = 0; i < fieldArray.length; i++) {
-				if ((modifiers & fieldArray[i].getModifiers()) == 0) {
-					fields.add(fieldArray[i]);
-				}
-			}
-
-			if ((modifiers & Modifier.STATIC) != 0) {
-				classArray = traverseClass.getInterfaces();
-
-				for (int i = 0; i < classArray.length; i++) {
-					classStack.add(classArray[i]);
-				}
-			}
-		}
-
-		return fields.toArray(new Field[fields.size()]);
+            return fields.toArray(new Field[fields.size()]);
 	}
 
 	/**
@@ -591,25 +559,20 @@ public final class ReflectionUtils {
 	 *         found, otherwise null
 	 */
 	public static Field getField(Class<?> clazz, String fieldName) {
-		Class<?> traverseClass = clazz;
+            final String internedName = fieldName.intern();
+            return traverseHierarchy(clazz, new TraverseTask<Field>() {
 
-		while (traverseClass != null) {
-			try {
-				return traverseClass.getDeclaredField(fieldName);
-			} catch (NoSuchFieldException ex1) {
-				// Look for the field in all interfaces of the traverse class
-				for (Class<?> interfaceClass : traverseClass.getInterfaces()) {
-					try {
-						return interfaceClass.getDeclaredField(fieldName);
-					} catch (NoSuchFieldException ex2) {
-					}
-				}
-
-				traverseClass = traverseClass.getSuperclass();
-			}
-		}
-
-		return null;
+                @Override
+                public Field run(Class<?> clazz) {
+                    Field[] fields = clazz.getDeclaredFields();
+                    for (int i = 0; i < fields.length; i++) {
+                        if (fields[i].getName() == internedName) {
+                            return fields[i];
+                        }
+                    }
+                    return null;
+                }
+            });
 	}
 
 	/**
@@ -715,6 +678,8 @@ public final class ReflectionUtils {
 			if (genericParameterTypes[i] instanceof TypeVariable<?>) {
 				parameterTypes[i] = resolveTypeVariable(clazz,
 						(TypeVariable<?>) genericParameterTypes[i]);
+			} else if (genericParameterTypes[i] instanceof ParameterizedType) {
+				parameterTypes[i] = (Class<?>) ((ParameterizedType) genericParameterTypes[i]).getRawType();
 			} else {
 				parameterTypes[i] = (Class<?>) genericParameterTypes[i];
 			}
@@ -722,6 +687,22 @@ public final class ReflectionUtils {
 
 		return parameterTypes;
 	}
+
+        public static Class<?>[][] getResolvedMethodParameterTypesArguments(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
+            return getResolvedMethodParameterTypesArguments(clazz, getMethod(clazz, methodName, parameterTypes));
+        }
+
+        public static Class<?>[][] getResolvedMethodParameterTypesArguments(Class<?> clazz, Method method) {
+            int parameterCount = method.getParameterTypes().length;
+            Class<?>[][] parameterTypeArguments = new Class<?>[parameterCount][];
+            Type[] genericParameterTypes = method.getGenericParameterTypes();
+            
+            for (int i = 0; i < parameterCount; i++) {
+                parameterTypeArguments[i] = resolveTypeArguments(clazz, genericParameterTypes[i]);
+            }
+            
+            return parameterTypeArguments;
+        }
 
 	public static Class<?>[] getResolvedMethodExceptionTypes(Class<?> clazz,
 			String methodName, Class<?>... parameterTypes) {
@@ -809,31 +790,82 @@ public final class ReflectionUtils {
 	 * @return The method object with the given method name if the method can be
 	 *         found, otherwise null
 	 */
-	public static Method getMethod(Class<?> clazz, String methodName,
-			Class<?>... parameterTypes) {
-		Class<?> traverseClass = clazz;
+	public static Method getMethod(Class<?> clazz, final String methodName,
+			final Class<?>... parameterTypes) {
+            final String internedName = methodName.intern();
+            return traverseHierarchy(clazz, new TraverseTask<Method>() {
 
-		while (traverseClass != null) {
-			try {
-				return traverseClass.getDeclaredMethod(methodName,
-						parameterTypes);
-			} catch (NoSuchMethodException ex1) {
-
-				// Look for the method in all interfaces of the traverse class
-				for (Class<?> interfaceClass : traverseClass.getInterfaces()) {
-					try {
-						return interfaceClass.getDeclaredMethod(methodName,
-								parameterTypes);
-					} catch (NoSuchMethodException ex2) {
-					}
-				}
-
-				traverseClass = traverseClass.getSuperclass();
-			}
-		}
-
-		return null;
+                @Override
+                public Method run(Class<?> clazz) {
+                    Method[] methods = clazz.getDeclaredMethods();
+                    Method res = null;
+                    
+                    for (int i = 0; i < methods.length; i++) {
+                        Method m = methods[i];
+                        if (m.getName() == internedName
+                            && arrayContentsEq(parameterTypes, m.getParameterTypes())
+                            && (res == null
+                                || res.getReturnType().isAssignableFrom(m.getReturnType()))) {
+                            res = m;
+                        }
+                    }
+                    
+                    return res;
+                }
+            });
 	}
+        
+        private static interface TraverseTask<T> {
+            public T run(Class<?> clazz);
+        }
+        
+        private static <T> T traverseHierarchy(Class<?> clazz, TraverseTask<T> task) {
+            Queue<Class<?>> classQueue = new LinkedList<Class<?>>();
+            Class<?> traverseClass;
+            classQueue.add(clazz);
+            
+            while (!classQueue.isEmpty()) {
+                traverseClass = classQueue.remove();
+
+                T result = task.run(traverseClass);
+
+                if (result != null) {
+                    return result;
+                }
+
+                if (traverseClass.getSuperclass() != null) {
+                    classQueue.add(traverseClass.getSuperclass());
+                }
+
+                for (Class<?> interfaceClass : traverseClass.getInterfaces()) {
+                    classQueue.add(interfaceClass);
+                }
+            }
+
+            return null;
+	}
+
+    private static boolean arrayContentsEq(Object[] a1, Object[] a2) {
+        if (a1 == null) {
+            return a2 == null || a2.length == 0;
+        }
+
+        if (a2 == null) {
+            return a1.length == 0;
+        }
+
+        if (a1.length != a2.length) {
+            return false;
+        }
+
+        for (int i = 0; i < a1.length; i++) {
+            if (a1[i] != a2[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
         
 	/**
 	 * Returns the method object for a method which is annotated with the
@@ -856,29 +888,23 @@ public final class ReflectionUtils {
 	 * @return The method object for the method annotated with the given
          *         annotation type if the method can be found, otherwise null
 	 */
-        public static Method getMethod(Class<?> clazz, Class<? extends Annotation> annotation) {
-                //TODO: Write test
-		Class<?> traverseClass = clazz;
-		Method method = null;
+        public static Method getMethod(Class<?> clazz, final Class<? extends Annotation> annotation) {
+            return traverseHierarchy(clazz, new TraverseTask<Method>() {
 
-		while (traverseClass != null) {
-			method = findMethodWithAnnotation(annotation, traverseClass);
-
-			if (method != null) {
-				break;
-			}
-
-			// Look for the method in all interfaces of the traverse class
-			method = findMethodWithAnnotation(annotation, traverseClass.getInterfaces());
-
-			if (method != null) {
-				break;
-			}
-
-			traverseClass = traverseClass.getSuperclass();
-		}
-
-		return method;
+                @Override
+                public Method run(Class<?> clazz) {
+                    Method[] methods = clazz.getDeclaredMethods();
+                    
+                    for (int i = 0; i < methods.length; i++) {
+                        Method m = methods[i];
+                        if (m.getAnnotation(annotation) != null) {
+                                return m;
+                        }
+                    }
+                    
+                    return null;
+                }
+            });
 	}
         
 	/**
@@ -899,41 +925,25 @@ public final class ReflectionUtils {
 	 * @return A list of method objects for methods annotated with the given
          *         annotation type or an emtpy list
 	 */
-        public static List<Method> getMethods(Class<?> clazz, Class<? extends Annotation> annotation) {
-                //TODO: Write test
-                List<Method> methods = new ArrayList<Method>();
-		Class<?> traverseClass = clazz;
+        public static List<Method> getMethods(Class<?> clazz, final Class<? extends Annotation> annotation) {
+            final List<Method> methods = new ArrayList<Method>();
+            traverseHierarchy(clazz, new TraverseTask<Method>() {
 
-		while (traverseClass != null) {
-			findMethodsWithAnnotation(methods, annotation, traverseClass);
-			// Look for the method in all interfaces of the traverse class
-			findMethodsWithAnnotation(methods, annotation, traverseClass.getInterfaces());
-			traverseClass = traverseClass.getSuperclass();
-		}
-
-		return methods;
-	}
-
-	private static Method findMethodWithAnnotation(Class<? extends Annotation> annotation, Class<?>... classes) {
-		for (Class<?> clazz : classes) {
-			for (Method m : clazz.getDeclaredMethods()) {
-				if (m.getAnnotation(annotation) != null) {
-					return m;
-				}
-			}
-		}
-
-		return null;
-	}
-
-	private static void findMethodsWithAnnotation(List<Method> methods, Class<? extends Annotation> annotation, Class<?>... classes) {
-                for (Class<?> clazz : classes) {
-			for (Method m : clazz.getDeclaredMethods()) {
-				if (m.getAnnotation(annotation) != null) {
-					methods.add(m);
-				}
-			}
-		}
+                @Override
+                public Method run(Class<?> clazz) {
+                    Method[] methodArray = clazz.getDeclaredMethods();
+                    
+                    for (int i = 0; i < methodArray.length; i++) {
+                        Method m = methodArray[i];
+                        if (m.getAnnotation(annotation) != null) {
+                                methods.add(m);
+                        }
+                    }
+                    
+                    return null;
+                }
+            });
+            return methods;
 	}
 
 	/**
@@ -960,23 +970,44 @@ public final class ReflectionUtils {
 		StringBuilder sb = new StringBuilder("get").append(
 				Character.toUpperCase(fieldName.charAt(0))).append(fieldName,
 				1, fieldName.length());
-		Method m = getMethod(clazz, sb.toString());
+                final String internedGetName = sb.toString().intern();
+                final String internedIsName = sb.replace(0, 3, "is").toString().intern();
+                return traverseHierarchy(clazz, new TraverseTask<Method>() {
 
-		if (m == null) {
-			sb.replace(0, 3, "is");
-			m = getMethod(clazz, sb.toString());
-		}
-
-		if (!isGetter(m)) {
-			return null;
-		}
-
-		return m;
+                @Override
+                public Method run(Class<?> clazz) {
+                    Method[] methods = clazz.getDeclaredMethods();
+                    Method res = null;
+                    
+                    for (int i = 0; i < methods.length; i++) {
+                        Method m = methods[i];
+                        if (isGetterSignature(m)) {
+                            if (m.getName() == internedGetName
+                                && (res == null
+                                    || res.getReturnType().isAssignableFrom(m.getReturnType()))) {
+                                res = m;
+                            }
+                            if (m.getName() == internedIsName
+                                && (res == null
+                                    || res.getReturnType().isAssignableFrom(m.getReturnType()))) {
+                                res = m;
+                            }
+                        }
+                    }
+                    
+                    return res;
+                }
+            });
 	}
 
-	private static boolean isGetter(Method m) {
+	private static boolean isGetterSignature(Method m) {
 		return m != null && !void.class.equals(m.getReturnType())
 				&& m.getParameterTypes().length == 0;
+	}
+
+	public static boolean isGetter(Method m) {
+		return m != null && (m.getName().startsWith("get") || m.getName().startsWith("is"))
+                        && !void.class.equals(m.getReturnType()) && m.getParameterTypes().length == 0;
 	}
 
 	/**
@@ -996,47 +1027,40 @@ public final class ReflectionUtils {
 	 *         otherwise null
 	 */
 	public static Method getSetter(Class<?> clazz, String fieldName) {
-		StringBuilder sb = new StringBuilder("set").append(
+                StringBuilder sb = new StringBuilder("set").append(
 				Character.toUpperCase(fieldName.charAt(0))).append(fieldName,
 				1, fieldName.length());
-		String methodName = sb.toString();
-		Class<?> traverseClass = clazz;
-		Method method = null;
+                final String internedName = sb.toString().intern();
+                return traverseHierarchy(clazz, new TraverseTask<Method>() {
 
-		while (traverseClass != null) {
-			method = findSetter(methodName, traverseClass);
-
-			if (method != null) {
-				break;
-			}
-
-			// Look for the method in all interfaces of the traverse class
-			method = findSetter(methodName, traverseClass.getInterfaces());
-
-			if (method != null) {
-				break;
-			}
-
-			traverseClass = traverseClass.getSuperclass();
-		}
-
-		return method;
+                @Override
+                public Method run(Class<?> clazz) {
+                    Method[] methods = clazz.getDeclaredMethods();
+                    Method res = null;
+                    
+                    for (int i = 0; i < methods.length; i++) {
+                        Method m = methods[i];
+                        if (isSetterSignature(m)) {
+                            if (m.getName() == internedName
+                                && (res == null
+                                    || res.getParameterTypes()[0].isAssignableFrom(m.getParameterTypes()[0]))) {
+                                res = m;
+                            }
+                        }
+                    }
+                        
+                    return res;
+                }
+            });
 	}
 
-	private static Method findSetter(String methodName, Class<?>... classes) {
-		for (Class<?> clazz : classes) {
-			for (Method m : clazz.getDeclaredMethods()) {
-				if (m.getName().equals(methodName) && isSetter(m)) {
-					return m;
-				}
-			}
-		}
-
-		return null;
-	}
-
-	private static boolean isSetter(Method m) {
+	private static boolean isSetterSignature(Method m) {
 		return m != null && m.getReturnType().equals(void.class)
+				&& m.getParameterTypes().length == 1;
+	}
+
+	public static boolean isSetter(Method m) {
+		return m != null && m.getName().startsWith("set") && m.getReturnType().equals(void.class)
 				&& m.getParameterTypes().length == 1;
 	}
 }

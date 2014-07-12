@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package com.blazebit.persistence.view.metamodel;
+package com.blazebit.persistence.view.impl.proxy.model;
 
-import java.lang.reflect.Constructor;
-import java.util.List;
+import com.blazebit.persistence.view.Mapping;
 
 /**
  *
  * @author cpbec
  */
-public interface MappingConstructor<X> {
+public abstract class DocumentClassView implements DocumentInterfaceView {
     
-    public String getName();
+    private final long age;
     
-    public ViewType<X> getDeclaringType();
+    public DocumentClassView(
+            @Mapping("age + 1") long age
+    ) {
+        this.age = age;
+    }
     
-    public Constructor<X> getJavaConstructor();
-    
-    public List<ParameterAttribute<X, ?>> getParameterAttributes();
-    
-    public ParameterAttribute<X, ?> getParameterAttribute(int index);
+    public long getAge() {
+        return age;
+    }
 }

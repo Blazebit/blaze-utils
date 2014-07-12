@@ -196,7 +196,8 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
     @Override
     public <Y> QueryBuilder<Y, ?> selectNew(ObjectBuilder<Y> builder) {
         verifyBuilderEnded();
-        return selectManager.selectNew(builder);
+        selectManager.selectNew(builder);
+        return (QueryBuilder<Y, ?>) this;
     }
     
     /*
@@ -431,7 +432,7 @@ public abstract class AbstractCriteriaBuilder<T, U extends QueryBuilder<T, U>> i
         if (selectManager.getSelectObjectTransformer() != null) {
             // get hibernate query
             Query hQuery = query.unwrap(Query.class);
-            hQuery.setResultTransformer(selectManager.getSelectObjectTransformer());
+            hQuery.setResultTransformer(new ObjectBuilderResultTransformerAdapter(selectManager.getSelectObjectTransformer()));
         }
         
         parameterizeQuery(query);

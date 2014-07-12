@@ -16,10 +16,8 @@
 
 package com.blazebit.persistence.view;
 
-import com.blazebit.persistence.AbstractPersistenceTest;
 import com.blazebit.persistence.CriteriaBuilder;
 import com.blazebit.persistence.CriteriaProvider;
-import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.entity.Document;
 import com.blazebit.persistence.entity.Person;
 import com.blazebit.persistence.view.model.DocumentView2;
@@ -57,9 +55,7 @@ public class AbstractClassViewTest extends AbstractEntityViewPersistenceTest {
             doc2.setOwner(o2);
             
             doc1.getContacts().put(1, o1);
-            doc1.getContacts().put(2, o2);
             doc2.getContacts().put(1, o2);
-            doc2.getContacts().put(2, o1);
             
             em.persist(o1);
             em.persist(o2);
@@ -77,11 +73,9 @@ public class AbstractClassViewTest extends AbstractEntityViewPersistenceTest {
     
     @Test
     public void testAbstractClass() {
-        ObjectBuilder<DocumentView2> objectBuilder = evm.createObjectBuilder(DocumentView2.class);;
-        CriteriaBuilder<DocumentView2> criteria = CriteriaProvider.from(em, Document.class, "d")
-                .orderByAsc("id")
-                .selectNew(objectBuilder);
-        List<DocumentView2> results = criteria.getResultList(em);
+        CriteriaBuilder<Document> criteria = CriteriaProvider.from(em, Document.class, "d")
+                .orderByAsc("id");
+        List<DocumentView2> results = evm.applyObjectBuilder(DocumentView2.class, criteria).getResultList(em);
         
         assertEquals(2, results.size());
         // Doc1

@@ -16,6 +16,8 @@
 
 package com.blazebit.persistence.view.metamodel;
 
+import java.lang.reflect.Type;
+
 /**
  *
  * @author cpbec

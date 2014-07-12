@@ -16,7 +16,8 @@
 
 package com.blazebit.persistence.view;
 
-import com.blazebit.persistence.ObjectBuilder;
+import com.blazebit.persistence.CriteriaBuilder;
+import com.blazebit.persistence.PaginatedCriteriaBuilder;
 
 /**
  *
@@ -25,6 +26,12 @@ import com.blazebit.persistence.ObjectBuilder;
 public interface EntityViewManager {
     
     public EntityViewManagerFactory getEntityViewManagerFactory();
-
-    public <T> ObjectBuilder<T> createObjectBuilder(Class<T> clazz);
+    
+    public <T> PaginatedCriteriaBuilder<T> applyObjectBuilder(Class<T> clazz, PaginatedCriteriaBuilder<?> criteriaBuilder);
+    
+    public <T> CriteriaBuilder<T> applyObjectBuilder(Class<T> clazz, CriteriaBuilder<?> criteriaBuilder);
+    
+    public <T> PaginatedCriteriaBuilder<T> applyObjectBuilder(Class<T> clazz, String mappingConstructorName, PaginatedCriteriaBuilder<?> criteriaBuilder);
+    
+    public <T> CriteriaBuilder<T> applyObjectBuilder(Class<T> clazz, String mappingConstructorName, CriteriaBuilder<?> criteriaBuilder);
 }

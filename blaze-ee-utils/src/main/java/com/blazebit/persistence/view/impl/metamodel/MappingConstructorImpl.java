@@ -16,11 +16,13 @@
 
 package com.blazebit.persistence.view.impl.metamodel;
 
+import com.blazebit.persistence.view.ViewConstructor;
 import com.blazebit.persistence.view.metamodel.MappingConstructor;
 import com.blazebit.persistence.view.metamodel.ParameterAttribute;
 import com.blazebit.persistence.view.metamodel.ViewType;
 import edu.emory.mathcs.backport.java.util.Collections;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,11 +32,13 @@ import java.util.List;
  */
 public class MappingConstructorImpl<X> implements MappingConstructor<X> {
     
+    private final String name;
     private final ViewType<X> declaringType;
     private final Constructor<X> javaConstructor;
     private final List<ParameterAttribute<X, ?>> parameters;
     
-    public MappingConstructorImpl(ViewType<X> viewType, Constructor<X> constructor) {
+    public MappingConstructorImpl(ViewType<X> viewType, String name, Constructor<X> constructor) {
+        this.name = name;
         this.declaringType = viewType;
         this.javaConstructor = constructor;
         
@@ -45,6 +49,21 @@ public class MappingConstructorImpl<X> implements MappingConstructor<X> {
         }
         
         this.parameters = Collections.unmodifiableList(parameters);
+    }
+    
+    public static String validate(ViewType<?> viewType, Constructor<?> c) {
+        ViewConstructor viewConstructor = c.getAnnotation(ViewConstructor.class);
+        
+        if (viewConstructor == null) {
+            return "init";
+        }
+        
+        return viewConstructor.value();
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override

@@ -16,13 +16,8 @@
 
 package com.blazebit.persistence.view;
 
-import com.blazebit.persistence.AbstractPersistenceTest;
-import com.blazebit.persistence.CriteriaBuilder;
-import com.blazebit.persistence.CriteriaProvider;
-import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.entity.Document;
 import com.blazebit.persistence.entity.Person;
-import static com.blazebit.persistence.view.AbstractEntityViewPersistenceTest.evmf;
 import com.blazebit.persistence.view.impl.EntityViewConfiguration;
 import com.blazebit.persistence.view.metamodel.MappingConstructor;
 import com.blazebit.persistence.view.metamodel.MethodAttribute;
@@ -32,10 +27,8 @@ import com.blazebit.persistence.view.model.DocumentView1;
 import com.blazebit.persistence.view.model.DocumentView2;
 import com.blazebit.persistence.view.model.IdHolderView;
 import com.blazebit.persistence.view.model.PersonView1;
-import java.util.List;
 import java.util.Set;
 import static org.junit.Assert.*;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -208,6 +201,8 @@ public class ViewMetamodelTest extends AbstractEntityViewPersistenceTest {
         ViewType<?> viewType = viewMetamodel.view(DocumentView2.class);
         Set<MappingConstructor<?>> constructors = (Set<MappingConstructor<?>>) viewType.getConstructors();
         assertEquals(1, constructors.size());
+        assertNotNull(viewType.getConstructor(long.class));
+        assertTrue(constructors.contains(viewType.getConstructor(long.class)));
     }
     
     @Test

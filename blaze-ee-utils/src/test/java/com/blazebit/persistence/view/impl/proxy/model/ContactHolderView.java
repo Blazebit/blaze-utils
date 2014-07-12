@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package com.blazebit.persistence.view.metamodel;
+package com.blazebit.persistence.view.impl.proxy.model;
 
-import java.lang.reflect.Constructor;
-import java.util.List;
+import com.blazebit.persistence.entity.Person;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  *
  * @author cpbec
  */
-public interface MappingConstructor<X> {
+interface ContactHolderView<T> extends Serializable {
     
-    public String getName();
-    
-    public ViewType<X> getDeclaringType();
-    
-    public Constructor<X> getJavaConstructor();
-    
-    public List<ParameterAttribute<X, ?>> getParameterAttributes();
-    
-    public ParameterAttribute<X, ?> getParameterAttribute(int index);
+    public Map<T, Person> getContacts();
+
+    public void setContacts(Map<T, Person> localized);
 }

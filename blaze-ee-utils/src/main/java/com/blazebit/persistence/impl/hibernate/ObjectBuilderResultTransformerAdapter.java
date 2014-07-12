@@ -14,24 +14,31 @@
  * limitations under the License.
  */
 
-package com.blazebit.persistence.view.metamodel;
+package com.blazebit.persistence.impl.hibernate;
 
-import java.lang.reflect.Constructor;
+import com.blazebit.persistence.ObjectBuilder;
 import java.util.List;
+import org.hibernate.transform.ResultTransformer;
 
 /**
  *
  * @author cpbec
  */
-public interface MappingConstructor<X> {
+public class ObjectBuilderResultTransformerAdapter implements ResultTransformer {
     
-    public String getName();
-    
-    public ViewType<X> getDeclaringType();
-    
-    public Constructor<X> getJavaConstructor();
-    
-    public List<ParameterAttribute<X, ?>> getParameterAttributes();
-    
-    public ParameterAttribute<X, ?> getParameterAttribute(int index);
+    private final ObjectBuilder<?> builder;
+
+    public ObjectBuilderResultTransformerAdapter(ObjectBuilder<?> builder) {
+        this.builder = builder;
+    }
+
+    @Override
+    public Object transformTuple(Object[] tuple, String[] aliases) {
+        return builder.build(tuple, aliases);
+    }
+
+    @Override
+    public List transformList(List list) {
+        return builder.buildList(list);
+    }
 }

@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package com.blazebit.persistence.view.metamodel;
+package com.blazebit.persistence.view.impl.proxy.model;
 
-import java.lang.reflect.Constructor;
-import java.util.List;
+import java.io.Serializable;
 
 /**
  *
  * @author cpbec
  */
-public interface MappingConstructor<X> {
+interface IdHolderView<T> extends Serializable {
     
-    public String getName();
+    public T getId();
     
-    public ViewType<X> getDeclaringType();
-    
-    public Constructor<X> getJavaConstructor();
-    
-    public List<ParameterAttribute<X, ?>> getParameterAttributes();
-    
-    public ParameterAttribute<X, ?> getParameterAttribute(int index);
+    public void setId(T id);
 }

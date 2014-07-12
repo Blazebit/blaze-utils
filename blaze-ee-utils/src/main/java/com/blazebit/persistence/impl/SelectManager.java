@@ -15,6 +15,9 @@
  */
 package com.blazebit.persistence.impl;
 
+import com.blazebit.persistence.impl.objectbuilder.ClassResultTransformer;
+import com.blazebit.persistence.impl.objectbuilder.ConstructorResultTransformer;
+import com.blazebit.persistence.impl.objectbuilder.TupleResultTransformer;
 import com.blazebit.persistence.CaseWhenBuilder;
 import com.blazebit.persistence.ObjectBuilder;
 import com.blazebit.persistence.QueryBuilder;
@@ -42,7 +45,7 @@ public class SelectManager<T> extends AbstractManager {
     private final List<SelectInfo> selectInfos = new ArrayList<SelectInfo>();
     private boolean distinct = false;
     private SelectObjectBuilderImpl<?> selectObjectBuilder;
-    private ResultTransformer selectObjectTransformer;
+    private ObjectBuilder<T> selectObjectTransformer;
     // Maps alias to SelectInfo
     private final Map<String, SelectInfo> selectAliasToInfoMap = new HashMap<String, SelectInfo>();
     // needed for tuple/alias matching
@@ -50,27 +53,27 @@ public class SelectManager<T> extends AbstractManager {
     private final Map<String, SelectInfo> selectAbsolutePathToInfoMap = new HashMap<String, SelectInfo>();
     private final SelectObjectBuilderEndedListenerImpl selectObjectBuilderEndedListener = new SelectObjectBuilderEndedListenerImpl();
 
-    public SelectManager(QueryGenerator queryGenerator, ParameterManager parameterManager) {
-        super(queryGenerator, parameterManager);
+    public SelectManager(QueryGenerator queryGenerator) {
+        super(queryGenerator);
     }
 
     void verifyBuilderEnded() {
         selectObjectBuilderEndedListener.verifyBuilderEnded();
     }
 
-    ResultTransformer getSelectObjectTransformer() {
+    ObjectBuilder<T> getSelectObjectTransformer() {
         return selectObjectTransformer;
     }
 
-    Map<String, SelectInfo> getSelectAbsolutePathToInfoMap() {
+    public Map<String, SelectInfo> getSelectAbsolutePathToInfoMap() {
         return selectAbsolutePathToInfoMap;
     }
 
-    Map<String, SelectInfo> getSelectAliasToInfoMap() {
+    public Map<String, SelectInfo> getSelectAliasToInfoMap() {
         return selectAliasToInfoMap;
     }
 
-    Map<String, Integer> getSelectAliasToPositionMap() {
+    public Map<String, Integer> getSelectAliasToPositionMap() {
         return selectAliasToPositionMap;
     }
     
@@ -122,9 +125,7 @@ public class SelectManager<T> extends AbstractManager {
             selectAliasToPositionMap.put(selectAlias, selectAliasToPositionMap.size());
         }
         selectInfos.add(selectInfo);
-        selectObjectTransformer = new TupleResultTransformer(this);
-        
-        registerParameterExpressions(expr);
+        selectObjectTransformer = (ObjectBuilder<T>) new TupleResultTransformer(this);
     }
 
 //    public U select(Class<? extends T> clazz) {
@@ -173,14 +174,18 @@ public class SelectManager<T> extends AbstractManager {
         return (SelectObjectBuilder) selectObjectBuilder;
     }
 
-    <Y> QueryBuilder<Y, ?> selectNew(ObjectBuilder<Y> builder) {
+    void selectNew(ObjectBuilder<?> builder) {
         if (selectObjectBuilder != null) {
             throw new IllegalStateException("Only one selectNew is allowed");
         }
         if (!selectInfos.isEmpty()) {
             throw new IllegalStateException("No mixture of select and selectNew is allowed");
         }
-        throw new UnsupportedOperationException();
+        for (String expression : builder.getExpressions()) {
+            SelectInfo selectInfo = new SelectInfo(ExpressionUtils.parse(expression), null);
+            selectInfos.add(selectInfo);
+        }
+        selectObjectTransformer = (ObjectBuilder<T>) builder;
     }
 
     void distinct() {

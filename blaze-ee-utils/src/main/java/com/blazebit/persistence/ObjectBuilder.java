@@ -15,11 +15,17 @@
  */
 package com.blazebit.persistence;
 
+import java.util.List;
+
 /**
  *
  * @author cpbec
  */
 public interface ObjectBuilder<T> {
     
-    public T build();
+    public String[] getExpressions();
+    
+    public T build(Object[] tuple, String[] aliases);
+    
+    public List<T> buildList(List<T> list);
 }

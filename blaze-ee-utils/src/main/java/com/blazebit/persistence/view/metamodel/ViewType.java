@@ -35,4 +35,10 @@ public interface ViewType<X> {
     public MethodAttribute<? super X, ?> getAttribute(String name);
     
     public Set<MappingConstructor<X>> getConstructors();
+    
+    public MappingConstructor<X> getConstructor(Class<?>... parameterTypes);
+    
+    public Set<String> getConstructorNames();
+    
+    public MappingConstructor<X> getConstructor(String name);
 }
