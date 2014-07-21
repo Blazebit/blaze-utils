@@ -79,7 +79,7 @@
 
 	<properties>
 		<version.blazecbav>0.2.0</version.blazecbav>
-		<version.deltaspike>0.5</version.deltaspike>
+		<version.deltaspike>1.0.1</version.deltaspike>
 		<version.freemarker>2.3.19</version.freemarker>
 		<version.junit>4.11</version.junit>
 

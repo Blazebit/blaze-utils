@@ -32,6 +32,7 @@ import java.util.TreeSet;
  * 
  * @author Christian Beikov
  * @since 0.1.2
+ * TODO: Maybe compare to org.springframework.core.GenericTypeResolver
  */
 public final class ReflectionUtils {
 
