@@ -49,19 +49,21 @@
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
+        
         <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <!-- Use the old version for the bug workaround test -->
-            <!-- <version>4.2.4.Final</version>  -->
-            <version>4.2.6.Final</version>
+            <groupId>org.apache.deltaspike.cdictrl</groupId>
+            <artifactId>deltaspike-cdictrl-api</artifactId>
             <scope>test</scope>
         </dependency>
-        
         <dependency>
             <groupId>org.apache.openejb</groupId>
             <artifactId>openejb-core</artifactId>
+            <!--<version>4.7.1-SNAPSHOT</version>-->
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.deltaspike.cdictrl</groupId>
+            <artifactId>deltaspike-cdictrl-openejb</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -84,7 +86,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.9</version>
                 <executions>
                   <execution>
                     <id>add-resource</id>
@@ -133,19 +134,6 @@
                                 <processor>com.blazebit.apt.service.ServiceProviderAnnotationProcessor</processor>
                             </processors>
                         </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.antlr</groupId>
-                <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.2.2</version>
-                <executions>
-                    <execution>
-                        <!--<phase>generate-sources</phase>-->
-                        <goals>
-                            <goal>antlr4</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>

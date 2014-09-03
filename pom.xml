@@ -188,6 +188,18 @@
 				<version>${version.openejb}</version>
 				<scope>test</scope>
 			</dependency>
+                        <dependency>
+                            <groupId>org.apache.deltaspike.cdictrl</groupId>
+                            <artifactId>deltaspike-cdictrl-api</artifactId>
+                            <version>${version.deltaspike}</version>
+                            <scope>test</scope>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.apache.deltaspike.cdictrl</groupId>
+                            <artifactId>deltaspike-cdictrl-openejb</artifactId>
+                            <version>${version.deltaspike}</version>
+                            <scope>test</scope>
+                        </dependency>
 		</dependencies>
 	</dependencyManagement>
 
