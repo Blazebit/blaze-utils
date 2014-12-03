@@ -13,6 +13,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
@@ -183,7 +184,17 @@ public class CatchHandlerInterceptor implements Serializable {
                         // Christian Beikov 29.07.2013: Traverse whole hierarchy
                         // instead of retrieving the annotation directly from
                         // the class object.
-                        Method m = ReflectionUtils.getMethod(clazz, Cleanup.class);
+                        List<Method> methods = ReflectionUtils.getMethods(target.getClass(), Cleanup.class);
+                        Method m = null;
+                        
+                        for (Method candidate : methods) {
+                            Cleanup c = AnnotationUtils.findAnnotation(candidate, Cleanup.class);
+                            
+                            if (cleanupClazz.equals(c.value())) {
+                                m = candidate;
+                                break;
+                            }
+                        }
                         
                         if(m != null) {
                             final Class<?>[] parameterTypes = m.getParameterTypes();

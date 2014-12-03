@@ -12,6 +12,7 @@ import com.blazebit.reflection.ReflectionUtils;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
@@ -112,7 +113,17 @@ public class CleanupHandlerInterceptor implements Serializable {
                         // Christian Beikov 29.07.2013: Traverse whole hierarchy
                         // instead of retrieving the annotation directly from
                         // the class object.
-                        Method m = ReflectionUtils.getMethod(target.getClass(), Cleanup.class);
+                        List<Method> methods = ReflectionUtils.getMethods(target.getClass(), Cleanup.class);
+                        Method m = null;
+                        
+                        for (Method candidate : methods) {
+                            Cleanup c = AnnotationUtils.findAnnotation(candidate, Cleanup.class);
+                            
+                            if (cleanupClazz.equals(c.value())) {
+                                m = candidate;
+                                break;
+                            }
+                        }
                         
                         if(m != null) {
                             final Class<?>[] parameterTypes = m.getParameterTypes();
