@@ -80,19 +80,6 @@ public class ExcludeIfExistsExtension implements Extension {
         beans.put(processBean.getBean(), processBean.getAnnotated());
     }
 
-    private boolean hasAnyBean(Type[] types) {
-        for (Map.Entry<Bean<?>, Annotated> entry : beans.entrySet()) {
-            Bean<?> bean = entry.getKey();
-            for (Type t : types) {
-                if (bean.getTypes().contains(t)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     private boolean hasBean(Type[] types, Annotation[] qualifiers) {
         BEAN_OUTER: for (Map.Entry<Bean<?>, Annotated> entry : beans.entrySet()) {
             Bean<?> bean = entry.getKey();
@@ -249,31 +236,22 @@ public class ExcludeIfExistsExtension implements Extension {
         
         boolean isDependent = beanBuilder.getScope() == Dependent.class;
         
-        if (isDependent || !isOwbBug) {
-            beanBuilder.beanClass(annotatedMember.getJavaMember().getDeclaringClass());
+        Class<?> declaringClass = annotatedMember.getDeclaringType().getJavaClass();
+
+        if (annotatedMember instanceof AnnotatedField<?>) {
+            AnnotatedField<Object> annotatedField = (AnnotatedField<Object>) annotatedMember;
+            Field field = annotatedField.getJavaMember();
+            Class<?> rawType = ReflectionUtils.getResolvedFieldType(declaringClass, field);
+            beanBuilder.beanClass(rawType);
+            beanBuilder.beanLifecycle(new ProducerFieldCreationalContext(bean, annotatedField, beanBuilder.getBeanManager()));
         } else {
-            // This is a workaround for OWB
-            Class<?> declaringClass = annotatedMember.getDeclaringType().getJavaClass();
-
-            if (annotatedMember instanceof AnnotatedField<?>) {
-                Field field = ((AnnotatedField<?>) annotatedMember).getJavaMember();
-                Class<?> rawType = ReflectionUtils.getResolvedFieldType(declaringClass, field);
-                beanBuilder.beanClass(rawType);
-            } else {
-                Method method = ((AnnotatedMethod<?>) annotatedMember).getJavaMember();
-                Class<?> rawType = ReflectionUtils.getResolvedMethodReturnType(declaringClass, method);
-                beanBuilder.beanClass(rawType);
-            }
-        }
-
-        if (annotatedMember instanceof AnnotatedMethod<?>) {
-            AnnotatedMethod<Object> method = (AnnotatedMethod<Object>) annotatedMember;
-            ProducerMethodCreationalContext ctx = new ProducerMethodCreationalContext(bean, method, beanBuilder.getBeanManager(), isDependent && isOwbBug);
+            AnnotatedMethod<Object> annotatedMethod = (AnnotatedMethod<Object>) annotatedMember;
+            Method method = annotatedMethod.getJavaMember();
+            Class<?> rawType = ReflectionUtils.getResolvedMethodReturnType(declaringClass, method);
+            beanBuilder.beanClass(rawType);
+            ProducerMethodCreationalContext ctx = new ProducerMethodCreationalContext(bean, annotatedMethod, beanBuilder.getBeanManager(), isDependent && isOwbBug);
             beanBuilder.beanLifecycle(ctx);
             beanBuilder.injectionPoints(ctx.getInjectionPoints());
-        } else {
-            AnnotatedField<Object> field = (AnnotatedField<Object>) annotatedMember;
-            beanBuilder.beanLifecycle(new ProducerFieldCreationalContext(bean, field, beanBuilder.getBeanManager()));
         }
 
         beanBuilder.types(annotatedMember.getTypeClosure());

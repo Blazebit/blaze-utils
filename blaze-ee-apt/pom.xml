@@ -32,6 +32,10 @@
 			<artifactId>blaze-ee-utils</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>blaze-template-utils</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.openejb</groupId>
 			<artifactId>javaee-api</artifactId>
 			<scope>provided</scope>
@@ -40,6 +44,12 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.testing.compile</groupId>
+			<artifactId>compile-testing</artifactId>
+			<version>0.5</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
