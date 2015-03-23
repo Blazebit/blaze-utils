@@ -171,21 +171,21 @@ public class ReflectionUtilsTest {
 				GenericClassA.class, "field").getGenericType();
 		concreteType = ReflectionUtils.resolveTypeVariable(GenericClassA.class,
 				typeVariable);
-		assertNull(concreteType);
+		assertEquals(Object.class, concreteType);
 
 		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
 				.getField(GenericClassA.class, "fieldCollection")
 				.getGenericType()).getActualTypeArguments()[0];
 		concreteType = ReflectionUtils.resolveTypeVariable(GenericClassA.class,
 				typeVariable);
-		assertNull(concreteType);
+		assertEquals(Object.class, concreteType);
 
 		typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
 				.getField(GenericClassA.class, "fieldMap").getGenericType())
 				.getActualTypeArguments()[0];
 		concreteType = ReflectionUtils.resolveTypeVariable(GenericClassA.class,
 				typeVariable);
-		assertNull(concreteType);
+		assertEquals(Object.class, concreteType);
 
 		// Resolve method return types
 

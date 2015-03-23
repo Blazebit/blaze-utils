@@ -376,11 +376,21 @@ public final class ReflectionUtils {
                         }
 		}
 
-		if (!(resolvedType instanceof Class<?>)) {
-			return null;
-		}
-
-		return (Class<?>) resolvedType;
+                if (resolvedType instanceof Class<?>) {
+                    return (Class<?>) resolvedType;
+                } else if (resolvedType instanceof TypeVariable<?>) {
+                    Type boundType = ((TypeVariable<?>) resolvedType).getBounds()[0];
+                    
+                    if (boundType instanceof Class<?>) {
+                        return (Class<?>) boundType;
+                    } else if (boundType instanceof ParameterizedType) {
+                        return (Class<?>) ((ParameterizedType) boundType).getRawType();
+                    }
+                } else if (resolvedType instanceof ParameterizedType) {
+                    return (Class<?>) ((ParameterizedType) resolvedType).getRawType();
+                }
+		
+                throw new IllegalArgumentException("Could not resolve the type variable '" + typeVariable + "' for the concrete class " + concreteClass.getName() + ". The resolved type is unknown: " + resolvedType);
 	}
 
 	/**
