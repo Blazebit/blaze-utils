@@ -88,6 +88,7 @@
 
 		<!-- Plugin versions -->
 		<version.processor.plugin>2.2.1</version.processor.plugin>
+        <version.release.plugin>2.5.1</version.release.plugin>
 	</properties>
 
 	<repositories>
