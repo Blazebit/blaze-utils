@@ -77,8 +77,6 @@
             <version>1.4.178</version>
             <scope>test</scope>
         </dependency>
-            
-        
     </dependencies>
     <build>
         <plugins>
@@ -87,17 +85,15 @@
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
                   <execution>
-                    <id>add-resource</id>
-                    <phase>generate-resources</phase>
+                    <id>add-source</id>
+                    <phase>generate-sources</phase>
                     <goals>
-                      <goal>add-resource</goal>
+                      <goal>add-source</goal>
                     </goals>
                     <configuration>
-                      <resources>
-                          <resource>
-                              <directory>src/generated/resources</directory>
-                          </resource>
-                      </resources>
+                      <sources>
+                          <source>target/generated/java</source>
+                      </sources>
                     </configuration>
                   </execution>
                 </executions>
@@ -113,23 +109,10 @@
                         </goals>
                         <phase>generate-sources</phase>
                         <configuration>
-                            <outputDirectory>src/generated/java</outputDirectory>
+                            <outputDirectory>target/generated/java</outputDirectory>
                             <processors>
                                 <!-- list of processors to use -->
                                 <processor>com.blazebit.apt.validation.ConstraintBasedAnnotationProcessor</processor>
-                            </processors>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>process-resouces</id>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <outputDirectory>src/generated/resources</outputDirectory>
-                            <processors>
-                                <!-- list of processors to use -->
                                 <processor>com.blazebit.apt.service.ServiceProviderAnnotationProcessor</processor>
                             </processors>
                         </configuration>
