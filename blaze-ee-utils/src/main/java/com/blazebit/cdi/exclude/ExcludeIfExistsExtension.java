@@ -35,7 +35,8 @@ import com.blazebit.cdi.exclude.annotation.ExcludeIfExists;
 import com.blazebit.reflection.ReflectionUtils;
 import java.lang.reflect.Field;
 
-@ServiceProvider(Extension.class)
+// Deactivate for now
+//@ServiceProvider(Extension.class)
 public class ExcludeIfExistsExtension implements Extension {
 
     private final Map<AnnotatedType<Object>, ExcludeIfExists> possibleIncludes = new HashMap<AnnotatedType<Object>, ExcludeIfExists>();
