@@ -238,9 +238,11 @@ public final class ReflectionUtils {
 			if (argumentTypes[i] instanceof TypeVariable<?>) {
 				resolvedClasses[i] = resolveTypeVariable(concreteClass,
 						(TypeVariable<?>) argumentTypes[i]);
+			} else if (argumentTypes[i] instanceof ParameterizedType) {
+				resolvedClasses[i] = (Class<?>) ((ParameterizedType) argumentTypes[i]).getRawType();
 			} else {
-				// We assume here that only class types and type variables are
-				// possible argument types for the parameterizedType
+				// We assume here that only class types, type variables and parameterized types are
+				// possible as argument types for the parameterized type
 				resolvedClasses[i] = (Class<?>) argumentTypes[i];
 			}
 		}
@@ -734,6 +736,8 @@ public final class ReflectionUtils {
 			if (genericExceptionTypes[i] instanceof TypeVariable<?>) {
 				exceptionTypes[i] = resolveTypeVariable(clazz,
 						(TypeVariable<?>) genericExceptionTypes[i]);
+			} else if (genericExceptionTypes[i] instanceof ParameterizedType) {
+				exceptionTypes[i] = (Class<?>) ((ParameterizedType) genericExceptionTypes[i]).getRawType();
 			} else {
 				exceptionTypes[i] = (Class<?>) genericExceptionTypes[i];
 			}
