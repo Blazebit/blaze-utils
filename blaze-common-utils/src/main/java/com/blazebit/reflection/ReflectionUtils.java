@@ -4,8 +4,10 @@
 package com.blazebit.reflection;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -240,6 +242,19 @@ public final class ReflectionUtils {
 						(TypeVariable<?>) argumentTypes[i]);
 			} else if (argumentTypes[i] instanceof ParameterizedType) {
 				resolvedClasses[i] = (Class<?>) ((ParameterizedType) argumentTypes[i]).getRawType();
+			} else if (argumentTypes[i] instanceof GenericArrayType) {
+                                Type componentType = ((GenericArrayType) argumentTypes[i]).getGenericComponentType();
+                                Class<?> componentClass;
+                                if (componentType instanceof Class) {
+                                    componentClass = (Class<?>) componentType;
+                                } else if (componentType instanceof ParameterizedType) {
+                                    componentClass = (Class<?>) ((ParameterizedType) componentType).getRawType();
+                                } else {
+                                    throw new IllegalArgumentException("Unsupported array component type: " + componentType);
+                                }
+                                
+                                Object o = Array.newInstance((Class<?>) componentClass, 0);
+                                resolvedClasses[i] = (Class<?>) o.getClass();
 			} else {
 				// We assume here that only class types, type variables and parameterized types are
 				// possible as argument types for the parameterized type
