@@ -128,11 +128,15 @@ public class CleanupHandlerInterceptor implements Serializable {
                         if(m != null) {
                             final Class<?>[] parameterTypes = m.getParameterTypes();
                             if (parameterTypes.length == 1) {
-                                if (ReflectionUtils.isSubtype(exception.getClass(), parameterTypes[0])) {
-                                    m.invoke(target, exception);
-                                } else {
-                                    throw new IllegalArgumentException("Cleanup method with name " + cleanupClazz.getName() + " requires a parameter that is not a subtype of the exception class " + exception.getClass().getName());
-                                }
+                            	// Need to check for null exception
+                            	if(exception != null) {
+                            		// Check if exception type fits formal parameter type
+	                                if (!ReflectionUtils.isSubtype(exception.getClass(), parameterTypes[0])) {
+	                                    throw new IllegalArgumentException("Cleanup method with name " + cleanupClazz.getName() + " requires a parameter that is not a subtype of the exception class " + exception.getClass().getName());
+	                                } 	                                
+                            	}
+                            	// Invoked either with set or null exception
+                    		m.invoke(target, exception);
                             } else {
                                 m.invoke(target);
                             }
