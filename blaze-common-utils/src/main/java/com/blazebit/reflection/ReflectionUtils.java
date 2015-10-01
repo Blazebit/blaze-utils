@@ -14,6 +14,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -237,32 +238,43 @@ public final class ReflectionUtils {
 		Class<?>[] resolvedClasses = new Class<?>[argumentTypes.length];
 
 		for (int i = 0; i < argumentTypes.length; i++) {
-			if (argumentTypes[i] instanceof TypeVariable<?>) {
-				resolvedClasses[i] = resolveTypeVariable(concreteClass,
-						(TypeVariable<?>) argumentTypes[i]);
-			} else if (argumentTypes[i] instanceof ParameterizedType) {
-				resolvedClasses[i] = (Class<?>) ((ParameterizedType) argumentTypes[i]).getRawType();
-			} else if (argumentTypes[i] instanceof GenericArrayType) {
-                                Type componentType = ((GenericArrayType) argumentTypes[i]).getGenericComponentType();
-                                Class<?> componentClass;
-                                if (componentType instanceof Class) {
-                                    componentClass = (Class<?>) componentType;
-                                } else if (componentType instanceof ParameterizedType) {
-                                    componentClass = (Class<?>) ((ParameterizedType) componentType).getRawType();
-                                } else {
-                                    throw new IllegalArgumentException("Unsupported array component type: " + componentType);
-                                }
-                                
-                                Object o = Array.newInstance((Class<?>) componentClass, 0);
-                                resolvedClasses[i] = (Class<?>) o.getClass();
-			} else {
-				// We assume here that only class types, type variables and parameterized types are
-				// possible as argument types for the parameterized type
-				resolvedClasses[i] = (Class<?>) argumentTypes[i];
-			}
+			resolvedClasses[i] = resolveType(concreteClass, argumentTypes[i]);
 		}
 
 		return resolvedClasses;
+	}
+	
+	private static Class<?> resolveType(Class<?> concreteClass, Type type) {
+		if (type instanceof TypeVariable<?>) {
+			return resolveTypeVariable(concreteClass, (TypeVariable<?>) type);
+		} else if (type instanceof ParameterizedType) {
+			return (Class<?>) ((ParameterizedType) type).getRawType();
+		} else if (type instanceof GenericArrayType) {
+            Type componentType = ((GenericArrayType) type).getGenericComponentType();
+            Class<?> componentClass;
+            if (componentType instanceof Class) {
+                componentClass = (Class<?>) componentType;
+            } else if (componentType instanceof ParameterizedType) {
+                componentClass = (Class<?>) ((ParameterizedType) componentType).getRawType();
+            } else {
+                throw new IllegalArgumentException("Unsupported array component type: " + componentType);
+            }
+            
+            Object o = Array.newInstance((Class<?>) componentClass, 0);
+            return (Class<?>) o.getClass();
+		} else if (type instanceof WildcardType) {
+			WildcardType wildcardType = ((WildcardType) type);
+			
+			if (wildcardType.getLowerBounds().length > 0) {
+				return resolveType(concreteClass, wildcardType.getLowerBounds()[0]);
+			} else {
+				return resolveType(concreteClass, wildcardType.getUpperBounds()[0]);
+			}
+		} else {
+			// We assume here that only class types, type variables and parameterized types are
+			// possible as argument types for the parameterized type
+			return (Class<?>) type;
+		}
 	}
         
         private static Class<?> getClassThatContainsTypeVariable(TypeVariable<?> typeVariable) {
@@ -387,7 +399,16 @@ public final class ReflectionUtils {
                                     // type
                                     resolvedType = ((ParameterizedType) resolvedType).getRawType();
                                 break;
-                            } else if (resolvedType instanceof Class<?>) {
+                            } else if (resolvedType instanceof WildcardType) {
+                    			WildcardType wildcardType = ((WildcardType) resolvedType);
+                    			
+                    			if (wildcardType.getLowerBounds().length > 0) {
+                    				resolvedType = resolveType(concreteClass, wildcardType.getLowerBounds()[0]);
+                    			} else {
+                    				resolvedType = resolveType(concreteClass, wildcardType.getUpperBounds()[0]);
+                    			}
+                                break;
+                    		} else if (resolvedType instanceof Class<?>) {
                                 break;
                             }
                         }
@@ -405,7 +426,15 @@ public final class ReflectionUtils {
                     }
                 } else if (resolvedType instanceof ParameterizedType) {
                     return (Class<?>) ((ParameterizedType) resolvedType).getRawType();
-                }
+                } else if (resolvedType instanceof WildcardType) {
+        			WildcardType wildcardType = ((WildcardType) resolvedType);
+        			
+        			if (wildcardType.getLowerBounds().length > 0) {
+        				return resolveType(concreteClass, wildcardType.getLowerBounds()[0]);
+        			} else {
+        				return resolveType(concreteClass, wildcardType.getUpperBounds()[0]);
+        			}
+        		}
 		
                 throw new IllegalArgumentException("Could not resolve the type variable '" + typeVariable + "' for the concrete class " + concreteClass.getName() + ". The resolved type is unknown: " + resolvedType);
 	}
