@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeSet;
 
 /**
@@ -39,29 +38,46 @@ import java.util.TreeSet;
  */
 public final class ReflectionUtils {
 
-	private static final Map<String, Class<?>> primitiveClasses = new HashMap<String, Class<?>>();
-	private static final Map<Class<?>, Class<?>> primitiveToObjectClasses = new HashMap<Class<?>, Class<?>>();
+	private static final Map<String, Class<?>> PRIMITIVE_NAME_TO_TYPE;
+	private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER;
+	private static final Map<Class<?>, Class<?>> WRAPPER_TO_PRIMITIVE;
 
 	static {
-		primitiveClasses.put("int", Integer.TYPE);
-		primitiveClasses.put("long", Long.TYPE);
-		primitiveClasses.put("double", Double.TYPE);
-		primitiveClasses.put("float", Float.TYPE);
-		primitiveClasses.put("boolean", Boolean.TYPE);
-		primitiveClasses.put("char", Character.TYPE);
-		primitiveClasses.put("byte", Byte.TYPE);
-		primitiveClasses.put("void", Void.TYPE);
-		primitiveClasses.put("short", Short.TYPE);
+                Map<String, Class<?>> primitiveNameToType = new HashMap<String, Class<?>>();
+		primitiveNameToType.put("int", Integer.TYPE);
+		primitiveNameToType.put("long", Long.TYPE);
+		primitiveNameToType.put("double", Double.TYPE);
+		primitiveNameToType.put("float", Float.TYPE);
+		primitiveNameToType.put("boolean", Boolean.TYPE);
+		primitiveNameToType.put("char", Character.TYPE);
+		primitiveNameToType.put("byte", Byte.TYPE);
+		primitiveNameToType.put("void", Void.TYPE);
+		primitiveNameToType.put("short", Short.TYPE);
+                PRIMITIVE_NAME_TO_TYPE = Collections.unmodifiableMap(primitiveNameToType);
 
-		primitiveToObjectClasses.put(int.class, Integer.class);
-		primitiveToObjectClasses.put(long.class, Long.class);
-		primitiveToObjectClasses.put(double.class, Double.class);
-		primitiveToObjectClasses.put(float.class, Float.class);
-		primitiveToObjectClasses.put(boolean.class, Boolean.class);
-		primitiveToObjectClasses.put(char.class, Character.class);
-		primitiveToObjectClasses.put(byte.class, Byte.class);
-		primitiveToObjectClasses.put(void.class, Void.class);
-		primitiveToObjectClasses.put(short.class, Short.class);
+                Map<Class<?>, Class<?>> primitiveToWrapper = new HashMap<Class<?>, Class<?>>();
+		primitiveToWrapper.put(int.class, Integer.class);
+		primitiveToWrapper.put(long.class, Long.class);
+		primitiveToWrapper.put(double.class, Double.class);
+		primitiveToWrapper.put(float.class, Float.class);
+		primitiveToWrapper.put(boolean.class, Boolean.class);
+		primitiveToWrapper.put(char.class, Character.class);
+		primitiveToWrapper.put(byte.class, Byte.class);
+		primitiveToWrapper.put(void.class, Void.class);
+		primitiveToWrapper.put(short.class, Short.class);
+                PRIMITIVE_TO_WRAPPER = Collections.unmodifiableMap(primitiveToWrapper);
+
+                Map<Class<?>, Class<?>> wrapperToPrimitive = new HashMap<Class<?>, Class<?>>();
+		wrapperToPrimitive.put(Integer.class, int.class);
+		wrapperToPrimitive.put(Long.class, long.class);
+		wrapperToPrimitive.put(Double.class, double.class);
+		wrapperToPrimitive.put(Float.class, float.class);
+		wrapperToPrimitive.put(Boolean.class, boolean.class);
+		wrapperToPrimitive.put(Character.class, char.class);
+		wrapperToPrimitive.put(Byte.class, byte.class);
+		wrapperToPrimitive.put(Void.class, void.class);
+		wrapperToPrimitive.put(Short.class, short.class);
+                WRAPPER_TO_PRIMITIVE = Collections.unmodifiableMap(wrapperToPrimitive);
 	}
 
 	private ReflectionUtils() {
@@ -87,7 +103,7 @@ public final class ReflectionUtils {
 	 */
 	public static Class<?> getClass(String className)
 			throws ClassNotFoundException {
-		Class<?> clazz = primitiveClasses.get(className);
+		Class<?> clazz = PRIMITIVE_NAME_TO_TYPE.get(className);
 
 		if (clazz == null) {
 			clazz = Class.forName(className);
@@ -96,13 +112,39 @@ public final class ReflectionUtils {
 		return clazz;
 	}
 
+        /**
+         * Returns the wrapper class of the given primitive class or the given class.
+         * 
+         * @param primitive The primitive class
+         * @return The wrapper class or the given class
+         */
 	public static Class<?> getObjectClassOfPrimitve(Class<?> primitive) {
-		if (primitiveToObjectClasses.containsKey(primitive)) {
-			return primitiveToObjectClasses.get(primitive);
+                Class<?> objectClass = PRIMITIVE_TO_WRAPPER.get(primitive);
+		if (objectClass != null) {
+			return objectClass;
 		}
 
 		return primitive;
+	}
 
+        /**
+         * Returns the wrapper class of the given primitive class or null.
+         * 
+         * @param primitive The primitive class
+         * @return The wrapper class or null
+         */
+	public static Class<?> getWrapperClassOfPrimitve(Class<?> primitive) {
+                return PRIMITIVE_TO_WRAPPER.get(primitive);
+	}
+
+        /**
+         * Returns the primitive class of the given wrapper class or null.
+         * 
+         * @param wrapperClass The wrapper class
+         * @return The primitive class or null
+         */
+	public static Class<?> getPrimitiveClassOfWrapper(Class<?> wrapperClass) {
+                return WRAPPER_TO_PRIMITIVE.get(wrapperClass);
 	}
 
 	/**
@@ -332,14 +374,14 @@ public final class ReflectionUtils {
 		}
 
                 Set<Class<?>> superTypes = getSuperTypes(concreteClass, classThatContainsTypeVariable);
-		Stack<Class<?>> classStack = new Stack<Class<?>>();
+		List<Class<?>> classStack = new ArrayList<Class<?>>();
 		Type resolvedType = typeVariable;
                 
                 // The class that contains the type variable mustn't be considered
                 superTypes.remove(classThatContainsTypeVariable);
                 // Build a stack of the class hierarchy to be able to resolve the type
                 for (Class<?> superType : superTypes) {
-                    classStack.push(superType);
+                    classStack.add(superType);
                 }
 
 		// Resolve every type variable in every class level
@@ -351,7 +393,7 @@ public final class ReflectionUtils {
 			// we reach concreteClass. Resolve the current type variable
 			// to every level of the hierarchy and stop as soon as the
 			// type is instance of java.lang.Class
-			Class<?> classToInspect = classStack.pop();
+			Class<?> classToInspect = classStack.remove(classStack.size() - 1);
                         Type[] genericInterfaces = classToInspect.getGenericInterfaces();
                         List<Type> typesToInspect = new ArrayList<Type>(genericInterfaces.length + 1);
                         typesToInspect.add(classToInspect.getGenericSuperclass());
