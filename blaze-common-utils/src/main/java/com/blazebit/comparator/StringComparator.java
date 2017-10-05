@@ -44,8 +44,7 @@ public class StringComparator extends BaseComparator<Object> {
     /**
      * Sets the default Locale
      *
-     * @see
-     * PropertyPathStringComparator#PropertyPathStringComparator(java.util.Locale,
+     * @see PropertyPathStringComparator#PropertyPathStringComparator(java.util.Locale,
      * java.lang.String)
      */
     public StringComparator() {

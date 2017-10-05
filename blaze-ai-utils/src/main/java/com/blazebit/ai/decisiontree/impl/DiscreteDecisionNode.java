@@ -1,20 +1,10 @@
 package com.blazebit.ai.decisiontree.impl;
 
-import com.blazebit.ai.decisiontree.Attribute;
-import com.blazebit.ai.decisiontree.AttributeValue;
-import com.blazebit.ai.decisiontree.DecisionNode;
-import com.blazebit.ai.decisiontree.DecisionNodeFactory;
-import com.blazebit.ai.decisiontree.DiscreteAttribute;
-import com.blazebit.ai.decisiontree.Example;
-import com.blazebit.ai.decisiontree.Item;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.blazebit.ai.decisiontree.*;
+
+import java.util.*;
 
 /**
- *
  * @author Christian Beikov
  */
 public class DiscreteDecisionNode<T> implements DecisionNode<T> {
@@ -33,11 +23,11 @@ public class DiscreteDecisionNode<T> implements DecisionNode<T> {
             final AttributeValue attributeValue = example.getValues().get(attribute);
             Set<Example<T>> set = exampleMap.get(attributeValue);
 
-            if(set == null){
+            if (set == null) {
                 set = new HashSet<Example<T>>();
                 exampleMap.put(attributeValue, set);
             }
-            
+
             set.add(example);
         }
 
@@ -47,7 +37,7 @@ public class DiscreteDecisionNode<T> implements DecisionNode<T> {
         for (final Map.Entry<AttributeValue, Set<Example<T>>> entry : exampleMap.entrySet()) {
             localChildren.put(entry.getKey(), decisionNodeFactory.createNode(attribute, entry.getValue()));
         }
-        
+
         this.children = localChildren;
     }
 
@@ -90,10 +80,10 @@ public class DiscreteDecisionNode<T> implements DecisionNode<T> {
 
             for (final DecisionNode<T> node : children.values()) {
                 final T tempResult = node.applySingle(item);
-                
-                if(result == null){
+
+                if (result == null) {
                     result = tempResult;
-                }else if(tempResult != null){
+                } else if (tempResult != null) {
                     throw new IllegalArgumentException("Ambigious result for the given item!");
                 }
             }

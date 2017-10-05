@@ -3,12 +3,12 @@ package com.blazebit.ai.decisiontree.impl;
 import com.blazebit.ai.decisiontree.Attribute;
 import com.blazebit.ai.decisiontree.AttributeValue;
 import com.blazebit.ai.decisiontree.Item;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
  * @author Christian Beikov
  */
 public class SimpleItem implements Item {

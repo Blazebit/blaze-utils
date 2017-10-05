@@ -21,7 +21,7 @@ public class GenericComparator<T> extends BaseComparator<T> {
      * occur.
      *
      * @param propertyPath the path to the memeber which shall be compared.
-     * E.g.: object.valueHolder.value
+     *                     E.g.: object.valueHolder.value
      */
     public GenericComparator(final String propertyPath) {
         super();

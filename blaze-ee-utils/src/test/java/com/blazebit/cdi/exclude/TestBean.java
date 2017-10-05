@@ -20,21 +20,20 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 /**
- *
  * @author Christian Beikov
  */
 @ApplicationScoped
 public class TestBean {
-    
+
     @Inject
     ExcludeInterface1 excludeInterface1;
-    
+
     @Inject
     ExcludeInterface2 excludeInterface2;
-    
+
     @Inject
     StringHolder disposableObject;
-    
+
     @Inject
     Integer integer;
 

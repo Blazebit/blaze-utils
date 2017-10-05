@@ -1,8 +1,7 @@
 package com.blazebit.message.apt;
 
-import java.util.Collection;
-
 import javax.lang.model.element.TypeElement;
+import java.util.Collection;
 
 
 public class DefaultInterfaceInfo<T extends InterfaceMethodInfo> implements InterfaceInfo<T> {
@@ -14,7 +13,7 @@ public class DefaultInterfaceInfo<T extends InterfaceMethodInfo> implements Inte
     private final String absolutePath;
     private final long lastModified;
     private final Collection<T> interfaceMethodInfos;
-    
+
     public DefaultInterfaceInfo(TypeElement element, String qualifiedName, String packageName, String simpleName, String absolutePath, long lastModified, Collection<T> interfaceMethodInfos) {
         this.element = element;
         this.qualifiedName = qualifiedName;

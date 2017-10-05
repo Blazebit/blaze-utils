@@ -3,23 +3,22 @@ package com.blazebit.ai.decisiontree.impl;
 import com.blazebit.ai.decisiontree.AttributeValue;
 
 /**
- *
  * @author Christian Beikov
  */
-public class SimpleAttributeValue implements AttributeValue{
+public class SimpleAttributeValue implements AttributeValue {
     private final Object value;
     private transient int hashCode = -1;
-    
-    public SimpleAttributeValue(Object value){
+
+    public SimpleAttributeValue(Object value) {
         this.value = value;
     }
 
     @Override
     public int hashCode() {
-        if(hashCode < 0){
+        if (hashCode < 0) {
             hashCode = 89 * 3 + (this.value != null ? this.value.hashCode() : 0);
         }
-        
+
         return hashCode;
     }
 
@@ -39,9 +38,9 @@ public class SimpleAttributeValue implements AttributeValue{
         }
         return true;
     }
-    
+
     @Override
-    public Object getValue(){
+    public Object getValue() {
         return value;
     }
 

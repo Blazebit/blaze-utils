@@ -10,84 +10,83 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
 /**
- * 
  * @author Christian Beikov
  */
 public class MethodParameter {
 
-	private Constructor<?> constructor;
-	private Method method;
-	private int index;
+    private Constructor<?> constructor;
+    private Method method;
+    private int index;
 
-	MethodParameter(Method method, int index) {
-		if (method == null) {
-			throw new NullPointerException("Method must not be null");
-		}
+    MethodParameter(Method method, int index) {
+        if (method == null) {
+            throw new NullPointerException("Method must not be null");
+        }
 
-		this.method = method;
-		this.index = index;
-	}
+        this.method = method;
+        this.index = index;
+    }
 
-	MethodParameter(Constructor<?> constructor, int index) {
-		if (constructor == null) {
-			throw new NullPointerException("Method must not be null");
-		}
+    MethodParameter(Constructor<?> constructor, int index) {
+        if (constructor == null) {
+            throw new NullPointerException("Method must not be null");
+        }
 
-		this.constructor = constructor;
-		this.index = index;
-	}
+        this.constructor = constructor;
+        this.index = index;
+    }
 
-	public Constructor<?> getConstructor() {
-		return constructor;
-	}
+    public Constructor<?> getConstructor() {
+        return constructor;
+    }
 
-	public int getIndex() {
-		return index;
-	}
+    public int getIndex() {
+        return index;
+    }
 
-	public Class<?> getType() {
-		return method != null ? method.getParameterTypes()[index] : constructor
-				.getParameterTypes()[index];
-	}
+    public Class<?> getType() {
+        return method != null ? method.getParameterTypes()[index] : constructor
+                .getParameterTypes()[index];
+    }
 
-	public Class<?> getResolvedType(Class<?> concreteClass) {
-		Type t = method != null ? method.getGenericParameterTypes()[index]
-				: constructor.getGenericParameterTypes()[index];
+    public Class<?> getResolvedType(Class<?> concreteClass) {
+        Type t = method != null ? method.getGenericParameterTypes()[index]
+                : constructor.getGenericParameterTypes()[index];
 
-		if (t instanceof TypeVariable<?>) {
-			return ReflectionUtils.resolveTypeVariable(concreteClass,
-					(TypeVariable<?>) t);
-		}
+        if (t instanceof TypeVariable<?>) {
+            return ReflectionUtils.resolveTypeVariable(concreteClass,
+                    (TypeVariable<?>) t);
+        }
 
-		return getType();
-	}
+        return getType();
+    }
 
-	public Class<?>[] getResolvedTypeParameters(Class<?> concreteClass) {
-		Type t = method != null ? method.getGenericParameterTypes()[index]
-				: constructor.getGenericParameterTypes()[index];
-		return ReflectionUtils.resolveTypeArguments(concreteClass, t);
-	}
+    public Class<?>[] getResolvedTypeParameters(Class<?> concreteClass) {
+        Type t = method != null ? method.getGenericParameterTypes()[index]
+                : constructor.getGenericParameterTypes()[index];
+        return ReflectionUtils.resolveTypeArguments(concreteClass, t);
+    }
 
-	public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-		if (annotationClass == null) {
-			throw new NullPointerException("annotationClass must not be null");
-		}
+    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+        if (annotationClass == null) {
+            throw new NullPointerException("annotationClass must not be null");
+        }
 
-		for (Annotation a : getAnnotations()) {
-			if (annotationClass.isInstance(a)) {
-				return annotationClass.cast(a);
-			}
-		}
+        for (Annotation a : getAnnotations()) {
+            if (annotationClass.isInstance(a)) {
+                return annotationClass.cast(a);
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public Annotation[] getAnnotations() {
-		return method != null ? method.getParameterAnnotations()[index]
-				: constructor.getParameterAnnotations()[index];
-	}
+    public Annotation[] getAnnotations() {
+        return method != null ? method.getParameterAnnotations()[index]
+                : constructor.getParameterAnnotations()[index];
+    }
 
-	public Method getMethod() {
-		return method;
-	}
+    public Method getMethod() {
+        return method;
+    }
 }

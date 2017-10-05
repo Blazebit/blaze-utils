@@ -3,6 +3,7 @@
  */
 package com.blazebit.mail.transport;
 
+import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -17,212 +18,205 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
 
 /**
- * 
  * @author Christian Beikov
  * @since 0.1.2
  */
 public class MailSSLSocketFactory extends SSLSocketFactory {
 
-	private boolean trustAllHosts = false;
-	private List<String> trustedHosts = new ArrayList<String>();
-	private List<String> temporaryTrustedHosts = new ArrayList<String>();
-	private SSLContext sslContext;
-	private KeyManager[] keyManagers;
-	private TrustManager[] trustManagers;
-	private SecureRandom secureRandom;
-	private SSLSocketFactory delegateFactory = null;
+    private boolean trustAllHosts = false;
+    private List<String> trustedHosts = new ArrayList<String>();
+    private List<String> temporaryTrustedHosts = new ArrayList<String>();
+    private SSLContext sslContext;
+    private KeyManager[] keyManagers;
+    private TrustManager[] trustManagers;
+    private SecureRandom secureRandom;
+    private SSLSocketFactory delegateFactory = null;
 
-	public MailSSLSocketFactory() throws GeneralSecurityException {
-		this("TLS");
-	}
+    public MailSSLSocketFactory() throws GeneralSecurityException {
+        this("TLS");
+    }
 
-	public MailSSLSocketFactory(String protocol)
-			throws GeneralSecurityException {
-		trustAllHosts = false;
-		sslContext = SSLContext.getInstance(protocol);
-		keyManagers = null;
-		trustManagers = new TrustManager[] { new MailTrustManager() };
-		secureRandom = null;
+    public MailSSLSocketFactory(String protocol)
+            throws GeneralSecurityException {
+        trustAllHosts = false;
+        sslContext = SSLContext.getInstance(protocol);
+        keyManagers = null;
+        trustManagers = new TrustManager[]{new MailTrustManager()};
+        secureRandom = null;
 
-		createDelegateFactory();
-	}
+        createDelegateFactory();
+    }
 
-	private synchronized void createDelegateFactory()
-			throws KeyManagementException {
-		sslContext.init(keyManagers, trustManagers, secureRandom);
-		delegateFactory = (SSLSocketFactory) sslContext.getSocketFactory();
-	}
+    private synchronized void createDelegateFactory()
+            throws KeyManagementException {
+        sslContext.init(keyManagers, trustManagers, secureRandom);
+        delegateFactory = (SSLSocketFactory) sslContext.getSocketFactory();
+    }
 
-	public synchronized KeyManager[] getKeyManagers() {
-		return (KeyManager[]) keyManagers.clone();
-	}
+    public synchronized KeyManager[] getKeyManagers() {
+        return (KeyManager[]) keyManagers.clone();
+    }
 
-	public synchronized void setKeyManagers(KeyManager[] keyManagers)
-			throws GeneralSecurityException {
-		this.keyManagers = (KeyManager[]) keyManagers.clone();
-		createDelegateFactory();
-	}
+    public synchronized void setKeyManagers(KeyManager[] keyManagers)
+            throws GeneralSecurityException {
+        this.keyManagers = (KeyManager[]) keyManagers.clone();
+        createDelegateFactory();
+    }
 
-	public synchronized SecureRandom getSecureRandom() {
-		return secureRandom;
-	}
+    public synchronized SecureRandom getSecureRandom() {
+        return secureRandom;
+    }
 
-	public synchronized void setSecureRandom(SecureRandom secureRandom)
-			throws GeneralSecurityException {
-		this.secureRandom = secureRandom;
-		createDelegateFactory();
-	}
+    public synchronized void setSecureRandom(SecureRandom secureRandom)
+            throws GeneralSecurityException {
+        this.secureRandom = secureRandom;
+        createDelegateFactory();
+    }
 
-	public synchronized TrustManager[] getTrustManagers() {
-		return trustManagers;
-	}
+    public synchronized TrustManager[] getTrustManagers() {
+        return trustManagers;
+    }
 
-	public synchronized void setTrustManagers(TrustManager[] trustManagers)
-			throws GeneralSecurityException {
-		this.trustManagers = trustManagers;
-		createDelegateFactory();
-	}
+    public synchronized void setTrustManagers(TrustManager[] trustManagers)
+            throws GeneralSecurityException {
+        this.trustManagers = trustManagers;
+        createDelegateFactory();
+    }
 
-	public synchronized boolean isTrustAllHosts() {
-		return trustAllHosts;
-	}
+    public synchronized boolean isTrustAllHosts() {
+        return trustAllHosts;
+    }
 
-	public synchronized void setTrustAllHosts(boolean trustAllHosts) {
-		this.trustAllHosts = trustAllHosts;
-	}
+    public synchronized void setTrustAllHosts(boolean trustAllHosts) {
+        this.trustAllHosts = trustAllHosts;
+    }
 
-	public synchronized String[] getTrustedHosts() {
-		return trustedHosts.toArray(new String[0]);
-	}
+    public synchronized String[] getTrustedHosts() {
+        return trustedHosts.toArray(new String[0]);
+    }
 
-	public synchronized void setTrustedHosts(String[] trustedHosts) {
-		this.trustedHosts = Arrays.asList(trustedHosts);
-	}
+    public synchronized void setTrustedHosts(String[] trustedHosts) {
+        this.trustedHosts = Arrays.asList(trustedHosts);
+    }
 
-	public synchronized void removeTrustedHost(String trustedHost) {
-		this.trustedHosts.remove(trustedHost);
-		this.temporaryTrustedHosts.remove(trustedHost);
-	}
+    public synchronized void removeTrustedHost(String trustedHost) {
+        this.trustedHosts.remove(trustedHost);
+        this.temporaryTrustedHosts.remove(trustedHost);
+    }
 
-	public synchronized void addTrustedHost(String host, boolean permanently) {
-		if (!permanently) {
-			temporaryTrustedHosts.add(host);
-		} else {
-			trustedHosts.add(host);
-		}
-	}
+    public synchronized void addTrustedHost(String host, boolean permanently) {
+        if (!permanently) {
+            temporaryTrustedHosts.add(host);
+        } else {
+            trustedHosts.add(host);
+        }
+    }
 
-	public synchronized void clearTemporaryTrustedHosts() {
-		temporaryTrustedHosts.clear();
-	}
+    public synchronized void clearTemporaryTrustedHosts() {
+        temporaryTrustedHosts.clear();
+    }
 
-	public synchronized List<String> getTemporaryTrustedHosts() {
-		return Collections.unmodifiableList(temporaryTrustedHosts);
-	}
+    public synchronized List<String> getTemporaryTrustedHosts() {
+        return Collections.unmodifiableList(temporaryTrustedHosts);
+    }
 
-	@Override
-	public synchronized Socket createSocket(Socket socket, String s, int i,
-			boolean flag) throws IOException {
-		return delegateFactory.createSocket(socket, s, i, flag);
-	}
+    @Override
+    public synchronized Socket createSocket(Socket socket, String s, int i,
+                                            boolean flag) throws IOException {
+        return delegateFactory.createSocket(socket, s, i, flag);
+    }
 
-	@Override
-	public synchronized String[] getDefaultCipherSuites() {
-		return delegateFactory.getDefaultCipherSuites();
-	}
+    @Override
+    public synchronized String[] getDefaultCipherSuites() {
+        return delegateFactory.getDefaultCipherSuites();
+    }
 
-	@Override
-	public synchronized String[] getSupportedCipherSuites() {
-		return delegateFactory.getSupportedCipherSuites();
-	}
+    @Override
+    public synchronized String[] getSupportedCipherSuites() {
+        return delegateFactory.getSupportedCipherSuites();
+    }
 
-	@Override
-	public synchronized Socket createSocket() throws IOException {
-		return delegateFactory.createSocket();
-	}
+    @Override
+    public synchronized Socket createSocket() throws IOException {
+        return delegateFactory.createSocket();
+    }
 
-	@Override
-	public synchronized Socket createSocket(InetAddress inetAddress, int i,
-			InetAddress inetAddress1, int j) throws IOException {
-		return delegateFactory.createSocket(inetAddress, i, inetAddress1, j);
-	}
+    @Override
+    public synchronized Socket createSocket(InetAddress inetAddress, int i,
+                                            InetAddress inetAddress1, int j) throws IOException {
+        return delegateFactory.createSocket(inetAddress, i, inetAddress1, j);
+    }
 
-	@Override
-	public synchronized Socket createSocket(InetAddress inetAddress, int i)
-			throws IOException {
-		return delegateFactory.createSocket(inetAddress, i);
-	}
+    @Override
+    public synchronized Socket createSocket(InetAddress inetAddress, int i)
+            throws IOException {
+        return delegateFactory.createSocket(inetAddress, i);
+    }
 
-	@Override
-	public synchronized Socket createSocket(String s, int i,
-			InetAddress inetAddress, int j) throws IOException,
-			UnknownHostException {
-		return delegateFactory.createSocket(s, i, inetAddress, j);
-	}
+    @Override
+    public synchronized Socket createSocket(String s, int i,
+                                            InetAddress inetAddress, int j) throws IOException,
+            UnknownHostException {
+        return delegateFactory.createSocket(s, i, inetAddress, j);
+    }
 
-	@Override
-	public synchronized Socket createSocket(String s, int i)
-			throws IOException, UnknownHostException {
-		return delegateFactory.createSocket(s, i);
-	}
+    @Override
+    public synchronized Socket createSocket(String s, int i)
+            throws IOException, UnknownHostException {
+        return delegateFactory.createSocket(s, i);
+    }
 
-	private class MailTrustManager implements X509TrustManager {
+    private class MailTrustManager implements X509TrustManager {
 
-		private X509TrustManager delegateTrustManager = null;
+        private X509TrustManager delegateTrustManager = null;
 
-		private MailTrustManager() throws GeneralSecurityException {
-			TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
-			tmf.init((KeyStore) null);
-			delegateTrustManager = (X509TrustManager) tmf.getTrustManagers()[0];
-		}
+        private MailTrustManager() throws GeneralSecurityException {
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
+            tmf.init((KeyStore) null);
+            delegateTrustManager = (X509TrustManager) tmf.getTrustManagers()[0];
+        }
 
-		@Override
-		public void checkClientTrusted(X509Certificate[] certs, String authType)
-				throws CertificateException {
-			delegateTrustManager.checkClientTrusted(certs, authType);
-		}
+        @Override
+        public void checkClientTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            delegateTrustManager.checkClientTrusted(certs, authType);
+        }
 
-		@Override
-		public void checkServerTrusted(X509Certificate[] certs, String authType)
-				throws CertificateException {
-			if (isTrustAllHosts())
-				return;
-			String host = null;
+        @Override
+        public void checkServerTrusted(X509Certificate[] certs, String authType)
+                throws CertificateException {
+            if (isTrustAllHosts())
+                return;
+            String host = null;
 
-			for (String part : certs[0].getSubjectX500Principal().getName()
-					.split(",")) {
-				String[] keyValue = part.split("=");
+            for (String part : certs[0].getSubjectX500Principal().getName()
+                    .split(",")) {
+                String[] keyValue = part.split("=");
 
-				if ("CN".equals(keyValue[0])) {
-					host = keyValue[1];
-					break;
-				}
-			}
+                if ("CN".equals(keyValue[0])) {
+                    host = keyValue[1];
+                    break;
+                }
+            }
 
-			for (String trustedHost : getTemporaryTrustedHosts()) {
-				if (host.equals(trustedHost))
-					return;
-			}
+            for (String trustedHost : getTemporaryTrustedHosts()) {
+                if (host.equals(trustedHost))
+                    return;
+            }
 
-			for (String trustedHost : getTrustedHosts()) {
-				if (host.equals(trustedHost))
-					return;
-			}
+            for (String trustedHost : getTrustedHosts()) {
+                if (host.equals(trustedHost))
+                    return;
+            }
 
-			delegateTrustManager.checkServerTrusted(certs, authType);
-		}
+            delegateTrustManager.checkServerTrusted(certs, authType);
+        }
 
-		@Override
-		public X509Certificate[] getAcceptedIssuers() {
-			return delegateTrustManager.getAcceptedIssuers();
-		}
-	}
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            return delegateTrustManager.getAcceptedIssuers();
+        }
+    }
 }

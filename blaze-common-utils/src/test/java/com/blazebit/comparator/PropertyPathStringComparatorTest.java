@@ -15,13 +15,15 @@
  */
 package com.blazebit.comparator;
 
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.Test;
 
 /**
  * This test class test the #{@link PropertyPathStringComparator}.
@@ -91,7 +93,7 @@ public class PropertyPathStringComparatorTest {
                 new CompareModel(new CompareModel((String) null)));
         Collections.sort(actual,
                 new PropertyPathStringComparator<
-               CompareModel>(Locale.getDefault(), CompareModel.PATH_MODEL));
+                        CompareModel>(Locale.getDefault(), CompareModel.PATH_MODEL));
 
         assertEquals(expected, actual);
     }

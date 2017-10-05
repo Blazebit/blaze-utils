@@ -1,8 +1,8 @@
 package com.blazebit.cdi.exclude;
 
-import javax.enterprise.inject.Produces;
-
 import com.blazebit.cdi.exclude.annotation.ExcludeIfExists;
+
+import javax.enterprise.inject.Produces;
 
 public class IntegerProducer2 {
 

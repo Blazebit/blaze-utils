@@ -1,17 +1,13 @@
 package com.blazebit.ai.decisiontree.impl;
 
-import com.blazebit.ai.decisiontree.Attribute;
-import com.blazebit.ai.decisiontree.AttributeSelector;
-import com.blazebit.ai.decisiontree.AttributeValue;
-import com.blazebit.ai.decisiontree.DiscreteAttribute;
-import com.blazebit.ai.decisiontree.Example;
+import com.blazebit.ai.decisiontree.*;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
- *
  * @author Christian Beikov
  */
 public class ID3AttributeSelector implements AttributeSelector<Boolean> {
@@ -29,7 +25,7 @@ public class ID3AttributeSelector implements AttributeSelector<Boolean> {
         /* Make array for performance */
         final Example<Boolean>[] exampleArray = examples.toArray(new Example[0]);
         final int examplesSize = exampleArray.length;
-        
+
         for (final Attribute attr : availableAttributes) {
             if (usedAttributes.contains(attr)) {
                 continue;

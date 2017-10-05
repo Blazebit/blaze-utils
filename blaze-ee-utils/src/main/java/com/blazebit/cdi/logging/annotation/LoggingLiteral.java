@@ -7,13 +7,13 @@ import javax.enterprise.util.AnnotationLiteral;
 
 /**
  * Literal for annotation, that can be used for extensions.
- * 
+ *
  * @author Christian Beikov
- * @since 0.1.2
  * @see Logging
+ * @since 0.1.2
  */
 public class LoggingLiteral extends AnnotationLiteral<Logging> implements
-		Logging {
-	private static final long serialVersionUID = 1L;
+        Logging {
+    private static final long serialVersionUID = 1L;
 
 }

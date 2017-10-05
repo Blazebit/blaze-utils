@@ -3,13 +3,14 @@
  */
 package com.blazebit.exception;
 
-import java.lang.reflect.InvocationTargetException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 /**
- *
  * @author Christian Beikov
  */
 @SuppressWarnings("unchecked")
@@ -23,17 +24,17 @@ public class ExceptionUtilsTest {
         Throwable inner = new RuntimeException();
         Throwable outer = new InvocationTargetException(inner);
         assertEquals(
-            ExceptionUtils.unwrap(outer, InvocationTargetException.class),
-            inner);
+                ExceptionUtils.unwrap(outer, InvocationTargetException.class),
+                inner);
         outer = new InvocationTargetException(outer);
         assertEquals(
-            ExceptionUtils.unwrap(outer, InvocationTargetException.class),
-            inner);
+                ExceptionUtils.unwrap(outer, InvocationTargetException.class),
+                inner);
         assertEquals(
-            ExceptionUtils.unwrap(inner, InvocationTargetException.class),
-            inner);
+                ExceptionUtils.unwrap(inner, InvocationTargetException.class),
+                inner);
         assertNull(ExceptionUtils.unwrap(new InvocationTargetException(null),
-                                         InvocationTargetException.class));
+                InvocationTargetException.class));
     }
 
     /**
@@ -44,114 +45,114 @@ public class ExceptionUtilsTest {
         Throwable inner = new RuntimeException();
         Throwable outer = new InvocationTargetException(inner);
         assertEquals(
-            ExceptionUtils.unwrap(outer, InvocationTargetException.class),
-            inner);
+                ExceptionUtils.unwrap(outer, InvocationTargetException.class),
+                inner);
         Throwable outer1 = new Error(outer);
         assertEquals(ExceptionUtils.unwrap(outer1, Error.class), outer);
         assertNull(ExceptionUtils.unwrap(inner, RuntimeException.class));
 
     }
-    
+
     @Test
     public void test_unwrap_withNullShouldReturnNull() {
         // Given
         Throwable expected = null;
         Throwable exception = null;
-        
+
         // When
         Throwable actual = ExceptionUtils.unwrap(exception);
-        
+
         // Then
         assertEquals(expected, actual);
     }
-    
+
     @Test
     public void test_unwrap_withNonAvailableTypeShouldReturnPassedInstance() {
         // Given
         Throwable expected = new Exception();
         Throwable exception = expected;
-        
+
         // When
         Throwable actual = ExceptionUtils.unwrap(exception);
-        
+
         // Then
         assertEquals(expected, actual);
     }
-    
+
     @Test
     public void test_unwrap_withNonAvailableSubTypeShouldReturnPassedInstance() {
         // Given
         Throwable expected = new Exception();
         Throwable exception = expected;
-        
+
         // When
         Throwable actual = ExceptionUtils.unwrap(exception, RuntimeException.class);
-        
+
         // Then
         assertEquals(expected, actual);
     }
-    
+
     @Test
     public void test_unwrap_withKnownWrapperShouldReturnExpected() {
         // Given
         Throwable expected = new Exception();
         Throwable exception = new RuntimeException(expected);
-        
+
         // When
         Throwable actual = ExceptionUtils.unwrap(exception, RuntimeException.class);
-        
+
         // Then
         assertEquals(expected, actual);
     }
-    
+
     @Test
     public void test_unwrap_withInvocationTargetExceptionWrapperShouldReturnExpected() {
         // Given
         Throwable expected = new Exception();
         Throwable exception = new InvocationTargetException(expected);
-        
+
         // When
         Throwable actual = ExceptionUtils.unwrap(exception, InvocationTargetException.class);
-        
+
         // Then
         assertEquals(expected, actual);
     }
-    
+
     @Test
     public void test_unwrap_withInvocationTargetExceptionWrapperAndNullCauseShouldReturnNull() {
         // Given
         Throwable expected = null;
         Throwable exception = new InvocationTargetException(expected);
-        
+
         // When
         Throwable actual = ExceptionUtils.unwrap(exception, InvocationTargetException.class);
-        
+
         // Then
         assertEquals(expected, actual);
     }
-    
+
     @Test
     public void test_unwrap_withMultipleNestedWrappersShouldReturnExpected() {
         // Given
         Throwable expected = new Exception();
         Throwable exception = new RuntimeException(new InvocationTargetException(new RuntimeException(new InvocationTargetException(expected))));
-        
+
         // When
         Throwable actual = ExceptionUtils.unwrap(exception, RuntimeException.class, InvocationTargetException.class);
-        
+
         // Then
         assertEquals(expected, actual);
     }
-    
+
     @Test
     public void test_unwrap_withMultipleNestedWrappersAndNullCauseShouldReturnNull() {
         // Given
         Throwable expected = null;
         Throwable exception = new RuntimeException(new InvocationTargetException(new RuntimeException(new InvocationTargetException(expected))));
-        
+
         // When
         Throwable actual = ExceptionUtils.unwrap(exception, RuntimeException.class, InvocationTargetException.class);
-        
+
         // Then
         assertEquals(expected, actual);
     }

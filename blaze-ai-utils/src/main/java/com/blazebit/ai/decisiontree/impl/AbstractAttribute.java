@@ -3,13 +3,12 @@ package com.blazebit.ai.decisiontree.impl;
 import com.blazebit.ai.decisiontree.Attribute;
 
 /**
- *
  * @author Christian Beikov
  */
 public abstract class AbstractAttribute implements Attribute {
     private final String name;
-    
-    public AbstractAttribute(final String name){
+
+    public AbstractAttribute(final String name) {
         this.name = name;
     }
 

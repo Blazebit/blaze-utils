@@ -7,20 +7,19 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 
 /**
- * 
  * @author Christian Beikov
  * @since 0.1.2
  */
 public class SimplePasswordAuthenticator extends Authenticator {
 
-	private final PasswordAuthentication passwordAuthentication;
+    private final PasswordAuthentication passwordAuthentication;
 
-	public SimplePasswordAuthenticator(String user, String password) {
-		this.passwordAuthentication = new PasswordAuthentication(user, password);
-	}
+    public SimplePasswordAuthenticator(String user, String password) {
+        this.passwordAuthentication = new PasswordAuthentication(user, password);
+    }
 
-	@Override
-	protected PasswordAuthentication getPasswordAuthentication() {
-		return passwordAuthentication;
-	}
+    @Override
+    protected PasswordAuthentication getPasswordAuthentication() {
+        return passwordAuthentication;
+    }
 }

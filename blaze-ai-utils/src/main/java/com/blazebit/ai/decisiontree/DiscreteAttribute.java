@@ -7,7 +7,7 @@ import java.util.Set;
  *
  * @author Christian Beikov
  */
-public interface DiscreteAttribute extends Attribute{
+public interface DiscreteAttribute extends Attribute {
 
     public Set<AttributeValue> getValues();
 }

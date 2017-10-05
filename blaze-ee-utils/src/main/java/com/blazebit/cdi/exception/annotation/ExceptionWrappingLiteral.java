@@ -3,32 +3,32 @@
  */
 package com.blazebit.cdi.exception.annotation;
 
-import java.util.Arrays;
 import javax.enterprise.util.AnnotationLiteral;
+import java.util.Arrays;
 
 /**
  * Literal for annotation, that can be used for extensions.
- * 
+ *
  * @author Christian Beikov
- * @since 0.1.2
  * @see ExceptionWrapping
+ * @since 0.1.2
  */
 public class ExceptionWrappingLiteral extends
-		AnnotationLiteral<ExceptionWrapping> implements ExceptionWrapping {
+        AnnotationLiteral<ExceptionWrapping> implements ExceptionWrapping {
 
-	private static final long serialVersionUID = 1L;
-	private ExceptionWrap[] value;
+    private static final long serialVersionUID = 1L;
+    private ExceptionWrap[] value;
 
-	public ExceptionWrappingLiteral() {
-		this(new ExceptionWrap[0]);
-	}
+    public ExceptionWrappingLiteral() {
+        this(new ExceptionWrap[0]);
+    }
 
-	public ExceptionWrappingLiteral(ExceptionWrap[] value) {
-		this.value = value;
-	}
+    public ExceptionWrappingLiteral(ExceptionWrap[] value) {
+        this.value = value;
+    }
 
-	@Override
-	public ExceptionWrap[] value() {
-		return value == null ? null : Arrays.copyOf(value, value.length);
-	}
+    @Override
+    public ExceptionWrap[] value() {
+        return value == null ? null : Arrays.copyOf(value, value.length);
+    }
 }

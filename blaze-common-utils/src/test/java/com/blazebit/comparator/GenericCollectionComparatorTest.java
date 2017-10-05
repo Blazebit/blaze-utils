@@ -15,15 +15,16 @@
  */
 package com.blazebit.comparator;
 
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import org.junit.Test;
 
 /**
- *
  * @author cchet
  */
 @SuppressWarnings("unchecked")
@@ -57,23 +58,23 @@ public class GenericCollectionComparatorTest {
     @Test
     public void testGenericCollectionComparator_with_array() {
         List<CompareModel[]> values = Arrays.asList(new CompareModel[]{
-                    new CompareModel("3"), new CompareModel("1")}, new CompareModel[]{
-                    new CompareModel("2"), new CompareModel("2")}, new CompareModel[]{
-                    new CompareModel("1"), new CompareModel("3")});
-        
+                new CompareModel("3"), new CompareModel("1")}, new CompareModel[]{
+                new CompareModel("2"), new CompareModel("2")}, new CompareModel[]{
+                new CompareModel("1"), new CompareModel("3")});
+
         List<CompareModel[]> expected1 = Arrays.asList(new CompareModel[]{
-                    new CompareModel("1"), new CompareModel("3")}, new CompareModel[]{
-                    new CompareModel("2"), new CompareModel("2")}, new CompareModel[]{
-                    new CompareModel("3"), new CompareModel("1")});
+                new CompareModel("1"), new CompareModel("3")}, new CompareModel[]{
+                new CompareModel("2"), new CompareModel("2")}, new CompareModel[]{
+                new CompareModel("3"), new CompareModel("1")});
         Collections.sort(values, new GenericCollectionComparator<Object>(
                 CompareModel.PATH_VALUE, 0));
         assertArrayEquals(expected1.toArray(), values.toArray());
 
 
         List<CompareModel[]> expected2 = Arrays.asList(new CompareModel[]{
-                    new CompareModel("3"), new CompareModel("1")}, new CompareModel[]{
-                    new CompareModel("2"), new CompareModel("2")}, new CompareModel[]{
-                    new CompareModel("1"), new CompareModel("3")});
+                new CompareModel("3"), new CompareModel("1")}, new CompareModel[]{
+                new CompareModel("2"), new CompareModel("2")}, new CompareModel[]{
+                new CompareModel("1"), new CompareModel("3")});
         Collections.sort(values, new GenericCollectionComparator<Object>(
                 CompareModel.PATH_VALUE, 1));
         assertArrayEquals(expected2.toArray(), values.toArray());

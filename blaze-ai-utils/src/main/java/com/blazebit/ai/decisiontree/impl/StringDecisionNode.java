@@ -1,19 +1,14 @@
 package com.blazebit.ai.decisiontree.impl;
 
-import com.blazebit.ai.decisiontree.Attribute;
-import com.blazebit.ai.decisiontree.AttributeValue;
-import com.blazebit.ai.decisiontree.DecisionNode;
-import com.blazebit.ai.decisiontree.DecisionNodeFactory;
-import com.blazebit.ai.decisiontree.Example;
-import com.blazebit.ai.decisiontree.Item;
+import com.blazebit.ai.decisiontree.*;
 import com.blazebit.collection.TrieMap;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 /**
- *
  * @author Christian Beikov
  */
 public class StringDecisionNode<T> implements DecisionNode<T> {
@@ -32,12 +27,12 @@ public class StringDecisionNode<T> implements DecisionNode<T> {
             final AttributeValue exampleAttributeValue = example.getValues().get(attribute);
             final String key = exampleAttributeValue == null ? "" : (String) exampleAttributeValue.getValue();
             Set<Example<T>> set = exampleTrieMap.get(key);
-            
+
             if (set == null) {
                 set = new HashSet<Example<T>>();
                 exampleTrieMap.put(key, set);
             }
-            
+
             set.add(example);
         }
 
@@ -61,11 +56,11 @@ public class StringDecisionNode<T> implements DecisionNode<T> {
     @Override
     public Set<T> apply(final Item item) {
         final AttributeValue value = item.getValues().get(attribute);
-        
+
         if (value == null) {
             /* If no value exists for the current attribute, use the results of all the children */
             final Set<T> results = new HashSet<T>();
-            
+
             for (final DecisionNode<T> node : children.values()) {
                 results.addAll(node.apply(item));
             }
@@ -92,10 +87,10 @@ public class StringDecisionNode<T> implements DecisionNode<T> {
 
             for (final DecisionNode<T> node : children.values()) {
                 final T tempResult = node.applySingle(item);
-                
-                if(result == null){
+
+                if (result == null) {
                     result = tempResult;
-                }else if(tempResult != null){
+                } else if (tempResult != null) {
                     throw new IllegalArgumentException("Ambigious result for the given item!");
                 }
             }

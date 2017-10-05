@@ -19,10 +19,9 @@ package com.blazebit.cdi.exclude;
 import java.io.Serializable;
 
 /**
- *
  * @author Christian Beikov
  */
 public interface StringHolder extends Serializable {
-    
+
     public String getString();
 }

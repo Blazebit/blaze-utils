@@ -1,17 +1,16 @@
 package com.blazebit.cdi.exclude;
 
-import java.lang.reflect.Field;
+import org.apache.deltaspike.core.util.metadata.builder.ContextualLifecycle;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-
-import org.apache.deltaspike.core.util.metadata.builder.ContextualLifecycle;
+import java.lang.reflect.Field;
 
 
 public class ProducerFieldCreationalContext implements ContextualLifecycle<Object> {
-    
+
     private final Bean<Object> declaringBean;
     private final Field field;
     private final BeanManager beanManager;
@@ -27,7 +26,7 @@ public class ProducerFieldCreationalContext implements ContextualLifecycle<Objec
     public Object create(Bean<Object> bean, CreationalContext<Object> creationalContext) {
         CreationalContext<?> cc = beanManager.createCreationalContext(null);
         Object o = beanManager.getReference(declaringBean, declaringBean.getBeanClass(), cc);
-        
+
         try {
             return field.get(o);
         } catch (Exception e) {

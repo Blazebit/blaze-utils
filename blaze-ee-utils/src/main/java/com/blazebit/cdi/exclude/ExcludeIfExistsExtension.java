@@ -1,39 +1,26 @@
 package com.blazebit.cdi.exclude;
 
+import com.blazebit.cdi.exclude.annotation.ExcludeIfExists;
+import com.blazebit.reflection.ReflectionUtils;
+import org.apache.deltaspike.core.api.literal.AnyLiteral;
+import org.apache.deltaspike.core.api.literal.DefaultLiteral;
+import org.apache.deltaspike.core.util.bean.BeanBuilder;
+
+import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.*;
+import javax.enterprise.util.Nonbinding;
+import javax.inject.Named;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedMember;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessBean;
-import javax.enterprise.util.Nonbinding;
-import javax.inject.Named;
-
-import org.apache.deltaspike.core.api.literal.AnyLiteral;
-import org.apache.deltaspike.core.api.literal.DefaultLiteral;
-import org.apache.deltaspike.core.util.bean.BeanBuilder;
-
-import com.blazebit.apt.service.ServiceProvider;
-import com.blazebit.cdi.exclude.annotation.ExcludeIfExists;
-import com.blazebit.reflection.ReflectionUtils;
-import java.lang.reflect.Field;
 
 // Deactivate for now
 //@ServiceProvider(Extension.class)
@@ -82,7 +69,8 @@ public class ExcludeIfExistsExtension implements Extension {
     }
 
     private boolean hasBean(Type[] types, Annotation[] qualifiers) {
-        BEAN_OUTER: for (Map.Entry<Bean<?>, Annotated> entry : beans.entrySet()) {
+        BEAN_OUTER:
+        for (Map.Entry<Bean<?>, Annotated> entry : beans.entrySet()) {
             Bean<?> bean = entry.getKey();
             boolean found = false;
 
@@ -92,7 +80,7 @@ public class ExcludeIfExistsExtension implements Extension {
                     break;
                 }
             }
-            
+
             if (!found) {
                 continue;
             }
@@ -101,7 +89,8 @@ public class ExcludeIfExistsExtension implements Extension {
                 continue;
             }
 
-            OUTER: for (Annotation beanQualifier : bean.getQualifiers()) {
+            OUTER:
+            for (Annotation beanQualifier : bean.getQualifiers()) {
                 for (int i = 0; i < qualifiers.length; i++) {
                     if (areQualifiersEquivalent(beanQualifier, qualifiers[i])) {
                         continue OUTER;
@@ -111,7 +100,7 @@ public class ExcludeIfExistsExtension implements Extension {
                 // No qualifier matches the current bean qualifier
                 continue BEAN_OUTER;
             }
-            
+
             return true;
         }
 
@@ -155,7 +144,7 @@ public class ExcludeIfExistsExtension implements Extension {
 
     protected void vetoBeans(@Observes AfterBeanDiscovery afterBeanDiscovery, BeanManager beanManager) {
         boolean isOwbBug = isOwbBug(beanManager.getClass().getPackage());
-        
+
         for (Map.Entry<AnnotatedType<Object>, ExcludeIfExists> entry : possibleIncludes.entrySet()) {
             AnnotatedType<Object> annotatedType = entry.getKey();
             Class<?>[] types = entry.getValue().value();
@@ -179,7 +168,7 @@ public class ExcludeIfExistsExtension implements Extension {
             }
 
             Bean<Object> bean = typeBeans.get(annotatedMember.getDeclaringType());
-            
+
             if (bean == null) {
                 bean = new BeanBuilder<Object>(beanManager).readFromType(annotatedMember.getDeclaringType()).create();
                 typeBeans.put(annotatedMember.getDeclaringType(), bean);
@@ -234,9 +223,9 @@ public class ExcludeIfExistsExtension implements Extension {
         if (beanBuilder.getScope() == null) {
             beanBuilder.scope(Dependent.class);
         }
-        
+
         boolean isDependent = beanBuilder.getScope() == Dependent.class;
-        
+
         Class<?> declaringClass = annotatedMember.getDeclaringType().getJavaClass();
 
         if (annotatedMember instanceof AnnotatedField<?>) {
@@ -256,7 +245,7 @@ public class ExcludeIfExistsExtension implements Extension {
         }
 
         beanBuilder.types(annotatedMember.getTypeClosure());
-        
+
         if (beanBuilder.getQualifiers().isEmpty()) {
             beanBuilder.addQualifier(new DefaultLiteral());
         }

@@ -6,16 +6,15 @@ package com.blazebit.text;
 import java.io.Serializable;
 
 /**
- * 
  * @author Christian Beikov
  */
 public abstract class AbstractDecimalFormat<T extends Serializable> extends
-		AbstractFormat<T> {
+        AbstractFormat<T> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public AbstractDecimalFormat(Class<T> clazz) {
-		super(clazz);
-	}
+    public AbstractDecimalFormat(Class<T> clazz) {
+        super(clazz);
+    }
 
 }

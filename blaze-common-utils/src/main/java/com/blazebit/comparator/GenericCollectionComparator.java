@@ -4,15 +4,11 @@
 package com.blazebit.comparator;
 
 import java.lang.reflect.Array;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This comparator is able to compare objects on a specified index which are part of a Collection or an Array.
- * 
+ *
  * @author Thomas Herzog
  */
 public class GenericCollectionComparator<T> extends GenericComparator<T> {

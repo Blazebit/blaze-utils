@@ -43,7 +43,7 @@ public class CompareModel implements Comparable<CompareModel> {
     static final String PATH_INVALID = "esgsgsdfgsdfgg";
 
     /**
-     * @param value 
+     * @param value
      */
     public CompareModel(final String value) {
         this.value = value;
@@ -51,7 +51,7 @@ public class CompareModel implements Comparable<CompareModel> {
     }
 
     /**
-     * @param model 
+     * @param model
      */
     public CompareModel(final CompareModel model) {
         if (model != null) {

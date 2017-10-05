@@ -1,20 +1,11 @@
 package com.blazebit.ai.decisiontree;
 
-import com.blazebit.ai.decisiontree.impl.ID3AttributeSelector;
-import com.blazebit.ai.decisiontree.impl.SimpleAttributeValue;
-import com.blazebit.ai.decisiontree.impl.SimpleDecisionTree;
-import com.blazebit.ai.decisiontree.impl.SimpleDiscreteAttribute;
-import com.blazebit.ai.decisiontree.impl.SimpleExample;
-import com.blazebit.ai.decisiontree.impl.SimpleItem;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import com.blazebit.ai.decisiontree.impl.*;
 import org.junit.Test;
 
+import java.util.*;
+
 /**
- *
  * @author Christian Beikov
  */
 public class DecisionTreePerformanceTest {
@@ -46,9 +37,10 @@ public class DecisionTreePerformanceTest {
         results.put(new OutlookExample(Outlook.RAIN, Temperature.MILD, Humidity.HIGH, Wind.STRONG), false);
         examples = examples(results);
     }
+
     private static final int WARMUP_RUNS = 100000;
     private static final int TEST_RUNS = 1000;
-    
+
     @Test
     public void testPerformance() throws Exception {
         final int warmup = WARMUP_RUNS;
@@ -82,7 +74,7 @@ public class DecisionTreePerformanceTest {
         System.out.println("DecisionTree.create - Average time per operation " + (sumCreate / runs) + " ns for " + TEST_RUNS + " operations.");
         System.out.println("DecisionTree.apply - Average time per operation " + (sumApply / runs) + " ns for " + TEST_RUNS + " operations.");
     }
-    
+
     public DecisionTree<Boolean> create() {
         return new SimpleDecisionTree<Boolean>(attributes, examples, new ID3AttributeSelector());
     }
@@ -90,7 +82,7 @@ public class DecisionTreePerformanceTest {
     public void apply(DecisionTree<Boolean> tree) {
         tree.apply(example);
     }
-    
+
     private static Item item(OutlookExample v) {
         return new SimpleItem(valueMap(v));
     }

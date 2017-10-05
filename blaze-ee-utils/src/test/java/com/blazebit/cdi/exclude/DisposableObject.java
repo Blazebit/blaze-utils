@@ -16,16 +16,14 @@
 
 package com.blazebit.cdi.exclude;
 
-import java.io.Serializable;
 import javax.enterprise.inject.Typed;
 
 /**
- *
  * @author Christian Beikov
  */
 @Typed
 public class DisposableObject implements StringHolder {
-    
+
     private final String string;
 
     // For CDI

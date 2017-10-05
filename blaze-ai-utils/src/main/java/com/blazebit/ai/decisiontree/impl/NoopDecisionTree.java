@@ -2,11 +2,11 @@ package com.blazebit.ai.decisiontree.impl;
 
 import com.blazebit.ai.decisiontree.DecisionTree;
 import com.blazebit.ai.decisiontree.Item;
+
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- *
  * @author Christian Beikov
  */
 public class NoopDecisionTree<T> implements DecisionTree<T> {

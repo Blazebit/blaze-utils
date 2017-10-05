@@ -17,6 +17,7 @@ package com.blazebit.comparator;
 
 import com.blazebit.lang.StringUtils;
 import com.blazebit.reflection.ExpressionUtils;
+
 import java.text.Collator;
 import java.util.Locale;
 
@@ -36,7 +37,7 @@ public class PropertyPathStringComparator<T> extends BaseComparator<T> {
     private final String propertyPath;
 
     /**
-     * @param locale null not allowed
+     * @param locale       null not allowed
      * @param propertyPath null or empty string not allowed
      */
     public PropertyPathStringComparator(Locale locale, String propertyPath) {
@@ -55,8 +56,7 @@ public class PropertyPathStringComparator<T> extends BaseComparator<T> {
      * Sets the JVM default Locale.
      *
      * @param propertyPath
-     * @see
-     * PropertyPathStringComparator#PropertyPathStringComparator(java.util.Locale,
+     * @see PropertyPathStringComparator#PropertyPathStringComparator(java.util.Locale,
      * java.lang.String)
      * @see Locale#getDefault()
      */

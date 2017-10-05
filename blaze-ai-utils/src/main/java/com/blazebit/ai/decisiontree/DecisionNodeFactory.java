@@ -3,13 +3,11 @@ package com.blazebit.ai.decisiontree;
 import java.util.Set;
 
 /**
- *
  * @author Christian Beikov
  */
 public interface DecisionNodeFactory {
-    
+
     /**
-     * 
      * @param <T>
      * @param usedAttribute
      * @param examples

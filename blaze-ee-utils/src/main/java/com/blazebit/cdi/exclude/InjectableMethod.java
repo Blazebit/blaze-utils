@@ -1,33 +1,36 @@
 package com.blazebit.cdi.exclude;
 
-import static org.apache.deltaspike.core.util.ReflectionUtils.invokeMethod;
-
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.spi.*;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.InjectionPoint;
+import static org.apache.deltaspike.core.util.ReflectionUtils.invokeMethod;
 
 public class InjectableMethod {
-    
+
     private final CreationalContext<?> creationalContext;
     private final BeanManager beanManager;
 
-    /** Injectable method */
+    /**
+     * Injectable method
+     */
     protected Method method;
 
-    /** Bean parent instance that owns the method */
+    /**
+     * Bean parent instance that owns the method
+     */
     protected Object ownerInstance;
 
-    /** If this method is dispose method */
+    /**
+     * If this method is dispose method
+     */
     private boolean disposable;
 
-    /** Used in dispose method, represents produces method parameter instance */
+    /**
+     * Used in dispose method, represents produces method parameter instance
+     */
     private Object producerMethodInstance = null;
 
     private List<InjectionPoint> injectionPoints;

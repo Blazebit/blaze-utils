@@ -1,10 +1,10 @@
 package com.blazebit.cdi.exclude;
 
-import javax.enterprise.inject.Produces;
-
 import com.blazebit.cdi.exclude.annotation.ExcludeIfExists;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.Produces;
 
 public class DisposableProducer {
 
@@ -16,7 +16,7 @@ public class DisposableProducer {
     public StringHolder getObject() {
         return new DisposableObject("Hello");
     }
-    
+
     public void dispose(@Disposes StringHolder object) {
         disposeCalled = true;
     }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -49,7 +50,7 @@
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.apache.deltaspike.cdictrl</groupId>
             <artifactId>deltaspike-cdictrl-api</artifactId>
@@ -70,7 +71,7 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -84,20 +85,20 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
-                  <execution>
-                    <id>add-source</id>
-                    <phase>generate-sources</phase>
-                    <goals>
-                      <goal>add-source</goal>
-                    </goals>
-                    <configuration>
-                      <sources>
-                          <source>target/generated/java</source>
-                      </sources>
-                    </configuration>
-                  </execution>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>target/generated/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
                 </executions>
-              </plugin>
+            </plugin>
             <plugin>
                 <groupId>org.bsc.maven</groupId>
                 <artifactId>maven-processor-plugin</artifactId>
@@ -120,6 +121,6 @@
                 </executions>
             </plugin>
         </plugins>
-    
+
     </build>
 </project>

@@ -2,44 +2,45 @@ package com.blazebit.validation;
 
 import com.blazebit.lang.StringUtils;
 import com.blazebit.lang.ValueRetriever;
-import java.util.Set;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Path.Node;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.util.Set;
 
 public final class ConstraintValidatorUtils {
 
-	private ConstraintValidatorUtils() {
-	}
+    private ConstraintValidatorUtils() {
+    }
 
-	public static Validator getValidator() {
-		return Validation.buildDefaultValidatorFactory().getValidator();
-	}
+    public static Validator getValidator() {
+        return Validation.buildDefaultValidatorFactory().getValidator();
+    }
 
-	public static <T> boolean containsViolation(
-			Set<ConstraintViolation<T>> violations, String name) {
-		if (name == null) {
-			return false;
-		}
+    public static <T> boolean containsViolation(
+            Set<ConstraintViolation<T>> violations, String name) {
+        if (name == null) {
+            return false;
+        }
 
-		for (ConstraintViolation<T> violation : violations) {
-			if (name.equals(StringUtils.join(".", violation.getPropertyPath(),
-					nodeNameValueRetriever))) {
-				return true;
-			}
-		}
+        for (ConstraintViolation<T> violation : violations) {
+            if (name.equals(StringUtils.join(".", violation.getPropertyPath(),
+                    nodeNameValueRetriever))) {
+                return true;
+            }
+        }
 
-		return false;
-	}
+        return false;
+    }
 
-	private static final ValueRetriever<Node, String> nodeNameValueRetriever = new ValueRetriever<Node, String>() {
+    private static final ValueRetriever<Node, String> nodeNameValueRetriever = new ValueRetriever<Node, String>() {
 
-		@Override
-		public String getValue(Node target) {
-			final String name = target.getName();
-			return name == null ? "" : name;
-		}
+        @Override
+        public String getValue(Node target) {
+            final String name = target.getName();
+            return name == null ? "" : name;
+        }
 
-	};
+    };
 }

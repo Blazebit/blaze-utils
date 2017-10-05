@@ -2,16 +2,15 @@ package com.blazebit.message.apt;
 
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Map;
 
 public class MessageBundleInfo2 extends DefaultInterfaceInfo<MessageBundleElementInfo> {
-    
+
     private final String qualifiedEnumClassName;
     private final String simpleEnumClassName;
     private final String propertiesBasePath;
     private final String propertiesBaseName;
     private final String templateLocation;
-	private final Collection<Locale> locales;
+    private final Collection<Locale> locales;
 
     public MessageBundleInfo2(InterfaceInfo<MessageBundleElementInfo> parent, String qualifiedEnumClassName, String simpleEnumClassName, String propertiesBasePath, String propertiesBaseName, String templateLocation, Collection<Locale> locales) {
         super(parent.getElement(), parent.getQualifiedName(), parent.getPackageName(), parent.getSimpleName(), parent.getAbsolutePath(), parent.getLastModified(), parent.getInterfaceMethodInfos());
@@ -30,11 +29,11 @@ public class MessageBundleInfo2 extends DefaultInterfaceInfo<MessageBundleElemen
     public String getSimpleEnumClassName() {
         return simpleEnumClassName;
     }
-    
+
     public String getPropertiesBasePath() {
         return propertiesBasePath;
     }
-    
+
     public String getPropertiesBaseName() {
         return propertiesBaseName;
     }

@@ -21,12 +21,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 
  * @author Christian
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface ServiceProvider {
 
-	Class<?> value();
+    Class<?> value();
 }

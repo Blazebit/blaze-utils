@@ -1,35 +1,25 @@
 package com.blazebit.ai.decisiontree;
 
-import com.blazebit.ai.decisiontree.impl.ID3AttributeSelector;
-import com.blazebit.ai.decisiontree.impl.SimpleAttributeValue;
-import com.blazebit.ai.decisiontree.impl.SimpleDecisionTree;
-import com.blazebit.ai.decisiontree.impl.SimpleDiscreteAttribute;
-import com.blazebit.ai.decisiontree.impl.SimpleExample;
-import com.blazebit.ai.decisiontree.impl.SimpleItem;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.blazebit.ai.decisiontree.impl.*;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.*;
+
+import static org.junit.Assert.*;
+
 
 /**
- *
  * @author Christian Beikov
  */
 public class ID3DecisionTreeTest {
-    
+
     @Ignore
     @Test
     public void testCreate() {
         Map<RestaurantExample, Boolean> results = new LinkedHashMap<RestaurantExample, Boolean>();
         Set<Attribute> attributes = new HashSet<Attribute>();
-        
+
         attributes.add(Bool.forName("alternate"));
         attributes.add(Bool.forName("bar"));
         attributes.add(Bool.forName("friday"));
@@ -40,7 +30,7 @@ public class ID3DecisionTreeTest {
         attributes.add(Price.ATTRIBUTE);
         attributes.add(Type.ATTRIBUTE);
         attributes.add(WaitEstimate.ATTRIBUTE);
-        
+
         results.put(new RestaurantExample(true, false, false, true, Patron.SOME, Price.EXPENSIVE, false, true, Type.FRENCH, WaitEstimate.ZERO_TO_TEN), true);
         results.put(new RestaurantExample(true, false, false, true, Patron.FULL, Price.CHEAP, false, false, Type.THAI, WaitEstimate.THIRTY_TO_SIXTY), false);
         results.put(new RestaurantExample(false, true, false, false, Patron.SOME, Price.CHEAP, false, false, Type.BURGER, WaitEstimate.ZERO_TO_TEN), true);
@@ -54,13 +44,13 @@ public class ID3DecisionTreeTest {
         results.put(new RestaurantExample(false, false, false, false, Patron.NONE, Price.CHEAP, false, false, Type.THAI, WaitEstimate.ZERO_TO_TEN), false);
         results.put(new RestaurantExample(true, true, true, true, Patron.FULL, Price.CHEAP, false, false, Type.BURGER, WaitEstimate.THIRTY_TO_SIXTY), true);
         DecisionTree<Boolean> tree = new SimpleDecisionTree<Boolean>(attributes, examples(results), new ID3AttributeSelector());
-        
+
         assertEquals(1, tree.apply(item(new RestaurantExample(null, null, null, null, Patron.NONE, null, null, null, null, null))).size());
         assertFalse(tree.apply(item(new RestaurantExample(null, null, null, null, Patron.NONE, null, null, null, null, null))).iterator().next());
-        
+
         assertEquals(1, tree.apply(item(new RestaurantExample(null, null, null, null, Patron.SOME, null, null, null, null, null))).size());
         assertTrue(tree.apply(item(new RestaurantExample(null, null, null, null, Patron.SOME, null, null, null, null, null))).iterator().next());
-        
+
         assertEquals(2, tree.apply(item(new RestaurantExample(null, null, null, false, Patron.FULL, null, null, null, null, null))).size());
         assertFalse(tree.apply(item(new RestaurantExample(null, null, null, false, Patron.FULL, null, null, null, null, null))).iterator().next());
         
@@ -69,10 +59,10 @@ public class ID3DecisionTreeTest {
         
         /* Make clear we can not make decisions in this case */
         assertEquals(0, tree.apply(item(new RestaurantExample(null, null, null, true, Patron.FULL, null, null, null, Type.FRENCH, null))).size());
-        
+
         assertEquals(1, tree.apply(item(new RestaurantExample(null, null, null, true, Patron.FULL, null, null, null, Type.ITALIAN, null))).size());
         assertFalse(tree.apply(item(new RestaurantExample(null, null, null, true, Patron.FULL, null, null, null, Type.ITALIAN, null))).iterator().next());
-        
+
         assertEquals(1, tree.apply(item(new RestaurantExample(null, null, null, true, Patron.FULL, null, null, null, Type.BURGER, null))).size());
         assertTrue(tree.apply(item(new RestaurantExample(null, null, null, true, Patron.FULL, null, null, null, Type.BURGER, null))).iterator().next());
         
@@ -88,69 +78,69 @@ public class ID3DecisionTreeTest {
         assertEquals(1, tree.apply(item(new RestaurantExample(null, true, false, true, Patron.FULL, null, null, null, Type.THAI, null))).size());
         assertFalse(tree.apply(item(new RestaurantExample(null, true, false, true, Patron.FULL, null, null, null, Type.THAI, null))).iterator().next());
     }
-    
-    private static Item item(RestaurantExample v){
+
+    private static Item item(RestaurantExample v) {
         return new SimpleItem(valueMap(v));
     }
-    
-    private static Set<Example<Boolean>> examples(Map<RestaurantExample, Boolean> restaurantExamples){
+
+    private static Set<Example<Boolean>> examples(Map<RestaurantExample, Boolean> restaurantExamples) {
         Set<Example<Boolean>> examples = new HashSet<Example<Boolean>>(restaurantExamples.size());
-        
-        for(Map.Entry<RestaurantExample, Boolean> entry : restaurantExamples.entrySet()){
+
+        for (Map.Entry<RestaurantExample, Boolean> entry : restaurantExamples.entrySet()) {
             final RestaurantExample restaurantExample = entry.getKey();
             examples.add(new SimpleExample<Boolean>(valueMap(restaurantExample), entry.getValue()));
         }
-        
+
         return examples;
     }
-    
-    private static Map<Attribute, AttributeValue> valueMap(RestaurantExample v){    
-        Map<Attribute, AttributeValue> values = new HashMap<Attribute, AttributeValue>();  
-        
-        if(v.alternate != null){
+
+    private static Map<Attribute, AttributeValue> valueMap(RestaurantExample v) {
+        Map<Attribute, AttributeValue> values = new HashMap<Attribute, AttributeValue>();
+
+        if (v.alternate != null) {
             values.put(Bool.forName("alternate"), Bool.value(v.alternate));
         }
-        
-        if(v.bar != null){
+
+        if (v.bar != null) {
             values.put(Bool.forName("bar"), Bool.value(v.bar));
         }
-        
-        if(v.friday != null){
+
+        if (v.friday != null) {
             values.put(Bool.forName("friday"), Bool.value(v.friday));
         }
-        
-        if(v.hungry != null){
+
+        if (v.hungry != null) {
             values.put(Bool.forName("hungry"), Bool.value(v.hungry));
         }
-        
-        if(v.raining != null){
+
+        if (v.raining != null) {
             values.put(Bool.forName("raining"), Bool.value(v.raining));
         }
-        
-        if(v.reservation != null){
+
+        if (v.reservation != null) {
             values.put(Bool.forName("reservation"), Bool.value(v.reservation));
         }
-        
-        if(v.patron != null){
+
+        if (v.patron != null) {
             values.put(Patron.ATTRIBUTE, new SimpleAttributeValue(v.patron));
         }
-        
-        if(v.price != null){
+
+        if (v.price != null) {
             values.put(Price.ATTRIBUTE, new SimpleAttributeValue(v.price));
         }
-        
-        if(v.type != null){
+
+        if (v.type != null) {
             values.put(Type.ATTRIBUTE, new SimpleAttributeValue(v.type));
         }
-        
-        if(v.estimate != null){
+
+        if (v.estimate != null) {
             values.put(WaitEstimate.ATTRIBUTE, new SimpleAttributeValue(v.estimate));
         }
-        
+
         return values;
     }
-    
-    static class RestaurantExample{
+
+    static class RestaurantExample {
         Boolean alternate;
         Boolean bar;
         Boolean friday;
@@ -233,62 +223,62 @@ public class ID3DecisionTreeTest {
             return true;
         }
     }
-    
-    static enum Bool{
+
+    static enum Bool {
         YES,
         NO;
-        
-        public static AttributeValue value(Boolean value){
-            if(value == null){
+
+        public static AttributeValue value(Boolean value) {
+            if (value == null) {
                 return null;
             }
-            
+
             return new SimpleAttributeValue(value ? YES : NO);
         }
-        
-        public static Attribute forName(String name){
+
+        public static Attribute forName(String name) {
             return new SimpleDiscreteAttribute(name, attributeValues(values()));
         }
     }
-    
-    static enum Patron{
+
+    static enum Patron {
         NONE,
         SOME,
         FULL;
-    
+
         public static final Attribute ATTRIBUTE = new SimpleDiscreteAttribute("patron", attributeValues(values()));
     }
-    
-    static enum Price{
+
+    static enum Price {
         CHEAP,
         MEDIUM,
         EXPENSIVE;
-    
+
         public static final Attribute ATTRIBUTE = new SimpleDiscreteAttribute("price", attributeValues(values()));
     }
-    
-    static enum Type{
+
+    static enum Type {
         FRENCH,
         THAI,
         BURGER,
         ITALIAN;
-    
+
         public static final Attribute ATTRIBUTE = new SimpleDiscreteAttribute("type", attributeValues(values()));
     }
-    
-    static enum WaitEstimate{
+
+    static enum WaitEstimate {
         ZERO_TO_TEN,
         TEN_TO_THIRTY,
         THIRTY_TO_SIXTY,
         GREATER_THAN_SIXTY;
-    
+
         public static final Attribute ATTRIBUTE = new SimpleDiscreteAttribute("waitEstimate", attributeValues(values()));
     }
-    
-    public static Set<AttributeValue> attributeValues(Object[] objects){
+
+    public static Set<AttributeValue> attributeValues(Object[] objects) {
         Set<AttributeValue> values = new HashSet<AttributeValue>(objects.length);
 
-        for(Object o : objects){
+        for (Object o : objects) {
             values.add(new SimpleAttributeValue(o));
         }
 

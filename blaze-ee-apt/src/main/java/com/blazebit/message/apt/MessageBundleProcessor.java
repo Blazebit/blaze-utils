@@ -15,26 +15,12 @@
  */
 package com.blazebit.message.apt;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.io.Writer;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.blazebit.i18n.LocaleUtils;
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.ObjectWrapper;
+import freemarker.template.Template;
+import org.apache.deltaspike.core.api.message.MessageBundle;
 
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
@@ -44,24 +30,19 @@ import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardLocation;
-
-import org.apache.deltaspike.core.api.message.MessageBundle;
-
-import com.blazebit.i18n.LocaleUtils;
-
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.ObjectWrapper;
-import freemarker.template.Template;
+import java.io.*;
+import java.lang.annotation.Annotation;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * 
  * @author Christian
  */
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<MessageBundleElementInfo, MessageBundleInfo2> {
-    
-    
+
+
     @Override
     protected Set<Class<? extends Annotation>> getAnnotationsToProcess() {
         Set<Class<? extends Annotation>> classes = new HashSet<Class<? extends Annotation>>();
@@ -74,14 +55,14 @@ public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<
         if (interfaceInfo.getElement().getKind() != ElementKind.INTERFACE) {
             processingEnv.getMessager().printMessage(Kind.ERROR, "The annotation '" + annotationClass.getName() + "' can only be applied on interfaces!", interfaceInfo.getElement());
         }
-        
+
         TypeMirror serializableType = processingEnv.getElementUtils().getTypeElement(Serializable.class.getName()).asType();
         TypeMirror interfaceType = interfaceInfo.getElement().asType();
-        
+
         if (!processingEnv.getTypeUtils().isSubtype(interfaceType, serializableType)) {
             processingEnv.getMessager().printMessage(Kind.ERROR, "The message bundle interface must extend java.io.Serializable!", interfaceInfo.getElement());
         }
-        
+
         String qualifiedEnumClassName = getQualifiedEnumClassName(interfaceInfo);
         String simpleEnumClassName = getSimpleEnumClassName(interfaceInfo);
         String propertiesBasePath = getPropertiesBasePath(interfaceInfo);
@@ -89,9 +70,9 @@ public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<
         String templateLocation = getTemplateLocation(interfaceInfo);
         Collection<Locale> locales = getLocales(interfaceInfo);
         MessageBundleInfo2 messageBundleInfo = new MessageBundleInfo2(interfaceInfo, qualifiedEnumClassName, simpleEnumClassName, propertiesBasePath, propertiesBaseName, templateLocation, locales);
-        
+
         validatePropertiesFiles(messageBundleInfo);
-        
+
         return messageBundleInfo;
     }
 
@@ -99,7 +80,7 @@ public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<
         try {
             FileObject fileObject = processingEnv.getFiler().getResource(StandardLocation.CLASS_OUTPUT, propertiesBasePath, propertiesFileName);
             return new File(fileObject.toUri());
-        } catch(FileNotFoundException ex) {
+        } catch (FileNotFoundException ex) {
             throw new IllegalArgumentException("Could not find the properties file '" + propertiesFileName + "' at the location '" + propertiesBasePath + "'!", ex);
         } catch (IOException ex) {
             throw new IllegalArgumentException("Could not load the properties file '" + propertiesFileName + "' from the location '" + propertiesBasePath + "'!", ex);
@@ -108,17 +89,17 @@ public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<
 
     protected String getPropertiesFileName(String propertiesBaseName, Locale locale) {
         StringBuilder sb = new StringBuilder(propertiesBaseName);
-        
+
         if (locale.getLanguage() != null && !locale.getLanguage().isEmpty()) {
             sb.append('_').append(locale.getLanguage());
         }
-        
+
         if (locale.getCountry() != null && !locale.getCountry().isEmpty()) {
             sb.append('_').append(locale.getCountry());
         }
-        
+
         sb.append(".properties");
-        
+
         return sb.toString();
     }
 
@@ -138,45 +119,45 @@ public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<
     protected String getPropertiesBasePath(InterfaceInfo<MessageBundleElementInfo> interfaceInfo) {
         MessageBundleConfig config = interfaceInfo.getElement().getAnnotation(MessageBundleConfig.class);
         String basePath = config.base();
-        
+
         if (basePath.isEmpty()) {
             basePath = interfaceInfo.getQualifiedName().replaceAll("\\.", "/");
         }
-        
+
         int slashIndex = basePath.lastIndexOf('/');
-        
+
         if (slashIndex == -1) {
             return "";
         }
-        
+
         return basePath.substring(0, slashIndex);
     }
 
     protected String getPropertiesBaseName(InterfaceInfo<MessageBundleElementInfo> interfaceInfo) {
         MessageBundleConfig config = interfaceInfo.getElement().getAnnotation(MessageBundleConfig.class);
         String basePath = config.base();
-        
+
         if (basePath.isEmpty()) {
             basePath = interfaceInfo.getQualifiedName().replaceAll("\\.", "/");
         }
-        
+
         int slashIndex = basePath.lastIndexOf('/');
-        
+
         if (slashIndex == -1) {
             return basePath;
         }
-        
+
         return basePath.substring(slashIndex + 1);
     }
 
     protected Collection<Locale> getLocales(InterfaceInfo<MessageBundleElementInfo> interfaceInfo) {
         MessageBundleConfig config = interfaceInfo.getElement().getAnnotation(MessageBundleConfig.class);
         Collection<Locale> locales = new ArrayList<Locale>(config.locales().length);
-        
+
         for (String localeString : config.locales()) {
             locales.add(LocaleUtils.getLocale(localeString));
         }
-        
+
         return locales;
     }
 
@@ -184,24 +165,24 @@ public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<
     protected MessageBundleElementInfo processMethod(InterfaceMethodInfo methodInfo) {
         String enumKey = getEnumKey(methodInfo);
         MessageBundleElementInfo messageBundleElementInfo = new MessageBundleElementInfo(methodInfo, enumKey);
-        
+
         if (validateMethod(messageBundleElementInfo)) {
             return messageBundleElementInfo;
         }
-        
+
         return null;
     }
 
     protected boolean validateMethod(MessageBundleElementInfo messageBundleElementInfo) {
         String returnTypeName = messageBundleElementInfo.getElement().getReturnType().toString();
         String expectedReturnTypeName = String.class.getName();
-        
+
         if (!messageBundleElementInfo.getName().startsWith("get") || !returnTypeName.equals(expectedReturnTypeName)) {
             String msg = "Only getter methods with the return type '" + expectedReturnTypeName + "' are allowed!";
             processingEnv.getMessager().printMessage(Kind.ERROR, msg, messageBundleElementInfo.getElement());
             return false;
         }
-        
+
         return true;
     }
 
@@ -238,12 +219,12 @@ public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<
         enumClassJavaFile.setLastModified(messageBundleInfo.getLastModified());
     }
 
-	protected void generateEnumClass(MessageBundleInfo2 info, Writer writer) throws Exception {
-	    Map<String, Object> parameters = getTemplateParameters(info);
-	    Template template = getTemplate(info);
-	    template.process(parameters, writer);
-	}
-	
+    protected void generateEnumClass(MessageBundleInfo2 info, Writer writer) throws Exception {
+        Map<String, Object> parameters = getTemplateParameters(info);
+        Template template = getTemplate(info);
+        template.process(parameters, writer);
+    }
+
     protected Template getTemplate(MessageBundleInfo2 info) throws IOException {
         final Configuration configuration = new Configuration();
         configuration.setTemplateLoader(new ClassTemplateLoader(MessageBundleProcessor.class, "/"));
@@ -251,20 +232,20 @@ public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<
         configuration.setObjectWrapper(ObjectWrapper.BEANS_WRAPPER);
         return configuration.getTemplate(info.getTemplateLocation());
     }
-    
+
     protected Map<String, Object> getTemplateParameters(MessageBundleInfo2 info) {
         Map<String, Object> parameters = new HashMap<String, Object>();
         parameters.put("packageName", info.getPackageName());
         parameters.put("baseName", new StringBuilder(info.getPropertiesBasePath()).append('/').append(info.getPropertiesBaseName()));
         parameters.put("enumName", info.getSimpleEnumClassName());
-        
+
         List<String> locales = new ArrayList<String>(info.getLocales().size());
         for (Locale locale : info.getLocales()) {
             locales.add(locale.toString());
         }
         Collections.sort(locales);
         parameters.put("locales", locales);
-        
+
         List<String> keys = new ArrayList<String>(info.getInterfaceMethodInfos().size());
         for (MessageBundleElementInfo elementInfo : info.getInterfaceMethodInfos()) {
             keys.add(elementInfo.getEnumKey());
@@ -274,19 +255,19 @@ public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<
         return parameters;
     }
 
-    protected void validatePropertiesFiles(MessageBundleInfo2 messageBundleInfo) {        
+    protected void validatePropertiesFiles(MessageBundleInfo2 messageBundleInfo) {
         for (Locale locale : messageBundleInfo.getLocales()) {
             String propertiesFileName = getPropertiesFileName(messageBundleInfo.getPropertiesBaseName(), locale);
-            
+
             try {
                 File propertiesFile = getResourceFile(messageBundleInfo.getPropertiesBasePath(), propertiesFileName);
                 Properties properties = new Properties();
                 properties.load(new InputStreamReader(new FileInputStream(propertiesFile), "UTF-8"));
-                
+
                 for (MessageBundleElementInfo elementInfo : messageBundleInfo.getInterfaceMethodInfos()) {
                     String enumKey = elementInfo.getEnumKey();
                     String propertiesValue = properties.remove(enumKey).toString();
-                    
+
                     if (propertiesValue == null) {
                         String msg = "The entry for the enum key '" + enumKey + "' is missing in the properties file '" + propertiesFileName + "'!";
                         processingEnv.getMessager().printMessage(Kind.ERROR, msg, elementInfo.getElement());
@@ -308,14 +289,14 @@ public abstract class MessageBundleProcessor extends AbstractInterfaceProcessor<
     protected void validatePropertiesFileEntry(MessageBundleElementInfo elementInfo, Locale locale, String propertiesValue) {
         int methodParameterCount = elementInfo.getQualifiedParameterTypeNames().size();
         int propertiesValueParameterCount = getParameterCount(propertiesValue);
-        
+
         if (methodParameterCount != propertiesValueParameterCount) {
-            String msg = "The method accepts " + methodParameterCount + " parameters, but the properties entry '" 
-                + elementInfo.getEnumKey() + "' for the locale '" + locale.toString() + "' requires " + propertiesValueParameterCount + " parameters!";
+            String msg = "The method accepts " + methodParameterCount + " parameters, but the properties entry '"
+                    + elementInfo.getEnumKey() + "' for the locale '" + locale.toString() + "' requires " + propertiesValueParameterCount + " parameters!";
             processingEnv.getMessager().printMessage(Kind.ERROR, msg, elementInfo.getElement());
         }
     }
-    
+
     private static final Pattern PROPERTY_VALUE_PARAMETER_PATTERN = Pattern.compile("\\{(.*?)\\}");
 
     private static int getParameterCount(final String value) {

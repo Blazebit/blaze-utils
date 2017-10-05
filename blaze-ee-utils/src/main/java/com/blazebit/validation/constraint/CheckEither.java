@@ -1,15 +1,12 @@
 package com.blazebit.validation.constraint;
 
 import com.blazebit.validation.constraint.validator.CheckEitherValidator;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.ConstraintViolation;
 import javax.validation.Payload;
+import java.lang.annotation.*;
 
 /**
  * This constraint tries to validate the object of the class which is annotated
@@ -18,7 +15,7 @@ import javax.validation.Payload;
  * constraint also succeeds. The {@link PopulationMode} influences how or which
  * of the {@link ConstraintViolation}s occurred within the sub validation will
  * be passed to the {@link ConstraintValidatorContext}.
- * 
+ * <p>
  * The default {@link PopulationMode} is {@link PopulationMode#NONE}. The
  * behaviors of the different {@link PopulationMode}s is as follows:
  * <ul>
@@ -35,48 +32,48 @@ import javax.validation.Payload;
  * {@link ConstraintViolation}s that occurred in the sub validations to the
  * {@link ConstraintValidatorContext}.</li>
  * </ul>
- * 
+ *
  * @author Christian Beikov
- * @since 1.0
  * @see PopulationMode
+ * @since 1.0
  */
-@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.TYPE,
-		ElementType.CONSTRUCTOR, ElementType.PARAMETER })
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.TYPE,
+        ElementType.CONSTRUCTOR, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = CheckEitherValidator.class)
 @Documented
 public @interface CheckEither {
 
-	String message() default "";
+    String message() default "";
 
-	Class<?>[] groups() default {};
+    Class<?>[] groups() default {};
 
-	Class<? extends Payload>[] payload() default {};
+    Class<? extends Payload>[] payload() default {};
 
-	/**
-	 * The validation group classes for which a validation should be processed.
-	 * 
-	 * @return
-	 */
-	Class<?>[] value() default {};
+    /**
+     * The validation group classes for which a validation should be processed.
+     *
+     * @return
+     */
+    Class<?>[] value() default {};
 
-	/**
-	 * The population mode that should be used.
-	 * 
-	 * @return
-	 */
-	PopulationMode mode() default PopulationMode.NONE;
+    /**
+     * The population mode that should be used.
+     *
+     * @return
+     */
+    PopulationMode mode() default PopulationMode.NONE;
 
-	/**
-	 * Defines several @CheckEither annotations on the same element
-	 * 
-	 * @see (@link CheckEither}
-	 */
-	@Target({ ElementType.METHOD, ElementType.FIELD, ElementType.TYPE,
-			ElementType.CONSTRUCTOR, ElementType.PARAMETER })
-	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
-	@interface List {
-		CheckEither[] value();
-	}
+    /**
+     * Defines several @CheckEither annotations on the same element
+     *
+     * @see (@link CheckEither}
+     */
+    @Target({ElementType.METHOD, ElementType.FIELD, ElementType.TYPE,
+            ElementType.CONSTRUCTOR, ElementType.PARAMETER})
+    @Retention(RetentionPolicy.RUNTIME)
+    @Documented
+    @interface List {
+        CheckEither[] value();
+    }
 }

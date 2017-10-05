@@ -3,12 +3,14 @@
  */
 package com.blazebit.comparator;
 
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.Test;
 
 /**
  * This test class tests the {@link GenericComparator}
@@ -52,7 +54,7 @@ public class GenericComparatorTest {
         List<CompareModel> values = Arrays.asList(new CompareModel(new CompareModel("4")),
                 new CompareModel(new CompareModel("2")), new CompareModel(new CompareModel("3")), new CompareModel((CompareModel) null));
         Collections.sort(values, new GenericComparator<CompareModel>(CompareModel.PATH_MODEL_VALUE));
-        fail();        
+        fail();
     }
 
     @Test(expected = IllegalArgumentException.class)
