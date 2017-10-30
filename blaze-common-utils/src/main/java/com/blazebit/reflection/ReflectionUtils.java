@@ -256,24 +256,33 @@ public final class ReflectionUtils {
         return resolvedClasses;
     }
 
-    private static Class<?> resolveType(Class<?> concreteClass, Type type) {
+    public static Type resolve(Class<?> concreteClass, Type type) {
+        if (type instanceof TypeVariable<?>) {
+            return resolveTypeVariableType(concreteClass, (TypeVariable<?>) type);
+        } else if (type instanceof GenericArrayType) {
+            return getArrayClass((GenericArrayType) type);
+        } else if (type instanceof WildcardType) {
+            WildcardType wildcardType = ((WildcardType) type);
+
+            if (wildcardType.getLowerBounds().length > 0) {
+                return resolve(concreteClass, wildcardType.getLowerBounds()[0]);
+            } else {
+                return resolve(concreteClass, wildcardType.getUpperBounds()[0]);
+            }
+        } else {
+            // We assume here that only class types, type variables and parameterized types are
+            // possible as argument types for the parameterized type
+            return type;
+        }
+    }
+
+    public static Class<?> resolveType(Class<?> concreteClass, Type type) {
         if (type instanceof TypeVariable<?>) {
             return resolveTypeVariable(concreteClass, (TypeVariable<?>) type);
         } else if (type instanceof ParameterizedType) {
             return (Class<?>) ((ParameterizedType) type).getRawType();
         } else if (type instanceof GenericArrayType) {
-            Type componentType = ((GenericArrayType) type).getGenericComponentType();
-            Class<?> componentClass;
-            if (componentType instanceof Class) {
-                componentClass = (Class<?>) componentType;
-            } else if (componentType instanceof ParameterizedType) {
-                componentClass = (Class<?>) ((ParameterizedType) componentType).getRawType();
-            } else {
-                throw new IllegalArgumentException("Unsupported array component type: " + componentType);
-            }
-
-            Object o = Array.newInstance((Class<?>) componentClass, 0);
-            return (Class<?>) o.getClass();
+            return getArrayClass((GenericArrayType) type);
         } else if (type instanceof WildcardType) {
             WildcardType wildcardType = ((WildcardType) type);
 
@@ -289,26 +298,35 @@ public final class ReflectionUtils {
         }
     }
 
+    private static Class<?> getArrayClass(GenericArrayType genericArrayType) {
+        Type componentType = genericArrayType.getGenericComponentType();
+        Class<?> componentClass;
+        if (componentType instanceof Class) {
+            componentClass = (Class<?>) componentType;
+        } else if (componentType instanceof ParameterizedType) {
+            componentClass = (Class<?>) ((ParameterizedType) componentType).getRawType();
+        } else {
+            throw new IllegalArgumentException("Unsupported array component type: " + componentType);
+        }
+
+        Object o = Array.newInstance(componentClass, 0);
+        return o.getClass();
+    }
+
     private static Class<?> getClassThatContainsTypeVariable(TypeVariable<?> typeVariable) {
-        if (isSubtype(typeVariable.getGenericDeclaration().getClass(),
-                Class.class)) {
-            return (Class<?>) typeVariable
-                    .getGenericDeclaration();
-        } else if (isSubtype(typeVariable.getGenericDeclaration().getClass(),
-                Method.class)) {
-            return ((Method) typeVariable
-                    .getGenericDeclaration()).getDeclaringClass();
-        } else if (isSubtype(typeVariable.getGenericDeclaration().getClass(),
-                Constructor.class)) {
-            return ((Constructor<?>) typeVariable
-                    .getGenericDeclaration()).getDeclaringClass();
+        if (typeVariable.getGenericDeclaration().getClass() == Class.class) {
+            return (Class<?>) typeVariable.getGenericDeclaration();
+        } else if (typeVariable.getGenericDeclaration().getClass() == Method.class) {
+            return ((Method) typeVariable.getGenericDeclaration()).getDeclaringClass();
+        } else if (typeVariable.getGenericDeclaration().getClass() == Constructor.class) {
+            return ((Constructor<?>) typeVariable .getGenericDeclaration()).getDeclaringClass();
         }
 
         return null;
     }
 
     /**
-     * Tries to resolve the type variable againts the concrete class. The
+     * Tries to resolve the type variable against the concrete class. The
      * concrete class has to be a subtype of the type in which the type variable
      * has been declared. This method tries to resolve the given type variable
      * by inspecting the subclasses of the class in which the type variable was
@@ -318,14 +336,17 @@ public final class ReflectionUtils {
      * @param concreteClass The class which is used to resolve the type. The type for the
      *                      type variable must be bound in this class or a superclass.
      * @param typeVariable  The type variable to resolve.
-     * @return The resolved type as class or null if the type can not be
-     * resolved.
+     * @return The resolved type
      * @throws IllegalArgumentException Is thrown when the concrete class is not a subtype of the
      *                                  class in which the type variable has been declared.
      */
-    public static Class<?> resolveTypeVariable(Class<?> concreteClass, TypeVariable<?> typeVariable) {
+    public static Type resolveTypeVariableType(Class<?> concreteClass, TypeVariable<?> typeVariable) {
         Class<?> classThatContainsTypeVariable = getClassThatContainsTypeVariable(typeVariable);
 
+        // If the type variable is defined in the concrete class, we can only use the bounds
+        if (concreteClass == classThatContainsTypeVariable) {
+            return resolve(concreteClass, typeVariable.getBounds()[0]);
+        }
         if (!isSubtype(concreteClass, classThatContainsTypeVariable)) {
             throw new IllegalArgumentException(
                     "The given concrete class is not a subtype of the class that contain the type variable!");
@@ -340,15 +361,13 @@ public final class ReflectionUtils {
         }
 
         Set<Class<?>> superTypes = getSuperTypes(concreteClass, classThatContainsTypeVariable);
-        List<Class<?>> classStack = new ArrayList<Class<?>>();
+        List<Class<?>> classStack = new ArrayList<>(superTypes.size());
         Type resolvedType = typeVariable;
 
         // The class that contains the type variable mustn't be considered
         superTypes.remove(classThatContainsTypeVariable);
         // Build a stack of the class hierarchy to be able to resolve the type
-        for (Class<?> superType : superTypes) {
-            classStack.add(superType);
-        }
+        classStack.addAll(superTypes);
 
         // Resolve every type variable in every class level
         // We need to do this here because the type variables of subclasses
@@ -422,29 +441,27 @@ public final class ReflectionUtils {
             }
         }
 
-        if (resolvedType instanceof Class<?>) {
-            return (Class<?>) resolvedType;
-        } else if (resolvedType instanceof TypeVariable<?>) {
-            Type boundType = ((TypeVariable<?>) resolvedType).getBounds()[0];
+        return resolvedType;
+    }
 
-            if (boundType instanceof Class<?>) {
-                return (Class<?>) boundType;
-            } else if (boundType instanceof ParameterizedType) {
-                return (Class<?>) ((ParameterizedType) boundType).getRawType();
-            }
-        } else if (resolvedType instanceof ParameterizedType) {
-            return (Class<?>) ((ParameterizedType) resolvedType).getRawType();
-        } else if (resolvedType instanceof WildcardType) {
-            WildcardType wildcardType = ((WildcardType) resolvedType);
-
-            if (wildcardType.getLowerBounds().length > 0) {
-                return resolveType(concreteClass, wildcardType.getLowerBounds()[0]);
-            } else {
-                return resolveType(concreteClass, wildcardType.getUpperBounds()[0]);
-            }
-        }
-
-        throw new IllegalArgumentException("Could not resolve the type variable '" + typeVariable + "' for the concrete class " + concreteClass.getName() + ". The resolved type is unknown: " + resolvedType);
+    /**
+     * Tries to resolve the type variable against the concrete class. The
+     * concrete class has to be a subtype of the type in which the type variable
+     * has been declared. This method tries to resolve the given type variable
+     * by inspecting the subclasses of the class in which the type variable was
+     * declared and as soon as the resolved type is instance of java.lang.Class
+     * it stops and returns that class.
+     *
+     * @param concreteClass The class which is used to resolve the type. The type for the
+     *                      type variable must be bound in this class or a superclass.
+     * @param typeVariable  The type variable to resolve.
+     * @return The resolved type as class
+     * @throws IllegalArgumentException Is thrown when the concrete class is not a subtype of the
+     *                                  class in which the type variable has been declared.
+     */
+    public static Class<?> resolveTypeVariable(Class<?> concreteClass, TypeVariable<?> typeVariable) {
+        Type resolvedType = resolveTypeVariableType(concreteClass, typeVariable);
+        return resolveType(concreteClass, resolvedType);
     }
 
     /**

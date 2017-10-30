@@ -7,10 +7,7 @@ import com.blazebit.reflection.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,8 +26,7 @@ public final class AnnotationUtils {
 
     static {
         try {
-            stereotypeAnnotationClass = (Class<? extends Annotation>) Class
-                    .forName("javax.enterprise.inject.Stereotype");
+            stereotypeAnnotationClass = (Class<? extends Annotation>) Class.forName("javax.enterprise.inject.Stereotype");
         } catch (ClassNotFoundException ex) {
             Logger log = Logger.getLogger(AnnotationUtils.class.getName());
             log.log(Level.WARNING, "Stereotype annotation can not be found, skipping annotation inheritance via stereotype.");
@@ -62,31 +58,26 @@ public final class AnnotationUtils {
 
             // Iterate through all annotations of the current class
             for (Annotation a : annotations) {
-                // Add the current annotation to the result and to the
-                // annotation types that needed to be examained for stereotype
-                // annotations
+                // Add the current annotation to the result and to the annotation types that needed to be examained for stereotype annotations
                 annotationSet.add(a);
                 annotationTypes.add(a.annotationType());
             }
         }
 
-        while (!annotationTypes.isEmpty()) {
-            Class<?> annotationType = annotationTypes.remove(annotationTypes.size() - 1);
+        if (stereotypeAnnotationClass != null) {
+            while (!annotationTypes.isEmpty()) {
+                Class<?> annotationType = annotationTypes.remove(annotationTypes.size() - 1);
 
-            if (stereotypeAnnotationClass != null
-                    && annotationType
-                    .isAnnotationPresent(stereotypeAnnotationClass)) {
-                // If the stereotype annotation is present examaine the
-                // 'inherited' annotations
-                for (Annotation annotation : annotationType.getAnnotations()) {
-                    // add the 'inherited' annotations to be examined for
-                    // further stereotype annotations
-                    annotationTypes.add(annotation.annotationType());
+                if (annotationType.isAnnotationPresent(stereotypeAnnotationClass)) {
+                    // If the stereotype annotation is present examine the 'inherited' annotations
+                    for (Annotation annotation : annotationType.getAnnotations()) {
+                        // add the 'inherited' annotations to be examined for further stereotype annotations
+                        annotationTypes.add(annotation.annotationType());
 
-                    if (!annotation.annotationType().equals(
-                            stereotypeAnnotationClass)) {
-                        // add the stereotyped annotations to the set
-                        annotationSet.add(annotation);
+                        if (!annotation.annotationType().equals(stereotypeAnnotationClass)) {
+                            // add the stereotyped annotations to the set
+                            annotationSet.add(annotation);
+                        }
                     }
                 }
             }
@@ -111,29 +102,25 @@ public final class AnnotationUtils {
 
         // Iterate through all annotations of the current class
         for (Annotation a : annotations) {
-            // Add the current annotation to the result and to the annotation
-            // types that needed to be examained for stereotype annotations
+            // Add the current annotation to the result and to the annotation types that needed to be examained for stereotype annotations
             annotationSet.add(a);
             annotationTypes.add(a.annotationType());
         }
 
-        while (!annotationTypes.isEmpty()) {
-            Class<?> annotationType = annotationTypes.remove(annotationTypes.size() - 1);
+        if (stereotypeAnnotationClass != null) {
+            while (!annotationTypes.isEmpty()) {
+                Class<?> annotationType = annotationTypes.remove(annotationTypes.size() - 1);
 
-            if (stereotypeAnnotationClass != null
-                    && annotationType
-                    .isAnnotationPresent(stereotypeAnnotationClass)) {
-                // If the stereotype annotation is present examaine the
-                // 'inherited' annotations
-                for (Annotation annotation : annotationType.getAnnotations()) {
-                    // add the 'inherited' annotations to be examined for
-                    // further stereotype annotations
-                    annotationTypes.add(annotation.annotationType());
+                if (annotationType.isAnnotationPresent(stereotypeAnnotationClass)) {
+                    // If the stereotype annotation is present examine the 'inherited' annotations
+                    for (Annotation annotation : annotationType.getAnnotations()) {
+                        // add the 'inherited' annotations to be examined for further stereotype annotations
+                        annotationTypes.add(annotation.annotationType());
 
-                    if (!annotation.annotationType().equals(
-                            stereotypeAnnotationClass)) {
-                        // add the stereotyped annotations to the set
-                        annotationSet.add(annotation);
+                        if (!annotation.annotationType().equals(stereotypeAnnotationClass)) {
+                            // add the stereotyped annotations to the set
+                            annotationSet.add(annotation);
+                        }
                     }
                 }
             }
@@ -158,8 +145,7 @@ public final class AnnotationUtils {
      * @param annotationClazz The type of the annotation to look for
      * @return The annotation with the given type if found, otherwise null
      */
-    public static <T extends Annotation> T findAnnotation(Method m,
-                                                          Class<?> clazz, Class<T> annotationClazz) {
+    public static <T extends Annotation> T findAnnotation(Method m, Class<?> clazz, Class<T> annotationClazz) {
         final T result = findAnnotation(m, annotationClazz);
         return result != null ? result : findAnnotation(clazz, annotationClazz);
     }
@@ -176,41 +162,18 @@ public final class AnnotationUtils {
      * @param annotationClazz The type of the annotation to look for
      * @return The annotation with the given type if found, otherwise null
      */
-    public static <T extends Annotation> T findAnnotation(Method m,
-                                                          Class<T> annotationClazz) {
-        List<Class<?>> annotationTypes = new ArrayList<Class<?>>();
-
-        // Iterate through all annotations of the current class
-        for (Annotation a : m.getAnnotations()) {
-
-            if (a.annotationType().equals(annotationClazz)) {
-                return annotationClazz.cast(a);
-            }
-
-            annotationTypes.add(a.annotationType());
+    public static <T extends Annotation> T findAnnotation(Method m, Class<T> annotationClazz) {
+        T annotation = m.getAnnotation(annotationClazz);
+        if (annotation != null) {
+            return annotation;
         }
 
-        while (!annotationTypes.isEmpty()) {
-            Class<?> annotationType = annotationTypes.remove(annotationTypes.size() - 1);
-
-            if (stereotypeAnnotationClass != null
-                    && annotationType
-                    .isAnnotationPresent(stereotypeAnnotationClass)) {
-                // If the stereotype annotation is present examaine the
-                // 'inherited' annotations
-                for (Annotation annotation : annotationType.getAnnotations()) {
-                    if (!annotation.annotationType().equals(
-                            stereotypeAnnotationClass)) {
-                        if (annotation.annotationType().equals(annotationClazz)) {
-                            return annotationClazz.cast(annotation);
-                        }
-                    }
-
-                    // add the 'inherited' annotations to be examined for
-                    // further stereotype annotations
-                    annotationTypes.add(annotation.annotationType());
-                }
+        if (stereotypeAnnotationClass != null) {
+            List<Class<?>> annotations = new ArrayList<>();
+            for (Annotation a : m.getAnnotations()) {
+                annotations.add(a.annotationType());
             }
+            return findAnnotation(annotations, annotationClazz);
         }
 
         return null;
@@ -227,44 +190,53 @@ public final class AnnotationUtils {
      * @param annotationClazz The type of the annotation to look for
      * @return The annotation with the given type if found, otherwise null
      */
-    public static <T extends Annotation> T findAnnotation(Class<?> clazz,
-                                                          Class<T> annotationClazz) {
-        List<Class<?>> annotationTypes = new ArrayList<Class<?>>();
+    public static <T extends Annotation> T findAnnotation(Class<?> clazz, Class<T> annotationClazz) {
+        T annotation = clazz.getAnnotation(annotationClazz);
+        if (annotation != null) {
+            return annotation;
+        }
 
-        // Iterate through all super types of the given class
-        for (Class<?> type : ReflectionUtils.getSuperTypes(clazz)) {
-            Annotation[] annotations = type.getAnnotations();
-
-            // Iterate through all annotations of the current class
-            for (Annotation a : annotations) {
-
-                if (a.annotationType().equals(annotationClazz)) {
-                    return annotationClazz.cast(a);
-                }
-
-                annotationTypes.add(a.annotationType());
+        Set<Class<?>> superTypes = ReflectionUtils.getSuperTypes(clazz);
+        for (Class<?> type : superTypes) {
+            annotation = type.getAnnotation(annotationClazz);
+            if (annotation != null) {
+                return annotation;
             }
         }
 
+        if (stereotypeAnnotationClass != null) {
+            List<Class<?>> annotations = new ArrayList<>();
+            for (Class<?> type : superTypes) {
+                for (Annotation a : type.getAnnotations()) {
+                    annotations.add(a.annotationType());
+                }
+            }
+
+            return findAnnotation(annotations, annotationClazz);
+        }
+
+        return null;
+    }
+
+    private static <T extends Annotation> T findAnnotation(List<Class<?>> annotationTypes, Class<T> annotationClazz) {
+        T annotation;
         while (!annotationTypes.isEmpty()) {
             Class<?> annotationType = annotationTypes.remove(annotationTypes.size() - 1);
 
-            if (stereotypeAnnotationClass != null
-                    && annotationType
-                    .isAnnotationPresent(stereotypeAnnotationClass)) {
-                // If the stereotype annotation is present examaine the
-                // 'inherited' annotations
-                for (Annotation annotation : annotationType.getAnnotations()) {
-                    if (!annotation.annotationType().equals(
-                            stereotypeAnnotationClass)) {
-                        if (annotation.annotationType().equals(annotationClazz)) {
-                            return annotationClazz.cast(annotation);
-                        }
-                    }
+            if (annotationType.isAnnotationPresent(stereotypeAnnotationClass)) {
+                // Fast path
+                annotation = annotationType.getAnnotation(annotationClazz);
+                if (annotation != null) {
+                    return annotation;
+                }
 
-                    // add the 'inherited' annotations to be examined for
-                    // further stereotype annotations
-                    annotationTypes.add(annotation.annotationType());
+                // If the stereotype annotation is present examine the 'inherited' annotations
+                for (Annotation a : annotationType.getAnnotations()) {
+                    Class<?> aType = a.annotationType();
+                    if (!aType.equals(stereotypeAnnotationClass)) {
+                        // add the 'inherited' annotations to be examined for further stereotype annotations
+                        annotationTypes.add(aType);
+                    }
                 }
             }
         }
