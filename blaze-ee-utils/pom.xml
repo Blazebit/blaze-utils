@@ -16,6 +16,10 @@
     <url>http://blazebit.com/utils</url>
     <description>Java EE Utilities for CDI, JPA ect.</description>
 
+    <properties>
+        <module.name>com.blazebit.ee.utils</module.name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.deltaspike.core</groupId>
@@ -58,6 +62,12 @@
         <dependency>
             <groupId>org.apache.openejb</groupId>
             <artifactId>openejb-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
             <scope>test</scope>
         </dependency>
         <dependency>

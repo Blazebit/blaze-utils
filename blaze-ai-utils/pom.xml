@@ -16,6 +16,10 @@
     <url>http://blazebit.com/utils</url>
     <description>Artificial Intelligence Utilities.</description>
 
+    <properties>
+        <module.name>com.blazebit.ai.utils</module.name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

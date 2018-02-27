@@ -16,6 +16,10 @@
     <url>http://blazebit.com/utils</url>
     <description>Utilities for JavaMail API</description>
 
+    <properties>
+        <module.name>com.blazebit.mail.utils</module.name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

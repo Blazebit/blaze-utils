@@ -16,6 +16,10 @@
     <url>http://blazebit.com/utils</url>
     <description>Common Utilities for Reflection ect.</description>
 
+    <properties>
+        <module.name>com.blazebit.common.utils</module.name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>

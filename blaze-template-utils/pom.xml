@@ -16,6 +16,10 @@
     <url>http://blazebit.com/utils</url>
     <description>Blazebit Template Utilities</description>
 
+    <properties>
+        <module.name>com.blazebit.template.utils</module.name>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.freemarker</groupId>
