@@ -316,10 +316,6 @@ public final class ReflectionUtils {
     private static Class<?> getClassThatContainsTypeVariable(TypeVariable<?> typeVariable) {
         if (typeVariable.getGenericDeclaration().getClass() == Class.class) {
             return (Class<?>) typeVariable.getGenericDeclaration();
-        } else if (typeVariable.getGenericDeclaration().getClass() == Method.class) {
-            return ((Method) typeVariable.getGenericDeclaration()).getDeclaringClass();
-        } else if (typeVariable.getGenericDeclaration().getClass() == Constructor.class) {
-            return ((Constructor<?>) typeVariable .getGenericDeclaration()).getDeclaringClass();
         }
 
         return null;
@@ -344,7 +340,7 @@ public final class ReflectionUtils {
         Class<?> classThatContainsTypeVariable = getClassThatContainsTypeVariable(typeVariable);
 
         // If the type variable is defined in the concrete class, we can only use the bounds
-        if (concreteClass == classThatContainsTypeVariable) {
+        if (classThatContainsTypeVariable == null || concreteClass == classThatContainsTypeVariable) {
             return resolve(concreteClass, typeVariable.getBounds()[0]);
         }
         if (!isSubtype(concreteClass, classThatContainsTypeVariable)) {
@@ -415,9 +411,11 @@ public final class ReflectionUtils {
                     // variables of the current class, so we can look in the next
                     // subclass for the concrete type
 
-                    position = getTypeVariablePosition(classToInspect,
-                            (TypeVariable<?>) resolvedType);
                     classThatContainsTypeVariable = getClassThatContainsTypeVariable((TypeVariable<?>) resolvedType);
+                    if (classThatContainsTypeVariable == null) {
+                        return resolve(concreteClass, ((TypeVariable<?>) resolvedType).getBounds()[0]);
+                    }
+                    position = getTypeVariablePosition(classToInspect, (TypeVariable<?>) resolvedType);
                     break;
                 } else if (resolvedType instanceof ParameterizedType) {
                     // Since we only want a class object, we don't

@@ -112,8 +112,19 @@ public class ReflectionUtilsTest {
 
     }
 
+    private interface SimpleInterface {
+
+        public <X> X get();
+
+    }
+
+    private interface SimpleSub extends SimpleInterface {
+
+    }
 
     private interface GenericInterfaceA<T, E extends Exception> {
+
+        public <X> X get();
 
         public T getField();
 
@@ -253,6 +264,12 @@ public class ReflectionUtilsTest {
      */
     @Test
     public void testGetResolvedMethodReturnType() throws Exception {
+        assertEquals(Object.class,
+                ReflectionUtils.getResolvedMethodReturnType(
+                        SimpleSub.class, "get"));
+        assertEquals(Object.class,
+                ReflectionUtils.getResolvedMethodReturnType(
+                        ConcreteInterfaceA.class, "get"));
         assertEquals(Integer.class,
                 ReflectionUtils.getResolvedMethodReturnType(
                         ConcreteClassA.class, ReflectionUtils.getGetter(
