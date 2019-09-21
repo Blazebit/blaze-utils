@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>blaze-utils</artifactId>
-    <version>0.1.18-SNAPSHOT</version>
+    <version>0.1.18</version>
     <packaging>pom</packaging>
 
     <name>Blazebit Utilities</name>
@@ -47,7 +47,7 @@
         <connection>scm:git:git@github.com:Blazebit/blaze-utils.git</connection>
         <developerConnection>scm:git:git@github.com:Blazebit/blaze-utils.git</developerConnection>
         <url>git@github.com:Blazebit/blaze-utils.git</url>
-        <tag>HEAD</tag>
+        <tag>0.1.18</tag>
     </scm>
 
     <developers>

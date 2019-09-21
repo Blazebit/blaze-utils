@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.blazebit</groupId>
         <artifactId>blaze-utils</artifactId>
-        <version>0.1.18-SNAPSHOT</version>
+        <version>0.1.18</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
