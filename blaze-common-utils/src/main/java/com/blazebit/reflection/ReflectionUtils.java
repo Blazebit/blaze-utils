@@ -439,6 +439,10 @@ public final class ReflectionUtils {
             }
         }
 
+        if (resolvedType == typeVariable) {
+            // The type variable was not assigned a type, so let's use the bounds
+            return resolve(concreteClass, typeVariable.getBounds()[0]);
+        }
         return resolvedType;
     }
 

@@ -112,6 +112,14 @@ public class ReflectionUtilsTest {
 
     }
 
+    private class GenericBaseClassA<T extends Integer, E extends Exception> extends GenericClassA<T, E> {
+
+    }
+
+    private class GenericSubClassA extends GenericBaseClassA {
+
+    }
+
     private interface SimpleInterface {
 
         public <X> X get();
@@ -249,6 +257,87 @@ public class ReflectionUtilsTest {
     }
 
     /**
+     * Test of resolveTypeVariable method, of class ReflectionUtil.
+     */
+    @Test
+    public void testResolveTypeVariable2() throws Exception {
+        // Resolve field types
+
+        TypeVariable<?> typeVariable = (TypeVariable<?>) ReflectionUtils
+                .getField(GenericSubClassA.class, "field").getGenericType();
+        Class<?> concreteType = ReflectionUtils.resolveTypeVariable(
+                GenericSubClassA.class, typeVariable);
+        assertEquals(Integer.class, concreteType);
+
+        typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
+                .getField(GenericSubClassA.class, "fieldCollection")
+                .getGenericType()).getActualTypeArguments()[0];
+        concreteType = ReflectionUtils.resolveTypeVariable(
+                GenericSubClassA.class, typeVariable);
+        assertEquals(Integer.class, concreteType);
+
+        typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
+                .getField(GenericSubClassA.class, "fieldMap").getGenericType())
+                .getActualTypeArguments()[0];
+        concreteType = ReflectionUtils.resolveTypeVariable(
+                GenericSubClassA.class, typeVariable);
+        assertEquals(Integer.class, concreteType);
+
+        // Resolve method return types
+
+        typeVariable = (TypeVariable<?>) ReflectionUtils.getGetter(
+                GenericSubClassA.class, "field").getGenericReturnType();
+        concreteType = ReflectionUtils.resolveTypeVariable(
+                GenericSubClassA.class, typeVariable);
+        assertEquals(Integer.class, concreteType);
+
+        typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
+                .getGetter(GenericSubClassA.class, "fieldCollection")
+                .getGenericReturnType()).getActualTypeArguments()[0];
+        concreteType = ReflectionUtils.resolveTypeVariable(
+                GenericSubClassA.class, typeVariable);
+        assertEquals(Integer.class, concreteType);
+
+        typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
+                .getGetter(GenericSubClassA.class, "fieldMap")
+                .getGenericReturnType()).getActualTypeArguments()[0];
+        concreteType = ReflectionUtils.resolveTypeVariable(
+                GenericSubClassA.class, typeVariable);
+        assertEquals(Integer.class, concreteType);
+
+        // Resolve method parameter types
+
+        typeVariable = (TypeVariable<?>) ReflectionUtils.getSetter(
+                GenericSubClassA.class, "field").getGenericParameterTypes()[0];
+        concreteType = ReflectionUtils.resolveTypeVariable(
+                GenericSubClassA.class, typeVariable);
+        assertEquals(Integer.class, concreteType);
+
+        typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
+                .getSetter(GenericSubClassA.class, "fieldCollection")
+                .getGenericParameterTypes()[0]).getActualTypeArguments()[0];
+        concreteType = ReflectionUtils.resolveTypeVariable(
+                GenericSubClassA.class, typeVariable);
+        assertEquals(Integer.class, concreteType);
+
+        typeVariable = (TypeVariable<?>) ((ParameterizedType) ReflectionUtils
+                .getSetter(GenericSubClassA.class, "fieldMap")
+                .getGenericParameterTypes()[0]).getActualTypeArguments()[0];
+        concreteType = ReflectionUtils.resolveTypeVariable(
+                GenericSubClassA.class, typeVariable);
+        assertEquals(Integer.class, concreteType);
+
+        // Resolve method throws types
+
+        typeVariable = (TypeVariable<?>) ReflectionUtils.getMethod(
+                GenericSubClassA.class, "throwsException")
+                .getGenericExceptionTypes()[0];
+        concreteType = ReflectionUtils.resolveTypeVariable(
+                GenericSubClassA.class, typeVariable);
+        assertEquals(Exception.class, concreteType);
+    }
+
+    /**
      * Test of getMethodExceptionTypes method, of class ReflectionUtil.
      */
     @Test
@@ -257,6 +346,17 @@ public class ReflectionUtilsTest {
                 ConcreteClassA.class, "throwsException")[0]);
         assertNull(ReflectionUtils.getMethodExceptionTypes(
                 ConcreteClassA.class, ""));
+    }
+
+    /**
+     * Test of getMethodExceptionTypes method, of class ReflectionUtil.
+     */
+    @Test
+    public void testGetMethodExceptionTypes2() throws Exception {
+        assertEquals(Exception.class, ReflectionUtils.getMethodExceptionTypes(
+                GenericSubClassA.class, "throwsException")[0]);
+        assertNull(ReflectionUtils.getMethodExceptionTypes(
+                GenericSubClassA.class, ""));
     }
 
     /**
@@ -276,6 +376,12 @@ public class ReflectionUtilsTest {
                                 ConcreteClassA.class, "field")));
         assertNull(ReflectionUtils.getResolvedMethodReturnType(
                 ConcreteClassA.class, ""));
+        assertEquals(Integer.class,
+                ReflectionUtils.getResolvedMethodReturnType(
+                        GenericSubClassA.class, ReflectionUtils.getGetter(
+                                GenericSubClassA.class, "field")));
+        assertNull(ReflectionUtils.getResolvedMethodReturnType(
+                GenericSubClassA.class, ""));
     }
 
     /**
@@ -300,6 +406,27 @@ public class ReflectionUtilsTest {
     }
 
     /**
+     * Test of getResolvedMethodReturnTypeArguments method, of class
+     * ReflectionUtil.
+     */
+    @Test
+    public void testGetResolvedMethodReturnTypeArguments2() throws Exception {
+        assertEquals(Integer.class,
+                ReflectionUtils.getResolvedMethodReturnTypeArguments(
+                        GenericSubClassA.class, ReflectionUtils.getGetter(
+                                GenericSubClassA.class, "fieldCollection"))[0]);
+        assertEquals(Integer.class,
+                ReflectionUtils.getResolvedMethodReturnTypeArguments(
+                        GenericSubClassA.class, ReflectionUtils.getGetter(
+                                GenericSubClassA.class, "fieldMap"))[0]);
+        assertArrayEquals(new Class<?>[0],
+                ReflectionUtils.getResolvedMethodReturnTypeArguments(
+                        GenericSubClassA.class, "throwsException"));
+        assertNull(ReflectionUtils.getResolvedMethodReturnTypeArguments(
+                GenericSubClassA.class, ""));
+    }
+
+    /**
      * Test of getResolvedMethodParameterTypes method, of class ReflectionUtil.
      */
     @Test
@@ -316,6 +443,22 @@ public class ReflectionUtilsTest {
     }
 
     /**
+     * Test of getResolvedMethodParameterTypes method, of class ReflectionUtil.
+     */
+    @Test
+    public void testGetResolvedMethodParameterTypes2() throws Exception {
+        assertEquals(Integer.class,
+                ReflectionUtils.getResolvedMethodParameterTypes(
+                        GenericSubClassA.class, ReflectionUtils.getSetter(
+                                GenericSubClassA.class, "field"))[0]);
+        assertArrayEquals(new Class<?>[0],
+                ReflectionUtils.getResolvedMethodParameterTypes(
+                        GenericSubClassA.class, "throwsException"));
+        assertNull(ReflectionUtils.getResolvedMethodParameterTypes(
+                GenericSubClassA.class, ""));
+    }
+
+    /**
      * Test of getResolvedMethodExceptionTypes method, of class ReflectionUtil.
      */
     @Test
@@ -329,6 +472,22 @@ public class ReflectionUtilsTest {
                         ConcreteClassA.class, "getField"));
         assertNull(ReflectionUtils.getResolvedMethodExceptionTypes(
                 ConcreteClassA.class, ""));
+    }
+
+    /**
+     * Test of getResolvedMethodExceptionTypes method, of class ReflectionUtil.
+     */
+    @Test
+    public void testGetResolvedMethodExceptionTypes2() throws Exception {
+        assertEquals(Exception.class,
+                ReflectionUtils.getResolvedMethodExceptionTypes(
+                        GenericSubClassA.class, ReflectionUtils.getMethod(
+                                GenericSubClassA.class, "throwsException"))[0]);
+        assertArrayEquals(new Class<?>[0],
+                ReflectionUtils.getResolvedMethodExceptionTypes(
+                        GenericSubClassA.class, "getField"));
+        assertNull(ReflectionUtils.getResolvedMethodExceptionTypes(
+                GenericSubClassA.class, ""));
     }
 
     /**
