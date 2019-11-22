@@ -5,22 +5,23 @@ package com.blazebit.text;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * @author Christian Beikov
- * @since 0.1.2
+ * @since 0.1.9
  */
-public class DateFormat extends AbstractFormat<Date> {
+public class GregorianCalendarFormat extends AbstractFormat<GregorianCalendar> {
 
     private static final long serialVersionUID = 1L;
 
-    public DateFormat() {
-        super(Date.class);
+    public GregorianCalendarFormat() {
+        super(GregorianCalendar.class);
     }
 
     @SuppressWarnings("unused")
-    public Date parse(String value, ParserContext context) throws ParseException {
+    public GregorianCalendar parse(String value, ParserContext context) throws ParseException {
+        GregorianCalendar calendar = new GregorianCalendar();
         Object o = null;
 
         if (context != null) {
@@ -35,11 +36,13 @@ public class DateFormat extends AbstractFormat<Date> {
         if (o == null) {
             o = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         }
-        return ((java.text.DateFormat) o).parse(value);
+
+        calendar.setTime(((java.text.DateFormat) o).parse(value));
+        return calendar;
     }
 
     @Override
-    public String format(Date value, ParserContext context) {
+    public String format(GregorianCalendar value, ParserContext context) {
         Object o = null;
 
         if (context != null) {
@@ -55,6 +58,6 @@ public class DateFormat extends AbstractFormat<Date> {
             o = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         }
 
-        return ((java.text.DateFormat) o).format(value);
+        return ((java.text.DateFormat) o).format(value.getTime());
     }
 }

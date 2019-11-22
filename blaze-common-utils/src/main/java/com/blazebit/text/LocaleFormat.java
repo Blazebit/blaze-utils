@@ -3,6 +3,8 @@
  */
 package com.blazebit.text;
 
+import com.blazebit.i18n.LocaleUtils;
+
 import java.util.Locale;
 
 /**
@@ -17,13 +19,7 @@ public class LocaleFormat extends AbstractFormat<Locale> {
     }
 
     public Locale parse(String value, ParserContext context) {
-        return new Locale(value);
-    }
-
-    @Override
-    public StringBuffer format(Object obj, StringBuffer toAppendTo) {
-        toAppendTo.append(((Locale) obj).getLanguage());
-        return toAppendTo;
+        return LocaleUtils.getLocale(value);
     }
 
 }

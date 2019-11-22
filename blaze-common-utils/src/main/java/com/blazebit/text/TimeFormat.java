@@ -3,24 +3,24 @@
  */
 package com.blazebit.text;
 
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * @author Christian Beikov
- * @since 0.1.2
+ * @since 0.1.9
  */
-public class DateFormat extends AbstractFormat<Date> {
+public class TimeFormat extends AbstractFormat<Time> {
 
     private static final long serialVersionUID = 1L;
 
-    public DateFormat() {
-        super(Date.class);
+    public TimeFormat() {
+        super(Time.class);
     }
 
     @SuppressWarnings("unused")
-    public Date parse(String value, ParserContext context) throws ParseException {
+    public Time parse(String value, ParserContext context) throws ParseException {
         Object o = null;
 
         if (context != null) {
@@ -35,11 +35,12 @@ public class DateFormat extends AbstractFormat<Date> {
         if (o == null) {
             o = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         }
-        return ((java.text.DateFormat) o).parse(value);
+
+        return new Time(((java.text.DateFormat) o).parse(value).getTime());
     }
 
     @Override
-    public String format(Date value, ParserContext context) {
+    public String format(Time value, ParserContext context) {
         Object o = null;
 
         if (context != null) {
@@ -55,6 +56,6 @@ public class DateFormat extends AbstractFormat<Date> {
             o = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         }
 
-        return ((java.text.DateFormat) o).format(value);
+        return ((java.text.DateFormat) o).format(value.getTime());
     }
 }

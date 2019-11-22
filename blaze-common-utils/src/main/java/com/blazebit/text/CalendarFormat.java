@@ -4,6 +4,7 @@
 package com.blazebit.text;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -19,12 +20,12 @@ public class CalendarFormat extends AbstractFormat<Calendar> {
     }
 
     @SuppressWarnings("unused")
-    public Calendar parse(String value, ParserContext context) {
+    public Calendar parse(String value, ParserContext context) throws ParseException {
         Calendar calendar = Calendar.getInstance();
         Object o = null;
 
         if (context != null) {
-            context.getAttribute("format");
+            o = context.getAttribute("format");
 
             if (o != null && !(o instanceof java.text.DateFormat)) {
                 throw new IllegalArgumentException(
@@ -33,15 +34,11 @@ public class CalendarFormat extends AbstractFormat<Calendar> {
         }
 
         if (o == null) {
-            o = java.text.DateFormat.getDateTimeInstance();
+            o = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         }
 
-        try {
-            calendar.setTime(((java.text.DateFormat) o).parse(value));
-            return calendar;
-        } catch (ParseException ex) {
-            return null;
-        }
+        calendar.setTime(((java.text.DateFormat) o).parse(value));
+        return calendar;
     }
 
     @Override
@@ -58,7 +55,7 @@ public class CalendarFormat extends AbstractFormat<Calendar> {
         }
 
         if (o == null) {
-            o = java.text.DateFormat.getDateTimeInstance();
+            o = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         }
 
         return ((java.text.DateFormat) o).format(value.getTime());

@@ -3,13 +3,24 @@
  */
 package com.blazebit.text;
 
-import com.blazebit.reflection.ReflectionUtils;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.ParseException;
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
 
 /**
  * @author Christian Beikov
@@ -36,13 +47,39 @@ public final class FormatUtils {
         parseableTypes.put(Byte.class, new ByteFormat());
         parseableTypes.put(Short.class, new ShortFormat());
         parseableTypes.put(String.class, new StringFormat());
+        parseableTypes.put(BigInteger.class, new BigIntegerFormat());
         parseableTypes.put(BigDecimal.class, new BigDecimalFormat());
         parseableTypes.put(Date.class, new DateFormat());
+        parseableTypes.put(java.sql.Date.class, new SqlDateFormat());
+        parseableTypes.put(Timestamp.class, new TimestampFormat());
+        parseableTypes.put(Time.class, new TimeFormat());
         parseableTypes.put(Calendar.class, new CalendarFormat());
+        parseableTypes.put(GregorianCalendar.class, new GregorianCalendarFormat());
         parseableTypes.put(Locale.class, new LocaleFormat());
         parseableTypes.put(TimeZone.class, new TimeZoneFormat());
         parseableTypes.put(Currency.class, new CurrencyFormat());
         parseableTypes.put(Class.class, new ClassFormat());
+        parseableTypes.put(UUID.class, new UUIDFormat());
+        parseableTypes.put(URL.class, new URLFormat());
+
+        try {
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.Instant"), new InstantFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.LocalDateTime"), new LocalDateTimeFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.LocalDate"), new LocalDateFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.LocalTime"), new LocalTimeFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.OffsetTime"), new OffsetTimeFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.OffsetDateTime"), new OffsetDateTimeFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.ZonedDateTime"), new ZonedDateTimeFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.Duration"), new DurationFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.MonthDay"), new MonthDayFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.Year"), new YearFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.YearMonth"), new YearMonthFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.Period"), new PeriodFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.ZoneId"), new ZoneIdFormat());
+            parseableTypes.put((Class<? extends Serializable>) Class.forName("java.time.ZoneOffset"), new ZoneOffsetFormat());
+        } catch (ClassNotFoundException ex) {
+            // We are on Java 7
+        }
     }
 
     private static class ParserContextImpl implements ParserContext {
@@ -107,21 +144,19 @@ public final class FormatUtils {
     /**
      * Returns the parsed object of the given type for the given string.
      * Invoking this method is equal to invoking #
-     * {@link ReflectionUtils#getParsedValue(java.lang.Class, java.lang.String, java.text.DateFormat, java.text.DateFormat)}
-     * and the 3rd argument <code>DateFormat.getDateTimeInstance()</code>
+     * {@link FormatUtils#getParsedValue(java.lang.Class, java.lang.String, java.text.DateFormat)}
+     * and the 3rd argument <code>new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")</code>
      *
      * @param returnType The type to which the value should be parsed
      * @param value      The string that should be parsed
      * @return The parsed object
      * @throws ParseException Is thrown when the string can not be parsed
-     * @see ReflectionUtils#isParseableType(java.lang.Class)
-     * @see ReflectionUtils#getParsedValue(java.lang.Class, java.lang.String,
-     * java.text.DateFormat, java.text.DateFormat)
+     * @see FormatUtils#isParseableType(java.lang.Class)
+     * @see FormatUtils#getParsedValue(Class, String, java.text.DateFormat)
      */
     public static <T extends Serializable> T getParsedValue(
             Class<T> returnType, String value) throws ParseException {
-        return getParsedValue(returnType, value,
-                java.text.DateFormat.getDateTimeInstance());
+        return getParsedValue(returnType, value, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"));
     }
 
     /**
@@ -132,45 +167,42 @@ public final class FormatUtils {
      *
      * @param returnType    The type to which the value should be parsed
      * @param value         The string that should be parsed
-     * @param dateFormatter The date format which should be used for string to
+     * @param dateFormat The date format which should be used for string to
      *                      date/calendar conversion
      * @return The parsed object
      * @throws ParseException Is thrown when the string can not be parsed
-     * @see ReflectionUtils#isParseableType(java.lang.Class)
+     * @see FormatUtils#isParseableType(java.lang.Class)
      */
     public static <T extends Serializable> T getParsedValue(
             Class<T> returnType, String value,
-            java.text.DateFormat dateFormatter) throws ParseException {
-        SerializableFormat<T> formatter = (SerializableFormat<T>) parseableTypes
-                .get(returnType);
+            java.text.DateFormat dateFormat) throws ParseException {
+        SerializableFormat<T> formatter = (SerializableFormat<T>) parseableTypes.get(returnType);
 
         if (formatter == null) {
             throw new IllegalArgumentException("Unknown return type");
         }
 
         ParserContextImpl ctx = new ParserContextImpl();
-        ctx.setAttribute("format", dateFormatter);
+        ctx.setAttribute("format", dateFormat);
 
         return formatter.parse(value, ctx);
     }
 
     public static <T extends Serializable> String getFormattedValue(
             Class<T> type, T object) {
-        return getFormattedValue(type, object,
-                java.text.DateFormat.getDateTimeInstance());
+        return getFormattedValue(type, object, new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS"));
     }
 
     public static <T extends Serializable> String getFormattedValue(
-            Class<T> type, T object, java.text.DateFormat dateFormatter) {
-        SerializableFormat<T> formatter = (SerializableFormat<T>) parseableTypes
-                .get(type);
+            Class<T> type, T object, java.text.DateFormat dateFormat) {
+        SerializableFormat<T> formatter = (SerializableFormat<T>) parseableTypes.get(type);
 
         if (formatter == null) {
             throw new IllegalArgumentException("Unknown return type");
         }
 
         ParserContextImpl ctx = new ParserContextImpl();
-        ctx.setAttribute("format", dateFormatter);
+        ctx.setAttribute("format", dateFormat);
 
         return formatter.format(object, ctx);
     }

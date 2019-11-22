@@ -20,4 +20,8 @@ public class TimeZoneFormat extends AbstractFormat<TimeZone> {
         return TimeZone.getTimeZone(value);
     }
 
+    @Override
+    public String format(TimeZone object, ParserContext context) {
+        return object.getID();
+    }
 }

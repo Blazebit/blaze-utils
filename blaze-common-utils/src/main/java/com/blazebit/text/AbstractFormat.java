@@ -6,6 +6,7 @@ package com.blazebit.text;
 import java.io.Serializable;
 import java.text.FieldPosition;
 import java.text.Format;
+import java.text.ParseException;
 import java.text.ParsePosition;
 
 /**
@@ -48,6 +49,10 @@ public abstract class AbstractFormat<T extends Serializable> extends Format
 
     @Override
     public Object parseObject(String source, ParsePosition pos) {
-        return parse(source, null);
+        try {
+            return parse(source, null);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 }

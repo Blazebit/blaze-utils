@@ -3,19 +3,19 @@
  */
 package com.blazebit.text;
 
+import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * @author Christian Beikov
- * @since 0.1.2
+ * @since 0.1.9
  */
-public class DateFormat extends AbstractFormat<Date> {
+public class SqlDateFormat extends AbstractFormat<Date> {
 
     private static final long serialVersionUID = 1L;
 
-    public DateFormat() {
+    public SqlDateFormat() {
         super(Date.class);
     }
 
@@ -35,7 +35,8 @@ public class DateFormat extends AbstractFormat<Date> {
         if (o == null) {
             o = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         }
-        return ((java.text.DateFormat) o).parse(value);
+
+        return new Date(((java.text.DateFormat) o).parse(value).getTime());
     }
 
     @Override
@@ -55,6 +56,6 @@ public class DateFormat extends AbstractFormat<Date> {
             o = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         }
 
-        return ((java.text.DateFormat) o).format(value);
+        return ((java.text.DateFormat) o).format(value.getTime());
     }
 }
