@@ -138,7 +138,7 @@ public final class FormatUtils {
      * @return true if the type is parseable, otherwise false
      */
     public static boolean isParseableType(Class<?> type) {
-        return parseableTypes.containsKey(type);
+        return parseableTypes.containsKey(type) || type.isEnum();
     }
 
     /**
@@ -179,6 +179,9 @@ public final class FormatUtils {
         SerializableFormat<T> formatter = (SerializableFormat<T>) parseableTypes.get(returnType);
 
         if (formatter == null) {
+            if (returnType.isEnum()) {
+                return (T) Enum.valueOf((Class<Enum>) returnType, value);
+            }
             throw new IllegalArgumentException("Unknown return type");
         }
 
@@ -198,6 +201,9 @@ public final class FormatUtils {
         SerializableFormat<T> formatter = (SerializableFormat<T>) parseableTypes.get(type);
 
         if (formatter == null) {
+            if (object instanceof Enum<?>) {
+                return ((Enum<?>) object).name();
+            }
             throw new IllegalArgumentException("Unknown return type");
         }
 
