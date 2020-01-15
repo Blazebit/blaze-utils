@@ -5,6 +5,7 @@ package com.blazebit.reflection;
 
 import com.blazebit.lang.ValueAccessor;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -22,8 +23,10 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
     private final Class<X> source;
     private String[] explodedPropertyPath;
     private Method[] getterChain;
+    private Field[] fieldChain;
     private Method leafGetter;
     private Method leafSetter;
+    private Field leafField;
     private volatile boolean dirty = true;
 
     /**
@@ -65,8 +68,8 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
                 if (dirty) {
                     final String[] properties = explodedPropertyPath;
                     final int getterChainLength = properties.length - 1;
-                    final List<Method> getters = new ArrayList<Method>(
-                            getterChainLength);
+                    final List<Method> getters = new ArrayList<>(getterChainLength);
+                    final List<Field> fields = new ArrayList<>(getterChainLength);
 
                     Class<?> current = source;
 
@@ -79,10 +82,16 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
                             final Method getter = ReflectionUtils.getGetter(
                                     current, properties[i]);
                             getters.add(getter);
-                            current = ReflectionUtils
-                                    .getResolvedMethodReturnType(current,
-                                            getter);
-
+                            if (getter == null) {
+                                Field field = ReflectionUtils.getField(current, properties[i]);
+                                field.setAccessible(true);
+                                fields.add(field);
+                                current = ReflectionUtils.getResolvedFieldType(current, field);
+                            } else {
+                                getter.setAccessible(true);
+                                fields.add(null);
+                                current = ReflectionUtils.getResolvedMethodReturnType(current, getter);
+                            }
                             if (current == null) {
                                 break;
                             }
@@ -90,13 +99,22 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
                     }
 
                     getterChain = getters.toArray(new Method[0]);
+                    fieldChain = fields.toArray(new Field[0]);
 
                     if (current != null) {
 						/* Retrieve the leaf methods for get and set access */
-                        leafGetter = ReflectionUtils.getGetter(current,
-                                properties[getterChainLength]);
-                        leafSetter = ReflectionUtils.getSetter(current,
-                                properties[getterChainLength]);
+                        leafGetter = ReflectionUtils.getGetter(current, properties[getterChainLength]);
+                        leafSetter = ReflectionUtils.getSetter(current, properties[getterChainLength]);
+                        leafField = ReflectionUtils.getField(current, properties[getterChainLength]);
+                        if (leafGetter != null) {
+                            leafGetter.setAccessible(true);
+                        }
+                        if (leafSetter != null) {
+                            leafSetter.setAccessible(true);
+                        }
+                        if (leafField != null) {
+                            leafField.setAccessible(true);
+                        }
                     }
 
                     dirty = false;
@@ -140,13 +158,28 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
 
         try {
             Object leafObj = getLeafObject(target, nullSafe);
-            final Method getter = leafGetter == null && leafObj != null ? ReflectionUtils
-                    .getGetter(
-                            leafObj.getClass(),
-                            explodedPropertyPath[explodedPropertyPath.length - 1])
-                    : leafGetter;
-            return nullSafe && leafObj == null ? null : (Y) getter
-                    .invoke(leafObj);
+            if (nullSafe && leafObj == null) {
+                return null;
+            }
+            if (leafField != null) {
+                return (Y) leafField.get(leafObj);
+            } else {
+                final Method getter;
+                if (leafGetter == null && leafObj != null) {
+                    getter = ReflectionUtils.getGetter(leafObj.getClass(), explodedPropertyPath[explodedPropertyPath.length - 1]);
+                    if (getter != null) {
+                        getter.setAccessible(true);
+                    }
+                } else {
+                    getter = leafGetter;
+                }
+                if (getter == null && leafObj != null) {
+                    Field field = ReflectionUtils.getField(leafObj.getClass(), explodedPropertyPath[explodedPropertyPath.length - 1]);
+                    field.setAccessible(true);
+                    return (Y) field.get(leafObj);
+                }
+                return (Y) getter.invoke(leafObj);
+            }
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -159,12 +192,26 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
 
         try {
             Object leafObj = getLeafObject(target, false);
-            final Method setter = leafSetter == null && leafObj != null ? ReflectionUtils
-                    .getSetter(
-                            leafObj.getClass(),
-                            explodedPropertyPath[explodedPropertyPath.length - 1])
-                    : leafSetter;
-            setter.invoke(leafObj, value);
+            if (leafField != null) {
+                leafField.set(leafObj, value);
+            } else {
+                final Method setter;
+                if (leafSetter == null && leafObj != null) {
+                    setter = ReflectionUtils.getSetter(leafObj.getClass(), explodedPropertyPath[explodedPropertyPath.length - 1]);
+                    if (setter != null) {
+                        setter.setAccessible(true);
+                    }
+                } else {
+                    setter = leafSetter;
+                }
+                if (setter == null && leafObj != null) {
+                    Field f = ReflectionUtils.getField(leafObj.getClass(), explodedPropertyPath[explodedPropertyPath.length - 1]);
+                    f.setAccessible(true);
+                    f.set(leafObj, value);
+                } else {
+                    setter.invoke(leafObj, value);
+                }
+            }
         } catch (RuntimeException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -185,20 +232,37 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
 
         Object current = target;
         final Method[] getters = getterChain;
+        final Field[] fields = fieldChain;
         int i = 0;
 
         if (getters.length > 0) {
             for (; i < getters.length; i++) {
-                current = getters[i].invoke(current);
+                Method getter = getters[i];
+                if (getter == null) {
+                    Field field = fields[i];
+                    current = field.get(current);
 
-                if (current == null) {
-                    if (nullSafe) {
-                        return null;
+                    if (current == null) {
+                        if (nullSafe) {
+                            return null;
+                        }
+
+                        throw new NullPointerException(new StringBuilder(
+                            field.getName()).append(" returned null")
+                                                           .toString());
                     }
+                } else {
+                    current = getter.invoke(current);
 
-                    throw new NullPointerException(new StringBuilder(
-                            getters[i].getName()).append(" returned null")
-                            .toString());
+                    if (current == null) {
+                        if (nullSafe) {
+                            return null;
+                        }
+
+                        throw new NullPointerException(new StringBuilder(
+                            getter.getName()).append(" returned null")
+                                                           .toString());
+                    }
                 }
             }
         }
@@ -206,8 +270,15 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
         final String[] properties = explodedPropertyPath;
 
         for (; i < properties.length - 1; i++) {
-            current = ReflectionUtils.getGetter(current.getClass(),
-                    properties[i]).invoke(current);
+            Method getter = ReflectionUtils.getGetter(current.getClass(), properties[i]);
+            if (getter == null) {
+                Field field = ReflectionUtils.getField(current.getClass(), properties[i]);
+                field.setAccessible(true);
+                current = field.get(current);
+            } else {
+                getter.setAccessible(true);
+                current = getter.invoke(current);
+            }
 
             if (current == null) {
                 if (nullSafe) {
