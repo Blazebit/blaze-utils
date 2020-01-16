@@ -19,18 +19,29 @@ public final class ExpressionUtils {
         return getValueHolder(source, target, propertyPath, (Class<Y>) null);
     }
 
+    public static <X, Y> PropertyPathExpressionValueHolder<X, Y> getValueHolder(
+        Class<X> source, X target, String propertyPath, boolean allowFieldAccess) {
+        return getValueHolder(source, target, propertyPath, (Class<Y>) null, allowFieldAccess);
+    }
+
 	/* With value class */
 
     @SuppressWarnings("unchecked")
     public static <X, Y> PropertyPathExpression<X, Y> getExpression(
             Class<X> source, String propertyPath, Class<Y> valueClass) {
+        return getExpression(source, propertyPath, valueClass, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <X, Y> PropertyPathExpression<X, Y> getExpression(
+        Class<X> source, String propertyPath, Class<Y> valueClass, boolean allowFieldAccess) {
         final PropertyPathExpressionKey key = new PropertyPathExpressionKey(
-                source, propertyPath);
+            source, propertyPath, allowFieldAccess);
         PropertyPathExpression<Object, Object> expression = cache.get(key);
 
         if (expression == null) {
             expression = new PropertyPathExpression<Object, Object>(
-                    (Class<Object>) source, propertyPath);
+                    (Class<Object>) source, propertyPath, allowFieldAccess);
             final PropertyPathExpression<Object, Object> oldExpression = cache
                     .putIfAbsent(key, expression);
 
@@ -44,8 +55,12 @@ public final class ExpressionUtils {
 
     public static <X, Y> PropertyPathExpressionValueHolder<X, Y> getValueHolder(
             Class<X> source, X target, String propertyPath, Class<Y> valueClass) {
-        return new PropertyPathExpressionValueHolder<X, Y>(target,
-                getExpression(source, propertyPath, valueClass));
+        return new PropertyPathExpressionValueHolder<X, Y>(target, getExpression(source, propertyPath, valueClass));
+    }
+
+    public static <X, Y> PropertyPathExpressionValueHolder<X, Y> getValueHolder(
+        Class<X> source, X target, String propertyPath, Class<Y> valueClass, boolean allowFieldAccess) {
+        return new PropertyPathExpressionValueHolder<X, Y>(target, getExpression(source, propertyPath, valueClass, allowFieldAccess));
     }
 
 	/* With source class */
@@ -65,6 +80,21 @@ public final class ExpressionUtils {
         getExpression(source, propertyPath).setValue(target, value);
     }
 
+    public static <X, Y> Y getValue(Class<X> source, X target,
+                                    String propertyPath, boolean allowFieldAccess) {
+        return getValue(source, target, propertyPath, (Class<Y>) null, allowFieldAccess);
+    }
+
+    public static <X, Y> Y getNullSafeValue(Class<X> source, X target,
+                                            String propertyPath, boolean allowFieldAccess) {
+        return getNullSafeValue(source, target, propertyPath, (Class<Y>) null, allowFieldAccess);
+    }
+
+    public static <X, Y> void setValue(Class<X> source, X target,
+                                       String propertyPath, Y value, boolean allowFieldAccess) {
+        getExpression(source, propertyPath, null, allowFieldAccess).setValue(target, value);
+    }
+
 	/* With value class */
 
     public static <X, Y> Y getValue(Class<X> source, X target,
@@ -76,6 +106,17 @@ public final class ExpressionUtils {
                                             String propertyPath, Class<Y> valueClass) {
         return getExpression(source, propertyPath, valueClass)
                 .getNullSafeValue(target);
+    }
+
+    public static <X, Y> Y getValue(Class<X> source, X target,
+                                    String propertyPath, Class<Y> valueClass, boolean allowFieldAccess) {
+        return getExpression(source, propertyPath, valueClass, allowFieldAccess).getValue(target);
+    }
+
+    public static <X, Y> Y getNullSafeValue(Class<X> source, X target,
+                                            String propertyPath, Class<Y> valueClass, boolean allowFieldAccess) {
+        return getExpression(source, propertyPath, valueClass, allowFieldAccess)
+            .getNullSafeValue(target);
     }
 
 	/* Without source class */
@@ -92,6 +133,20 @@ public final class ExpressionUtils {
     public static <X, Y> void setValue(X target, String propertyPath, Y value) {
         getExpression((Class<X>) target.getClass(), propertyPath).setValue(
                 target, value);
+    }
+
+    public static <X, Y> Y getValue(X target, String propertyPath, boolean allowFieldAccess) {
+        return getValue(target, propertyPath, null, allowFieldAccess);
+    }
+
+    public static <X, Y> Y getNullSafeValue(X target, String propertyPath, boolean allowFieldAccess) {
+        return getNullSafeValue(target, propertyPath, null, allowFieldAccess);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <X, Y> void setValue(X target, String propertyPath, Y value, boolean allowFieldAccess) {
+        getExpression((Class<X>) target.getClass(), propertyPath, null, allowFieldAccess).setValue(
+            target, value);
     }
 
 	/* With value class */
@@ -111,13 +166,30 @@ public final class ExpressionUtils {
                 .getNullSafeValue(target);
     }
 
-    private static class PropertyPathExpressionKey {
-        Class<?> source;
-        String propertyPath;
+    @SuppressWarnings("unchecked")
+    public static <X, Y> Y getValue(X target, String propertyPath,
+                                    Class<Y> valueClass, boolean allowFieldAccess) {
+        return getExpression((Class<X>) target.getClass(), propertyPath,
+                             valueClass, allowFieldAccess).getValue(target);
+    }
 
-        public PropertyPathExpressionKey(Class<?> source, String propertyPath) {
+    @SuppressWarnings("unchecked")
+    public static <X, Y> Y getNullSafeValue(X target, String propertyPath,
+                                            Class<Y> valueClass, boolean allowFieldAccess) {
+        return target == null ? null : getExpression(
+            (Class<X>) target.getClass(), propertyPath, valueClass, allowFieldAccess)
+            .getNullSafeValue(target);
+    }
+
+    private static class PropertyPathExpressionKey {
+        final Class<?> source;
+        final String propertyPath;
+        final boolean allowField;
+
+        public PropertyPathExpressionKey(Class<?> source, String propertyPath, boolean allowField) {
             this.source = source;
             this.propertyPath = propertyPath;
+            this.allowField = allowField;
         }
 
         @Override

@@ -7,9 +7,9 @@ import static org.junit.Assert.assertEquals;
 public class PropertyPathExpressionFieldTest {
 
     private PropertyPathExpression<Car, String> nameExpression = new PropertyPathExpression<Car, String>(
-            Car.class, "name");
+            Car.class, "name", true);
     private PropertyPathExpression<Car, String> vendorNameExpression = new PropertyPathExpression<Car, String>(
-            Car.class, "vendor.name");
+            Car.class, "vendor.name", true);
 
     @Test
     public void testSetValue() {
@@ -37,7 +37,7 @@ public class PropertyPathExpressionFieldTest {
         assertEquals("test",
                 new PropertyPathExpression<GenericId<String>, String>(
                         (Class<GenericId<String>>) (Class<?>) GenericId.class,
-                        "id").getValue(genericId));
+                        "id", true).getValue(genericId));
     }
 
     @Test

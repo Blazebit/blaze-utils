@@ -10,22 +10,22 @@ public class ExpressionUtilsFieldTest {
 
     @Test
     public void testExpressionCaching() {
-        assertTrue(ExpressionUtils.getExpression(Car.class, "name") == ExpressionUtils
+        assertTrue(ExpressionUtils.getExpression(Car.class, "name", null, true) == ExpressionUtils
                 .getExpression(Car.class, "name"));
         assertTrue(ExpressionUtils.getExpression(Car.class, "name",
-                String.class) == ExpressionUtils.getExpression(Car.class,
+                String.class, true) == ExpressionUtils.getExpression(Car.class,
                 "name", String.class));
     }
 
     @Test
     public void testGetExpression() {
-        assertNotNull(ExpressionUtils.getExpression(Car.class, "name"));
+        assertNotNull(ExpressionUtils.getExpression(Car.class, "name", null, true));
     }
 
     @Test
     public void testGetExpressionWithValueClass() {
         assertNotNull(ExpressionUtils.getExpression(Car.class, "name",
-                String.class));
+                String.class, true));
     }
 
     /***********************
@@ -35,14 +35,14 @@ public class ExpressionUtilsFieldTest {
     @Test
     public void testSetValue() {
         Car o = new Car(null);
-        ExpressionUtils.setValue(o, "name", "Test");
+        ExpressionUtils.setValue(o, "name", "Test", true);
         assertEquals(o.name, "Test");
     }
 
     @Test
     public void testSetValueWithSourceClass() {
         Car o = new Car(null);
-        ExpressionUtils.setValue(Car.class, o, "name", "Test");
+        ExpressionUtils.setValue(Car.class, o, "name", "Test", true);
         assertEquals(o.name, "Test");
     }
 
@@ -56,11 +56,11 @@ public class ExpressionUtilsFieldTest {
 
         o = new Car(null);
         assertEquals(o.name,
-                ExpressionUtils.getValueHolder(Car.class, o, "name").getValue());
+                ExpressionUtils.getValueHolder(Car.class, o, "name", true).getValue());
 
         o = new Car("Test");
         assertEquals(o.name,
-                ExpressionUtils.getValueHolder(Car.class, o, "name").getValue());
+                ExpressionUtils.getValueHolder(Car.class, o, "name", true).getValue());
     }
 
     @Test
@@ -71,13 +71,13 @@ public class ExpressionUtilsFieldTest {
         assertEquals(
                 o.name,
                 ExpressionUtils.getValueHolder(Car.class, o, "name",
-                        String.class).getValue());
+                        String.class, true).getValue());
 
         o = new Car("Test");
         assertEquals(
                 o.name,
                 ExpressionUtils.getValueHolder(Car.class, o, "name",
-                        String.class).getValue());
+                        String.class, true).getValue());
     }
 
     @Test
@@ -86,11 +86,11 @@ public class ExpressionUtilsFieldTest {
 
         o = new Car(null);
         assertEquals(o.name,
-                ExpressionUtils.getValue(Car.class, o, "name"));
+                ExpressionUtils.getValue(Car.class, o, "name", true));
 
         o = new Car("Test");
         assertEquals(o.name,
-                ExpressionUtils.getValue(Car.class, o, "name"));
+                ExpressionUtils.getValue(Car.class, o, "name", true));
     }
 
     @Test
@@ -99,11 +99,11 @@ public class ExpressionUtilsFieldTest {
 
         o = new Car(null);
         assertEquals(o.name,
-                ExpressionUtils.getValue(Car.class, o, "name", String.class));
+                ExpressionUtils.getValue(Car.class, o, "name", String.class, true));
 
         o = new Car("Test");
         assertEquals(o.name,
-                ExpressionUtils.getValue(Car.class, o, "name", String.class));
+                ExpressionUtils.getValue(Car.class, o, "name", String.class, true));
     }
 
     @Test
@@ -111,10 +111,10 @@ public class ExpressionUtilsFieldTest {
         Car o;
 
         o = new Car(null);
-        assertEquals(o.name, ExpressionUtils.getValue(o, "name"));
+        assertEquals(o.name, ExpressionUtils.getValue(o, "name", true));
 
         o = new Car("Test");
-        assertEquals(o.name, ExpressionUtils.getValue(o, "name"));
+        assertEquals(o.name, ExpressionUtils.getValue(o, "name", true));
     }
 
     @Test
@@ -123,11 +123,11 @@ public class ExpressionUtilsFieldTest {
 
         o = new Car(null);
         assertEquals(o.name,
-                ExpressionUtils.getValue(o, "name", String.class));
+                ExpressionUtils.getValue(o, "name", String.class, true));
 
         o = new Car("Test");
         assertEquals(o.name,
-                ExpressionUtils.getValue(o, "name", String.class));
+                ExpressionUtils.getValue(o, "name", String.class, true));
     }
 
     /*****************************
@@ -140,12 +140,12 @@ public class ExpressionUtilsFieldTest {
 
         o = new Car(null);
         assertEquals(null,
-                ExpressionUtils.getValueHolder(Car.class, o, "vendor.name")
+                ExpressionUtils.getValueHolder(Car.class, o, "vendor.name", true)
                         .getNullSafeValue());
 
         o = new Car("Test", "Test");
         assertEquals(o.vendor.name,
-                ExpressionUtils.getValueHolder(Car.class, o, "vendor.name")
+                ExpressionUtils.getValueHolder(Car.class, o, "vendor.name", true)
                         .getNullSafeValue());
     }
 
@@ -157,13 +157,13 @@ public class ExpressionUtilsFieldTest {
         assertEquals(
                 null,
                 ExpressionUtils.getValueHolder(Car.class, o, "vendor.name",
-                        String.class).getNullSafeValue());
+                        String.class, true).getNullSafeValue());
 
         o = new Car("Test", "Test");
         assertEquals(
                 o.vendor.name,
                 ExpressionUtils.getValueHolder(Car.class, o, "vendor.name",
-                        String.class).getNullSafeValue());
+                        String.class, true).getNullSafeValue());
     }
 
     @Test
@@ -172,11 +172,11 @@ public class ExpressionUtilsFieldTest {
 
         o = new Car(null);
         assertEquals(null,
-                ExpressionUtils.getNullSafeValue(Car.class, o, "vendor.name"));
+                ExpressionUtils.getNullSafeValue(Car.class, o, "vendor.name", true));
 
         o = new Car("Test", "Test");
         assertEquals(o.vendor.name,
-                ExpressionUtils.getNullSafeValue(Car.class, o, "vendor.name"));
+                ExpressionUtils.getNullSafeValue(Car.class, o, "vendor.name", true));
     }
 
     @Test
@@ -185,11 +185,11 @@ public class ExpressionUtilsFieldTest {
 
         o = new Car(null);
         assertEquals(null, ExpressionUtils.getNullSafeValue(Car.class, o,
-                "vendor.name", String.class));
+                "vendor.name", String.class, true));
 
         o = new Car("Test", "Test");
         assertEquals(o.vendor.name, ExpressionUtils.getNullSafeValue(
-                Car.class, o, "vendor.name", String.class));
+                Car.class, o, "vendor.name", String.class, true));
     }
 
     @Test
@@ -197,11 +197,11 @@ public class ExpressionUtilsFieldTest {
         Car o;
 
         o = new Car(null);
-        assertEquals(null, ExpressionUtils.getNullSafeValue(o, "vendor.name"));
+        assertEquals(null, ExpressionUtils.getNullSafeValue(o, "vendor.name", true));
 
         o = new Car("Test", "Test");
         assertEquals(o.vendor.name,
-                ExpressionUtils.getNullSafeValue(o, "vendor.name"));
+                ExpressionUtils.getNullSafeValue(o, "vendor.name", true));
     }
 
     @Test
@@ -210,11 +210,11 @@ public class ExpressionUtilsFieldTest {
 
         o = new Car(null);
         assertEquals(null, ExpressionUtils.getNullSafeValue(o, "vendor.name",
-                String.class));
+                String.class, true));
 
         o = new Car("Test", "Test");
         assertEquals(o.vendor.name, ExpressionUtils.getNullSafeValue(
-                o, "vendor.name", String.class));
+                o, "vendor.name", String.class, true));
     }
 
     public class Vendor {

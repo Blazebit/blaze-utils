@@ -21,6 +21,7 @@ import java.util.List;
  */
 public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
     private final Class<X> source;
+    private final boolean allowField;
     private String[] explodedPropertyPath;
     private Method[] getterChain;
     private Field[] fieldChain;
@@ -29,37 +30,23 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
     private Field leafField;
     private volatile boolean dirty = true;
 
-    /**
-     * Constructs a LazyGetterMethod object for the given source object and
-     * field names as a string separated by '.' (dots). Using this constructor
-     * is equal to #
-     * {@link PropertyPathExpression#LazyGetterMethod(java.lang.Object, java.lang.String[]) }
-     * with the second parameter <code>fieldNames.split("\\.")</code>.
-     *
-     * @param source       The object on which to invoke the first getter
-     * @param propertyPath The field names which should be used for the getter
-     *                     determination
-     */
     public PropertyPathExpression(Class<X> source, String propertyPath) {
-        this(source, propertyPath.split("\\."));
+        this(source, propertyPath.split("\\."), false);
     }
 
-    /**
-     * Constructs a LazyGetterMethod object for the given source object and
-     * field names as a string array.
-     *
-     * @param source               The object on which to invoke the first getter
-     * @param explodedPropertyPath The field names which should be used for the getter
-     *                             determination
-     */
+    public PropertyPathExpression(Class<X> source, String propertyPath, boolean allowFieldAccess) {
+        this(source, propertyPath.split("\\."), allowFieldAccess);
+    }
+
     private PropertyPathExpression(Class<X> source,
-                                   String[] explodedPropertyPath) {
+                                   String[] explodedPropertyPath, boolean allowField) {
         if (source == null) {
             throw new NullPointerException("source");
         }
 
         this.source = source;
         this.explodedPropertyPath = explodedPropertyPath;
+        this.allowField = allowField;
     }
 
     private void initialize() {
@@ -83,10 +70,14 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
                                     current, properties[i]);
                             getters.add(getter);
                             if (getter == null) {
-                                Field field = ReflectionUtils.getField(current, properties[i]);
-                                field.setAccessible(true);
-                                fields.add(field);
-                                current = ReflectionUtils.getResolvedFieldType(current, field);
+                                if (allowField) {
+                                    Field field = ReflectionUtils.getField(current, properties[i]);
+                                    field.setAccessible(true);
+                                    fields.add(field);
+                                    current = ReflectionUtils.getResolvedFieldType(current, field);
+                                } else {
+                                    current = null;
+                                }
                             } else {
                                 getter.setAccessible(true);
                                 fields.add(null);
@@ -105,15 +96,16 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
 						/* Retrieve the leaf methods for get and set access */
                         leafGetter = ReflectionUtils.getGetter(current, properties[getterChainLength]);
                         leafSetter = ReflectionUtils.getSetter(current, properties[getterChainLength]);
-                        leafField = ReflectionUtils.getField(current, properties[getterChainLength]);
                         if (leafGetter != null) {
                             leafGetter.setAccessible(true);
+                        } else if (allowField) {
+                            leafField = ReflectionUtils.getField(current, properties[getterChainLength]);
+                            if (leafField != null) {
+                                leafField.setAccessible(true);
+                            }
                         }
                         if (leafSetter != null) {
                             leafSetter.setAccessible(true);
-                        }
-                        if (leafField != null) {
-                            leafField.setAccessible(true);
                         }
                     }
 
@@ -173,7 +165,7 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
                 } else {
                     getter = leafGetter;
                 }
-                if (getter == null && leafObj != null) {
+                if (getter == null && leafObj != null && allowField) {
                     Field field = ReflectionUtils.getField(leafObj.getClass(), explodedPropertyPath[explodedPropertyPath.length - 1]);
                     field.setAccessible(true);
                     return (Y) field.get(leafObj);
@@ -204,7 +196,7 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
                 } else {
                     setter = leafSetter;
                 }
-                if (setter == null && leafObj != null) {
+                if (setter == null && leafObj != null && allowField) {
                     Field f = ReflectionUtils.getField(leafObj.getClass(), explodedPropertyPath[explodedPropertyPath.length - 1]);
                     f.setAccessible(true);
                     f.set(leafObj, value);
@@ -272,9 +264,13 @@ public class PropertyPathExpression<X, Y> implements ValueAccessor<X, Y> {
         for (; i < properties.length - 1; i++) {
             Method getter = ReflectionUtils.getGetter(current.getClass(), properties[i]);
             if (getter == null) {
-                Field field = ReflectionUtils.getField(current.getClass(), properties[i]);
-                field.setAccessible(true);
-                current = field.get(current);
+                if (allowField) {
+                    Field field = ReflectionUtils.getField(current.getClass(), properties[i]);
+                    field.setAccessible(true);
+                    current = field.get(current);
+                } else {
+                    current = null;
+                }
             } else {
                 getter.setAccessible(true);
                 current = getter.invoke(current);
